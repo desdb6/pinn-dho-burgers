@@ -40,6 +40,7 @@
                           % correct order with the other packages you load!
 
 \usepackage{mathptmx}
+\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}
 \iftutex
 \usepackage{fontspec}
 \setmainfont{Calibri} % comment this line out if you want computer
@@ -76,6 +77,153 @@
 \chapter{Theoretical background}
 
 \chapter{Damped Harmonic Oscillator}
+\begin{equation}\label{eq:damped_harmonic_oscillator}
+    my''(t)+cy'(t)+ky(t)=0
+\end{equation}
+
+\section{Understanding an the PINN example}
+
+\subsection{Questions on the method}
+
+\begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white]
+    Identify the total loss function in the code and write its expression down in your report. Identify the different contributions to the loss function.
+\end{tcolorbox}
+The total loss function has three terms and is displayed below:
+\begin{equation}\label{eq:loss_total_DHO}
+    \mathcal{L}_{tot}=\mathcal{L}_{data}+\lambda_{physics}\mathcal{L}_{physics}+\lambda_{i.c.}\mathcal{L}_{i.c.}
+\end{equation}
+
+The first term is the mean squared error of the predicted data compared to the 15 noisy observation points:
+\begin{equation}\label{eq:loss_data_DHO}
+    \mathcal{L}_{data}=\frac{1}{M}\sum_{j=1}^M \left(\hat{y}(t_j)-y_j\right)^2
+\end{equation}
+with $j=1, 2, \ldots 15$. This term is the total loss function of a standard, non-PI NN and gives the model direct information about the correct solution of the equation with the relevant boundary conditions, but doesn't check for any non-physical behavior.\\
+
+The second term is the mean squared residual of the ODE (see equation \ref{eq:damped_harmonic_oscillator}) at the 200 evenly spaced collocation points:
+\begin{equation}\label{eq:loss_physics_DHO}
+    \mathcal{L}_{physics}=\frac{1}{N}\sum_{i=1}^N \left(m\hat{y}''(t_i)+c\hat{y}'(t_i)+k\hat{y}(t_i)\right)^2
+\end{equation}
+with $i=1, 2, \ldots 200$. This term gives the model information about how much the predicted solution violates the mechanics of the system, without checking if the predicted solution matches the observed data.\\
+
+The third term is the sum of squared errors of the two inital conditions:
+\begin{equation}\label{eq:loss_i.c._DHO}
+    \mathcal{L}_{i.c.}=\left(\hat{y}(0)-y_0\right)^2+\left(\hat{y}'(0)-dy_0\right)^2
+\end{equation}
+This term enforces the initial conditions and applies only to the very first point $t=0$.\\
+
+The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative weight of every term in the loss function. Because it is important that the initial conditions are met, $\lambda_{i.c.}$ is chosen at a much larger value than $\lambda_{physics}$. This is why in the given program, the values are set at $\lambda_{physics}=0.01$ and $\lambda_{i.c.}=10$.
+
+
+\begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white]
+    Is the inclusion of the initial condition loss essential for this particular example? When would it be essential?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white]
+    The loss function used here is based on the mean squared errors (MSE) between predictions and data points or initial condition, and on the mean squared residual (MSR) of the PDE for the collocation points. Why are these specific functional forms used, and would there be alternative functions that could replace the MSE or MSR?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white]
+    What is the type of neural network used in this example? How many input nodes, output nodes and hidden layers does it have? How many parameters are then being optimized? What type of activation function is used and why? What quantity or quantities are provided at the input, and what quantity or quantities do we extract from the output of the network? Are the dimensions of this Neural Network architecture adequate, too small or too large for this example? How would you determine this?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white]
+    How many input samples are provided to the neural network model during each of its training cycles or epochs? What kind of samples are provided? Does the network receive again for each epoch the same exact samples? Would there be a better way to provide samples to this network for training over the various epochs?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white]
+    The example uses the Adam algorithm as the so-called optimizer. What is the purpose of this optimizer? What is specific about the Adam algorithm, and what are its main hyper-parameters? Are there viable alternatives for the Adam optimizer?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white]
+    The example also uses an additional optimizer: a learning rate scheduler. What does this scheduler do? Is is a necessary ingredient for training a neural network? What are its main hyper-parameters? Are there alternatives that can be usefully applied in this example?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white]
+    How many epochs is the network trained for? How would you determine whether you have trained for too little or too many epochs?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white]
+    Would it make sense to have a set of validation points? How would these look like? How would you use them?
+\end{tcolorbox}
+
+
+\subsection{Questions on the code}
+\begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white]
+    Why are these two lines of code good, or bad, for:
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|torch.manual_seed(42)|\\
+        \verb|np.random.seed(42)|
+    \end{tcolorbox}
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white]
+    What is the purpose of the \verb|np.ndarray| statements in this function definition:
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|def analytic(t: np.ndarray) -> np.ndarray:|
+    \end{tcolorbox}
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white]
+    The data points are created randomly and then sorted before being offered to the neural net, using this statement:
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|t_obs = np.sort(np.random.uniform(0.1, T_TRAIN, N_OBS))|
+    \end{tcolorbox}
+    Is this good or bad?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white]
+    The collocation points are created uniformly on a fixed grid, using this statement:
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|t_col = np.linspace(0.0, T_EXTRAP, N_COL)|
+    \end{tcolorbox}
+    Is this good or bad?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white]
+    What is this statement doing? Is it necessary?
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|optimiser.zero_grad()|
+    \end{tcolorbox}
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white]
+    What are these statements doing in the training cycle? Is their order important?
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|loss_total.backward()|\\
+        \verb|optimiser.step()|\\
+        \verb|scheduler.step()|
+    \end{tcolorbox}
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white]
+    Why do the collocation time input tensor and the initial condition time input tensor require the gradient option, while the input data tensors do not require a gradient?
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|t_obs_t = to_tensor(t_obs)|\\
+        \verb|y_obs_t = to_tensor(y_obs)|\\
+        \verb|t_col_t = to_tensor(t_col, requires_grad=True)|\\
+        \verb|t_ic_t  = to_tensor(t_ic,  requires_grad=True)|
+    \end{tcolorbox}
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white]
+    When presenting arrays of time points to the input of my neural network, I need to convert them into a pytorch tensor, using this helper function:
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|def to_tensor(arr, requires_grad=False):|\\
+        \verb|    return torch.tensor(arr, dtype=torch.float32,|\\
+        \verb|                       requires_grad=requires_grad).unsqueeze(1)|
+    \end{tcolorbox}
+    What does the \verb|unsqueeze(1)| method of the torch.tensor class do, and why do I need to do this?
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white]
+    When computing the first and second derivatives of $y(t)$ we use the \verb|torch.autograd| method. Explain why the \verb|grad_outputs| are set to ones and why we need to take the zero-th element \verb|[0]| of this output in the statements below:
+    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+        \verb|dy = torch.autograd.grad(|\\
+        \verb|    y_hat, t,|\\
+        \verb|    grad_outputs=torch.ones_like(y_hat),|\\
+        \verb|    create_graph=True)[0]|
+    \end{tcolorbox}
+\end{tcolorbox}
 
 \chapter{Burger's Equation}
 

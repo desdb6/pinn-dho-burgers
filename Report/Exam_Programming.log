@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  23 APR 2026 14:50
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  23 APR 2026 16:38
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -809,7 +809,9 @@ LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 (Font)                  OT1/cmr/bx/it --> OT1/ptm/m/it on input line 35.
 LaTeX Info: Redefining \hbar on input line 50.
-) (/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty
+)
+LaTeX Font Info:    Redeclaring math alphabet \mathcal on input line 43.
+ (/usr/share/texlive/texmf-dist/tex/latex/tools/multicol.sty
 Package: multicol 2023/03/30 v1.9f multicolumn formatting (FMi)
 \c@tracingmulticols=\count336
 \mult@box=\box79
@@ -886,7 +888,7 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \@float@everytoks=\toks48
 \@floatcapt=\box126
 )
-LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 64.
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 65.
  (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
@@ -897,43 +899,43 @@ LaTeX Warning: Unused global option(s):
 (./Exam_Programming.aux)
 \openout1 = `Exam_Programming.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 64.
-LaTeX Font Info:    ... okay on input line 64.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
 \smallogo=\box127
 <Logos/logo-uantwerpen-we-en-rgb-pos.pdf, id=4, 391.4625pt x 103.38625pt>
 File: Logos/logo-uantwerpen-we-en-rgb-pos.pdf Graphic file (type pdf)
 <use Logos/logo-uantwerpen-we-en-rgb-pos.pdf>
-Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 64.
+Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 65.
 (pdftex.def)             Requested size: 71.13188pt x 18.7854pt.
-Package hyperref Info: Option `breaklinks' set `true' on input line 64.
-Package hyperref Info: Option `colorlinks' set `true' on input line 64.
-Package hyperref Info: Option `pageanchor' set `true' on input line 64.
-Package scrbase Info: activating english \partname on input line 64.
-Package scrbase Info: activating english \chaptername on input line 64.
-Package scrbase Info: activating english \appendixname on input line 64.
-Package scrbase Info: activating english \figurename on input line 64.
-Package scrbase Info: activating english \tablename on input line 64.
-Package scrbase Info: activating english \contentsname on input line 64.
-Package scrbase Info: activating english \listfigurename on input line 64.
-Package scrbase Info: activating english \listtablename on input line 64.
-Package scrbase Info: activating english \bibname on input line 64.
-Package scrbase Info: activating english \indexname on input line 64.
+Package hyperref Info: Option `breaklinks' set `true' on input line 65.
+Package hyperref Info: Option `colorlinks' set `true' on input line 65.
+Package hyperref Info: Option `pageanchor' set `true' on input line 65.
+Package scrbase Info: activating english \partname on input line 65.
+Package scrbase Info: activating english \chaptername on input line 65.
+Package scrbase Info: activating english \appendixname on input line 65.
+Package scrbase Info: activating english \figurename on input line 65.
+Package scrbase Info: activating english \tablename on input line 65.
+Package scrbase Info: activating english \contentsname on input line 65.
+Package scrbase Info: activating english \listfigurename on input line 65.
+Package scrbase Info: activating english \listtablename on input line 65.
+Package scrbase Info: activating english \bibname on input line 65.
+Package scrbase Info: activating english \indexname on input line 65.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -992,7 +994,7 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring ON on input line 64.
+Package hyperref Info: Link coloring ON on input line 65.
  (./Exam_Programming.out) (./Exam_Programming.out)
 \@outlinefile=\write4
 \openout4 = `Exam_Programming.out'.
@@ -1004,7 +1006,7 @@ Class scrbook Info: loading recommended package `bookmark'.
 (scrbook)           `bookmarkpackage=false' before \begin{document} and
 (scrbook)           you can avoid this message adding:
 (scrbook)             \usepackage{bookmark}
-(scrbook)           before \begin{document} on input line 64.
+(scrbook)           before \begin{document} on input line 65.
  (/usr/share/texlive/texmf-dist/tex/latex/bookmark/bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
  (/usr/share/texlive/texmf-dist/tex/latex/bookmark/bkm-pdftex.def
@@ -1013,7 +1015,7 @@ File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
 ))
 File: Logos/logo-uantwerpen-we-en-rgb-pos.pdf Graphic file (type pdf)
 <use Logos/logo-uantwerpen-we-en-rgb-pos.pdf>
-Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 67.
+Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 68.
 (pdftex.def)             Requested size: 176.407pt x 46.58963pt.
  [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
@@ -1023,7 +1025,30 @@ Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input 
 
 
 
-] (./Exam_Programming.toc)
+] (./Exam_Programming.toc
+LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line 5.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd
+File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line 5.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd
+File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line 5.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd
+File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line 5.
+ (/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd
+File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 5.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 5.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 5.
+)
 \tf@toc=\write5
 \openout5 = `Exam_Programming.toc'.
 
@@ -1054,7 +1079,7 @@ Class scrbook Warning: \float@addtolists detected!
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.76 \chapter
+l.77 \chapter
              {Theoretical background} [1
 
 
@@ -1062,7 +1087,7 @@ l.76 \chapter
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.76 \chapter
+l.77 \chapter
              {Theoretical background} [2
 
 
@@ -1073,32 +1098,53 @@ chapter 2.
 
 ]
 chapter 3.
-[5] [6
+
+Underfull \hbox (badness 10000) in paragraph at lines 99--101
+
+ []
 
 
-]
+Underfull \hbox (badness 10000) in paragraph at lines 105--107
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 111--113
+
+ []
+
+[5]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [6]
+Underfull \vbox (badness 5302) has occurred while \output is active []
+
+ [7] [8]
 chapter 4.
-[7] [8
+[9
+
+
+] [10
 
 
 ]
 chapter 5.
-[9] [10
-
-
-]
-chapter A.
 [11] [12
 
 
 ]
-chapter B.
+chapter A.
 [13] [14
 
 
 ]
+chapter B.
+[15] [16
+
+
+]
 chapter C.
-[15] (./Exam_Programming.aux)
+[17] (./Exam_Programming.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1107,18 +1153,18 @@ Package rerunfilecheck Info: File `Exam_Programming.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 31203 strings out of 475582
- 613713 string characters out of 5778246
- 1938975 words of memory out of 5000000
- 52711 multiletter control sequences out of 15000+600000
- 570879 words of font info for 59 fonts, out of 8000000 for 9000
+ 31393 strings out of 475582
+ 617515 string characters out of 5778246
+ 1939975 words of memory out of 5000000
+ 52854 multiletter control sequences out of 15000+600000
+ 588223 words of font info for 99 fonts, out of 8000000 for 9000
  350 hyphenation exceptions out of 8191
  122i,18n,131p,10994b,1435s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on Exam_Programming.pdf (19 pages, 66053 bytes).
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on Exam_Programming.pdf (21 pages, 154976 bytes).
 PDF statistics:
- 169 PDF objects out of 1000 (max. 8388607)
- 134 compressed objects within 2 object streams
- 27 named destinations out of 1000 (max. 500000)
- 82 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 242 PDF objects out of 1000 (max. 8388607)
+ 189 compressed objects within 2 object streams
+ 37 named destinations out of 1000 (max. 500000)
+ 106 words of extra memory for PDF output out of 10000 (max. 10000000)
 
