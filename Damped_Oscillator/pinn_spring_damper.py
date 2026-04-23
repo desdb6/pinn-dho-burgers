@@ -301,6 +301,8 @@ GREEN  = "#1D9E75"
 GRAY   = "#888780"
 LGRAY  = "#D3D1C7"
 
+FOLDER_NAME="Damped_Oscillator/"
+
 fig = plt.figure(figsize=(15, 11))
 fig.patch.set_facecolor("#FAFAF8")
 
@@ -445,7 +447,7 @@ fig.suptitle(
     fontsize=11, y=0.975, color="#2C2C2A"
 )
 
-plt.savefig("pinn_spring_damper.png", dpi=150, bbox_inches="tight",
+plt.savefig(FOLDER_NAME + "pinn_spring_damper.png", dpi=150, bbox_inches="tight",
             facecolor=fig.get_facecolor())
 print("\nFigure saved to  pinn_spring_damper.png")
 plt.show()

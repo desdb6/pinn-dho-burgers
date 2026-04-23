@@ -387,6 +387,7 @@ PANEL  = "#F1EFE8"   # axes background
 # =============================================================================
 # 9.  FIGURE 1 — summary comparison
 # =============================================================================
+FOLDER_NAME="Damped_Oscillator/"
 
 def shade_extrap(ax):
     ax.axvspan(T_TRAIN, T_EXTRAP, color=GRAY, alpha=0.12)
@@ -528,7 +529,7 @@ fig1.suptitle(
     f"|  IC: y(0)={Y0}  y'(0)={DY0}",
     fontsize=9, y=0.975, color="#2C2C2A"
 )
-fig1.savefig("pinn_fig1_summary.png", dpi=150, bbox_inches="tight",
+fig1.savefig(FOLDER_NAME + "pinn_fig1_summary.png", dpi=150, bbox_inches="tight",
              facecolor=BG)
 print("Figure 1 saved to  pinn_fig1_summary.png")
 
@@ -675,7 +676,7 @@ fig2 = make_epoch_figure(
         f"{N_COL} collocation pts  |  "
         f"lambda_phys={LAMBDA_PHYS}  lambda_ic={LAMBDA_IC}"
     ),
-    filename     = "pinn_fig2_pinn_epochs.png",
+    filename     = FOLDER_NAME + "pinn_fig2_pinn_epochs.png",
     clip_y       = False,
 )
 
@@ -688,7 +689,7 @@ fig3 = make_epoch_figure(
         f"m={M}  c={C}  k={K}  |  {N_OBS} observations  sigma={SIGMA}  |  "
         f"data loss only  (no physics, no IC enforcement)"
     ),
-    filename     = "pinn_fig3_ml_epochs.png",
+    filename     = FOLDER_NAME + "pinn_fig3_ml_epochs.png",
     clip_y       = True,   # clip to prevent diverged ML from squashing the y-axis
 )
 
