@@ -85,7 +85,7 @@
 
 \subsection{Questions on the method}
 
-\begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Identify the total loss function in the code and write its expression down in your report. Identify the different contributions to the loss function.
 \end{tcolorbox}
 The total loss function has three terms and is displayed below:
@@ -114,41 +114,80 @@ This term enforces the initial conditions and applies only to the very first poi
 The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative weight of every term in the loss function. Because it is important that the initial conditions are met, $\lambda_{i.c.}$ is chosen at a much larger value than $\lambda_{physics}$. This is why in the given program, the values are set at $\lambda_{physics}=0.01$ and $\lambda_{i.c.}=10$.
 
 
-\begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Is the inclusion of the initial condition loss essential for this particular example? When would it be essential?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white]
+To investigate the effect of the initial condition term, the term can be dropped out of the loss function to compare the results. Figure \ref{fig:ic_comp} shows the predicted solutions of the ODE if the $\mathcal{L}_{i.c.}$ is included and excluded. In this specific case, there does not seem to be a big difference which indicated that the initial condition loss is not essential. This is because the noisy observations point, which also contribute to the loss function, are close enough to $t=0$ to give enough information for the model to accurately predict the initial conditions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/ic_effect.png}
+    \caption{Predicted solutions to the ODE of the $\mathcal{L}_{i.c.}$ is included and excluded. In this specific case, the $\mathcal{L}_{i.c.}$ is not absolutely necessary, because the noisy observation points give enoug information for the model to accurately predict the initial conditions.}
+    \label{fig:ic_comp}
+\end{figure}
+
+We do not always have access to observations close to the initial time $t_0$. However, if the initial conditions are known and need to be enforced, $\mathcal{L}_{i.c.}$ is a crucial term in the total loss function. 
+
+\begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The loss function used here is based on the mean squared errors (MSE) between predictions and data points or initial condition, and on the mean squared residual (MSR) of the PDE for the collocation points. Why are these specific functional forms used, and would there be alternative functions that could replace the MSE or MSR?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white]
+The mean square error and mean square residuals are the most commonly used loss functions for regression models. Any loss function has to be symmetrical and positive for all possible values, so that errors cannot cancel each other out. Furthermore, it is desired that the loss function is differentiable so that its gradient can be computed.\\
+
+The MSE and MSR check both of these boxes. However, since the errors are squared before averaging, these functions heavily punish and are sensitive to large outliers. This can lead to problems when very noisy data points are included in the calculation for the loss function. However, this effect is good for the residuals since it is essential that the predicted solution does not break the laws of physics. There are alternative loss functions with different (dis)advantages \cite{geeksforgeeks2024lossfunctions}:\\
+\paragraph{Mean Absolute Error} The Mean Absolute Error (MAE) does not average the squares, but the absolute distances:
+\begin{equation}\label{eq:loss_MAE}
+    \mathcal{L}_{MAE}=\frac{1}{M}\sum_{j=1}^M \left|\hat{y}(t_j)-y_j\right|
+\end{equation}
+Because the errors are not squared, this loss function is less sensitive to large outliers, which can make it more robust. However, it is not differentiable at zero, which can lead to problems for some optimisation algorithms.
+
+\paragraph{Huber Loss} The Huber Loss is a hybrid of the MAE and the MSE which is differentiable, but less sensitive to ouliers than the MSE. It is defined as follows:
+\begin{equation}\label{eq:huber_loss}
+    L_{\delta}(x) = \begin{cases}
+        \frac{1}{2}x^2 & \text{if } |x| \leq \delta \\
+        \delta\left(|x| - \frac{1}{2}\delta\right) & \text{if } |x| \geq \delta
+    \end{cases}
+\end{equation}
+The Huber Loss behaves like the MSE for $|x|<\delta$ and like the MAE for $|x|>\delta$. The hyperparameter $\delta$ can be tuned to make the loss function more or less sensitive to outliers.
+
+\begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What is the type of neural network used in this example? How many input nodes, output nodes and hidden layers does it have? How many parameters are then being optimized? What type of activation function is used and why? What quantity or quantities are provided at the input, and what quantity or quantities do we extract from the output of the network? Are the dimensions of this Neural Network architecture adequate, too small or too large for this example? How would you determine this?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white]
+A dense network is used in this case. We are trying to solve an ODE, which means to solve for a function $y(t)$. This function takes one input and returns one output, which means the network will also have one input and one output. The parameters for the hidden layers can be given as inputs, in the example script there are 4 hidden layes of 32 nodes. For every connection between nodes has a weight, and every node has a bias. From this we can calculate the total parameter count:
+\begin{equation}
+\begin{split}
+n ={}& \text{First layer weights} + \text{First layer bias} \\
+     &+ \text{Hidden layer weights} + \text{Hidden layer bias} \\
+     &+ \text{Last layer weights} + \text{Last layer bias} \\
+     ={}&1\cdot32 + 32 + 4(32\cdot32+32) + 1\cdot32 + 1=3265\ \text{parameters} 
+\end{split}
+\end{equation}
+
+\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     How many input samples are provided to the neural network model during each of its training cycles or epochs? What kind of samples are provided? Does the network receive again for each epoch the same exact samples? Would there be a better way to provide samples to this network for training over the various epochs?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The example uses the Adam algorithm as the so-called optimizer. What is the purpose of this optimizer? What is specific about the Adam algorithm, and what are its main hyper-parameters? Are there viable alternatives for the Adam optimizer?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The example also uses an additional optimizer: a learning rate scheduler. What does this scheduler do? Is is a necessary ingredient for training a neural network? What are its main hyper-parameters? Are there alternatives that can be usefully applied in this example?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     How many epochs is the network trained for? How would you determine whether you have trained for too little or too many epochs?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Would it make sense to have a set of validation points? How would these look like? How would you use them?
 \end{tcolorbox}
 
 
 \subsection{Questions on the code}
-\begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Why are these two lines of code good, or bad, for:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|torch.manual_seed(42)|\\
@@ -156,14 +195,14 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
     \end{tcolorbox}
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What is the purpose of the \verb|np.ndarray| statements in this function definition:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|def analytic(t: np.ndarray) -> np.ndarray:|
     \end{tcolorbox}
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The data points are created randomly and then sorted before being offered to the neural net, using this statement:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|t_obs = np.sort(np.random.uniform(0.1, T_TRAIN, N_OBS))|
@@ -171,7 +210,7 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
     Is this good or bad?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The collocation points are created uniformly on a fixed grid, using this statement:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|t_col = np.linspace(0.0, T_EXTRAP, N_COL)|
@@ -179,14 +218,14 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
     Is this good or bad?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What is this statement doing? Is it necessary?
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|optimiser.zero_grad()|
     \end{tcolorbox}
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What are these statements doing in the training cycle? Is their order important?
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|loss_total.backward()|\\
@@ -195,7 +234,7 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
     \end{tcolorbox}
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Why do the collocation time input tensor and the initial condition time input tensor require the gradient option, while the input data tensors do not require a gradient?
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|t_obs_t = to_tensor(t_obs)|\\
@@ -205,7 +244,7 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
     \end{tcolorbox}
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     When presenting arrays of time points to the input of my neural network, I need to convert them into a pytorch tensor, using this helper function:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|def to_tensor(arr, requires_grad=False):|\\
@@ -215,7 +254,7 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
     What does the \verb|unsqueeze(1)| method of the torch.tensor class do, and why do I need to do this?
 \end{tcolorbox}
 
-\begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white]
+\begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     When computing the first and second derivatives of $y(t)$ we use the \verb|torch.autograd| method. Explain why the \verb|grad_outputs| are set to ones and why we need to take the zero-th element \verb|[0]| of this output in the statements below:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|dy = torch.autograd.grad(|\\
@@ -235,9 +274,8 @@ The constants $\lambda_{physics}$ and $\lambda_{i.c.}$ determine the relative we
 
 \chapter{Figures}
 
-\chapter{References}
-% \bibliographystyle{abbrv}
-% \bibliography{bibliography}   % your .bib filename without .bib extension
+\bibliographystyle{abbrv}
+\bibliography{bibliography}   % your .bib filename without .bib extension
 
 \end{document}
 

@@ -1,7 +1,15 @@
 # Fdb version 4
-["pdflatex"] 1776955122.28639 "/home/des/ExProgrammeren/Report/Exam_Programming.tex" "Exam_Programming.pdf" "Exam_Programming" 1776955124.24184 0
+["bibtex Exam_Programming"] 1778075531.52349 "Exam_Programming.aux" "Exam_Programming.bbl" "Exam_Programming" 1778075803.71658 0
+  "./bibliography.bib" 1778074122.60695 1210 d346ef89c884cafe9dcd8fbc7e9e6f70 ""
+  "/usr/share/texlive/texmf-dist/bibtex/bst/base/abbrv.bst" 1292289607 20329 b5fed53e10044d0f8112183785c759b1 ""
+  "Exam_Programming.aux" 1778075803.58668 7085 46deecc6a75ed1723172a0edb2e28896 "pdflatex"
+  (generated)
+  "Exam_Programming.bbl"
+  "Exam_Programming.blg"
+  (rewritten before read)
+["pdflatex"] 1778075801.16049 "/home/des/ExProgrammeren/Report/Exam_Programming.tex" "Exam_Programming.pdf" "Exam_Programming" 1778075803.71672 0
   "/etc/texmf/web2c/texmf.cnf" 1776803370.79235 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/des/ExProgrammeren/Report/Exam_Programming.tex" 1776955120.16856 11678 629ef38e0f95b27fc0fb5c2b22865d81 ""
+  "/home/des/ExProgrammeren/Report/Exam_Programming.tex" 1778075800.97977 15905 ac5b722026069c28c7781e773305a079 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/symbol/psyr.tfm" 1136768653 1408 5937f58aa508ea2cea4901c07d10f5fe ""
@@ -222,12 +230,15 @@
   "/usr/share/texlive/texmf-dist/tex/latex/xkeyval/xkeyval.sty" 1655411236 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
   "/usr/share/texmf/web2c/texmf.cnf" 1707919699 40399 f2c302f7d2af602abb742093540a5834 ""
-  "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1776803732.53718 131070 447c6667b36c37152a1d6cda7e01a5d0 ""
+  "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1777035784.352 328502 528ebb36218a5fe888112f9a7b8587e7 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1776803745 7425197 ecc3d5e99bf1c309b9b665447c090e37 ""
-  "Exam_Programming.aux" 1776955124.12753 6056 a1cc7d8f7d2718fc5328581a68f74afb "pdflatex"
-  "Exam_Programming.out" 1776955123.84253 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "Exam_Programming.tex" 1776955120.16856 11678 629ef38e0f95b27fc0fb5c2b22865d81 ""
-  "Exam_Programming.toc" 1776955124.16853 951 ad5f2d4d877fa93f0e876016f3aa230d "pdflatex"
+  "Exam_Programming.aux" 1778075803.58668 7085 46deecc6a75ed1723172a0edb2e28896 "pdflatex"
+  "Exam_Programming.bbl" 1778075531.53807 214 ce7f0e770721659f99913be4fdd60a0c "bibtex Exam_Programming"
+  "Exam_Programming.brf" 1778075803.62768 73 0a5c3b51e39b132c36fda2da91e0c1f8 "pdflatex"
+  "Exam_Programming.out" 1778075802.71075 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "Exam_Programming.tex" 1778075800.97977 15905 ac5b722026069c28c7781e773305a079 ""
+  "Exam_Programming.toc" 1778075803.62825 1033 c87f24928b905ceb6cd23611d1ac6d92 "pdflatex"
+  "Images/ic_effect.png" 1778072302.59261 448927 b65af6c97fb924f7ea4bbf9cfd39ab7a ""
   "Logos/logo-uantwerpen-we-en-rgb-pos.pdf" 1776800886.96409 8462 da1ad7b8d9445e1bc658d46022dd4afa ""
   "uantwerpenbamathesis.cls" 1776948412.32565 17267 c96842663ea8e58cb6bccdb8c7953cd1 ""
   "uantwerpencolorlogoscheme.sty" 1776800887.00509 3997 60fa40da65f1cc76f44a56ad0903d87d ""
@@ -237,6 +248,7 @@
   "uantwerpendocs-en.data" 1776800887.00509 1963 4a5d4e2d4e237aaec621a84fab6e4496 ""
   (generated)
   "Exam_Programming.aux"
+  "Exam_Programming.brf"
   "Exam_Programming.log"
   "Exam_Programming.out"
   "Exam_Programming.pdf"
