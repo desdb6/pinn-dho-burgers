@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  6 MAY 2026 15:56
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.4.21)  7 MAY 2026 16:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1132,22 +1132,66 @@ Underfull \hbox (badness 10000) in paragraph at lines 138--139
 
 Underfull \vbox (badness 7047) has occurred while \output is active []
 
- [6 <./Images/ic_effect.png>] [7] [8] [9] [10
+ [6 <./Images/ic_effect.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 158--159
+
+ []
 
 
-]
+Underfull \hbox (badness 10000) in paragraph at lines 170--171
+
+ []
+
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 174.
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+) [7]
+Underfull \hbox (badness 10000) in paragraph at lines 184--185
+
+ []
+
+[8]
+Underfull \hbox (badness 10000) in paragraph at lines 230--231
+
+ []
+
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 249--250
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 261--262
+
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [10]
+Underfull \hbox (badness 10000) in paragraph at lines 282--283
+
+ []
+
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [11] [12]
 chapter 4.
-[11] [12
+[13
+
+
+] [14
 
 
 ]
 chapter 5.
-[13] [14
+[15] [16
 
 
 ]
 chapter A.
-[15] [16
+[17] [18
 
 
 ]
@@ -1156,10 +1200,10 @@ chapter B.
 \tf@brf=\write6
 \openout6 = `Exam_Programming.brf'.
 
- [17] [18
+ [19] [20
 
 
-]) [19] (./Exam_Programming.aux)
+]) [21] (./Exam_Programming.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
@@ -1167,21 +1211,21 @@ L3 programming layer <2024-01-22>
 Package rerunfilecheck Info: File `Exam_Programming.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 Package rerunfilecheck Info: File `Exam_Programming.brf' has not changed.
-(rerunfilecheck)             Checksum: 0A5C3B51E39B132C36FDA2DA91E0C1F8;73.
+(rerunfilecheck)             Checksum: 9A29206E05535FAE661976D47F01DDFD;369.
  ) 
 Here is how much of TeX's memory you used:
- 31457 strings out of 475582
- 619076 string characters out of 5778246
+ 31529 strings out of 475582
+ 620416 string characters out of 5778246
  1939975 words of memory out of 5000000
- 52901 multiletter control sequences out of 15000+600000
- 589237 words of font info for 101 fonts, out of 8000000 for 9000
+ 52947 multiletter control sequences out of 15000+600000
+ 591415 words of font info for 105 fonts, out of 8000000 for 9000
  350 hyphenation exceptions out of 8191
  122i,18n,131p,10994b,1435s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss17.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmssbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/symbol/usyr.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Exam_Programming.pdf (23 pages, 554667 bytes).
+Output written on Exam_Programming.pdf (25 pages, 569736 bytes).
 PDF statistics:
- 263 PDF objects out of 1000 (max. 8388607)
- 205 compressed objects within 3 object streams
- 48 named destinations out of 1000 (max. 500000)
+ 304 PDF objects out of 1000 (max. 8388607)
+ 244 compressed objects within 3 object streams
+ 67 named destinations out of 1000 (max. 500000)
  103 words of extra memory for PDF output out of 10000 (max. 10000000)
 

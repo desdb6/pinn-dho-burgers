@@ -155,36 +155,100 @@ The Huber Loss behaves like the MSE for $|x|<\delta$ and like the MAE for $|x|>\
     What is the type of neural network used in this example? How many input nodes, output nodes and hidden layers does it have? How many parameters are then being optimized? What type of activation function is used and why? What quantity or quantities are provided at the input, and what quantity or quantities do we extract from the output of the network? Are the dimensions of this Neural Network architecture adequate, too small or too large for this example? How would you determine this?
 \end{tcolorbox}
 
-A dense network is used in this case. We are trying to solve an ODE, which means to solve for a function $y(t)$. This function takes one input and returns one output, which means the network will also have one input and one output. The parameters for the hidden layers can be given as inputs, in the example script there are 4 hidden layes of 32 nodes. For every connection between nodes has a weight, and every node has a bias. From this we can calculate the total parameter count:
+We are trying to solve an ODE, which means to solve for a function $y(t)$. This function takes one input and returns one output, which means the network will also need to have one input and one output, representing the time and the function value respectively.\\
+
+A dense network is used in this specific case. The parameters for the hidden layers can be given as inputs, in the example script there are 4 hidden layers of 32 nodes. For every connection between nodes has a weight, and every node (except the input) has a bias. From this we can calculate the total parameter count:
 \begin{equation}
 \begin{split}
 n ={}& \text{First layer weights} + \text{First layer bias} \\
      &+ \text{Hidden layer weights} + \text{Hidden layer bias} \\
      &+ \text{Last layer weights} + \text{Last layer bias} \\
-     ={}&1\cdot32 + 32 + 4(32\cdot32+32) + 1\cdot32 + 1=3265\ \text{parameters} 
+     ={}&(1\cdot32 + 32) + 4(32\cdot32+32) + (1\cdot32 + 1)=3265\ \text{parameters} 
 \end{split}
 \end{equation}
+
+The dimensions of the network (the depth and layer size) are hyperparameters which should be tuned according to the specific problem needs to be solved by the model. Defining the optimal value for hyperparameters such as the dimensions is a relatively subjective and empirical process, since there are no general formulas that give the optimal hyperparameter set for every problem.\\
+
+Judging from the predicted solution, the model is large enough to make an accurate prediction for the solution to the equation. To optimise the network dimensions further, one can choose to implement an optimising algorithm which tunes the hyperparameters based on a validation set. This way, the acuraccy and training time can be optimised in a reproducible way \cite{geeksforgeeks2026hyperparameter}. Examples possible methods include:
+\begin{itemize}
+    \item Random search: for every hyperparameter, a range of evenly spaced values is defined. A model is trained for every single possible combination and their performances are compared.
+    \item Random search: hyperparameter sets are chosen at random with user-defined ranges, and the best performing model is chosen from the resulting set of models.
+    \item Bayesian optimization: a probabilistic sequential algorithm that optimises an unknown, computationally heavy function (such as the model performance).
+\end{itemize}
+
 
 \begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     How many input samples are provided to the neural network model during each of its training cycles or epochs? What kind of samples are provided? Does the network receive again for each epoch the same exact samples? Would there be a better way to provide samples to this network for training over the various epochs?
 \end{tcolorbox}
 
+The model receives the same 15 noisy observation points every singe epoch. These points are used to calculate $\mathcal{L}_{data}$. Furthermore, the model receives the initial conditions to calculate $\mathcal{L}_{i.c.}$. The $\mathcal{L}_{physics}$ is calculated only using the residual of equation \ref{eq:damped_harmonic_oscillator}, for which no inputs are needed.\\
+
+This is a suboptimal approach, since the model could simply memorize the 15 given points. A better approach would be to randomize the 15 points every epoch to avoid overtraining on a specific dataset. Furthermore, it would also be good practise to stop the inputting of datapoints after a defined number of epochs, so that the model is solely trained based on the equation residuals. This is even an even safer approach to avoid overtraining and is known as \textit{curriculum training}. \cite{guo2025ctlpinn}
+
 \begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The example uses the Adam algorithm as the so-called optimizer. What is the purpose of this optimizer? What is specific about the Adam algorithm, and what are its main hyper-parameters? Are there viable alternatives for the Adam optimizer?
 \end{tcolorbox}
 
+An optimizer is a tool to accelerate the gradient descent by taking previously calculated gradients into account \cite{geeksforgeeks2025adam}. This way, the optimizer can avoid oscillations and avoid local minima. Adam is actually a combination of two alternative optimisers:
+\begin{enumerate}
+    \item Momentum-based optimising \cite{geeksforgeeks2025momentum}: this technische incorporates the gradients of previous epochs by calculating an exponentially weighted moving average. If the gradient at epoch $t$ is given by $w_t$, the momentum-based gradient $m_t$ is calculated iteratively as follows:
+    \begin{equation}
+        m_t=\beta m_{t-1} + (1-\beta)\nabla_{w_t}\mathcal{L}_{tot}
+    \end{equation}
+    where $\beta$ is the momentum factor, typically chosen as 0.9. This parameter determines how much the previous gradients need to be taken into account. The weights are then updated:
+    \begin{equation}
+        w_t=w_{t-1}-\alpha m_t
+    \end{equation}
+    \item Root Mean Square Propagation \cite{geeksforgeeks2025rmsprop}: this technique uses an exponentially weighted moving average of squared gradients to optimise the learning rate $\alpha$. The learning rate is divided by a factor $\sqrt{v_t}$, the root (weighted)mean square of the gradients. This is also calculated iteratively:
+    \begin{equation}
+        v_t=\gamma v_{t-1}+(1-\gamma)\left(\nabla_{w_t}\mathcal{L}_{tot}\right)^2
+    \end{equation}
+     The weights are then updated:
+    \begin{equation}
+        w_t=w_{t-1}-\frac{\alpha}{\sqrt{v_t}+\epsilon} \nabla_{w_t}\mathcal{L}_{tot}
+    \end{equation}
+    A small value is added in the denominator to avoid division by zero.
+\end{enumerate}
+
+Both $m$ and $v$ are biased towards zero since they are initialized at zero. They need to be corrected:
+\begin{equation}
+    \begin{split}
+        \hat m_t&=\frac{m_t}{1-\beta^t}\\
+        \hat v_t&=\frac{v_t}{1-\gamma^t}\\
+    \end{split}
+\end{equation}
+
+The Adam optimiser combines these two techniques and updates the weights as follows:
+\begin{equation}
+    w_t=w_{t-1}-\frac{\alpha}{\sqrt{\hat v_t}+\epsilon} \hat m_t
+\end{equation}
+The Adam optimiser is widely used since it generally has an efficient performance with relative little hyperparameters; only $\alpha$, $\beta$, and $\gamma$ need to be defined. Both the learning rate and the gradient itself are made adaptive which helps to find the global minimum of the loss function more effectively. Anternative optimisers inlcude the momentum-based and RMSprop techniques as discussed above, or Adamax (a variant of Adam based on the infinity norm) and Adagrad (which accumulated the gradients instead of using the weighted average).
+
 \begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The example also uses an additional optimizer: a learning rate scheduler. What does this scheduler do? Is is a necessary ingredient for training a neural network? What are its main hyper-parameters? Are there alternatives that can be usefully applied in this example?
 \end{tcolorbox}
+The learning rate scheduler StepRL reduces the the learning rate with a factor $\gamma$ after every $n$ epochs, which are tunable hyperparameters. This adds a global decay, which can optimize the convergence in the different stages of optimisation. When the number of epochs is still small and the parameter set is still far from the optimum, the learning rate is big, but as the number of epochs gets bigger and the network converges towards the best set of parameters, the learning rate has to decrease as well in order to avoid oscillations around the minimum. This approach lead to a further acceleration of the gradient descent.\\
+
+There exist many different alternative learning rate schedulers, such as:
+\begin{enumerate}
+    \item ExponentialLR: similar to StepRL but apllies a small decay factor $\gamma$ after every epoch, leading to an exponentially decreasing learning rate.
+    \item CosineAnnealingLR: the learning rate follows a cosine curve which converges to a minimum value.
+    \item ReduceLROnPlateau: adaptive scheduler which applies a decay factor $\gamma$ when improvement stagnates.
+    \item CyclicalLR: non-traditional learning rate scheduler which periodically increases and decreases the learning rate in order to avoid local minima.
+\end{enumerate}
+In this specific case, StepRL or ExponentialLR are good choices to effectively train the model. 
 
 \begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     How many epochs is the network trained for? How would you determine whether you have trained for too little or too many epochs?
 \end{tcolorbox}
+The model is trained for $8000$ epochs. In order to determine if this is too many/too little, we need to compare the test and training loss function curves as a function of the number of epochs. When these two curves start to diverge, it means the model is overfitting on the test set. The model is then learning meaningless details in the test set.
 
 \begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Would it make sense to have a set of validation points? How would these look like? How would you use them?
 \end{tcolorbox}
+This script does not have a set of validation points, which makes it difficult to gauge the accuracy of the model while taking the possibility of overtraining into account. The most representative way to determine the accuracy of the solution is to compare it directly to the analytic, exact solution. This can be done by defining a set of many evenly spaced values fot $t$ and calculating the analytic solution $y(t)$ at these points. This acts as the ground truth of the model. Then, the MSR between the predicted and ground truth datapoints can be calculated to give an idea of the accuracy of the model.\\
 
+It could also be wise to split the validation points into two sets in order to more specifically invesitgate the models ability to extrapolate beyond the range in which observation points were supplied. The set would then be split up into a set of extrapolated and non-extrapolated points. Then, the mean squared errors of both sets can be compared to analyse how much worse the predictions for the extrapolated region are.
 
 \subsection{Questions on the code}
 \begin{tcolorbox}[title=Question 1, colback=blue!10!white, colframe=blue!40!white, sharp corners]
@@ -194,6 +258,9 @@ n ={}& \text{First layer weights} + \text{First layer bias} \\
         \verb|np.random.seed(42)|
     \end{tcolorbox}
 \end{tcolorbox}
+These lines of code set the seed for the random number generation in the script. Using the same seed every time makes it so that the noisy observation points are exactly the same when the script is ran. This can make it easier to debug the script when a specific combination of observation points causes a bug.\\
+
+It is however also important to occasionally test the script with different seeds. The model architecture and the script could become optimised for this specific seed if other seeds are never tested.
 
 \begin{tcolorbox}[title=Question 2, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What is the purpose of the \verb|np.ndarray| statements in this function definition:
@@ -201,6 +268,8 @@ n ={}& \text{First layer weights} + \text{First layer bias} \\
         \verb|def analytic(t: np.ndarray) -> np.ndarray:|
     \end{tcolorbox}
 \end{tcolorbox}
+
+It tells the user which datatypes the input and output need to be. This is good practise to avoid TypeErrors.
 
 \begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The data points are created randomly and then sorted before being offered to the neural net, using this statement:
@@ -210,6 +279,10 @@ n ={}& \text{First layer weights} + \text{First layer bias} \\
     Is this good or bad?
 \end{tcolorbox}
 
+Randomizing the datapoints is good practise. A periodic set of points could lead the model to memorize specific patterns, instead of predicting the general solution to the initial condition. However, as said before, this script always passes the same set of random points which negates the advantage of randomizing the points in the firs place.\\
+
+The sorting of the points has no effect, since we are taking the MSE between the observation points and predicted points. The order in which the errors are summed has no effect on the loss function.
+
 \begin{tcolorbox}[title=Question 4, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The collocation points are created uniformly on a fixed grid, using this statement:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
@@ -217,6 +290,7 @@ n ={}& \text{First layer weights} + \text{First layer bias} \\
     \end{tcolorbox}
     Is this good or bad?
 \end{tcolorbox}
+Using a uniform grid for the collocation points is not optimal, the model can fine-tune to the specific spacing of the collocation grid which is not desirable. It is better practise to generate the collocation points randomly at every epoch. By constantly regenerating a set of collocation points, any bias towards one region is also avoided.
 
 \begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What is this statement doing? Is it necessary?

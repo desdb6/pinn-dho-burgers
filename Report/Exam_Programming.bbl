@@ -5,4 +5,30 @@
 \newblock Loss function for linear regression in machine learning, 2024.
 \newblock Accessed: 2026-05-06.
 
+\bibitem{geeksforgeeks2025adam}
+{GeeksforGeeks}.
+\newblock Adam optimizer, 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{geeksforgeeks2025momentum}
+{GeeksforGeeks}.
+\newblock Momentum-based gradient optimizer, 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{geeksforgeeks2025rmsprop}
+{GeeksforGeeks}.
+\newblock Rmsprop optimizer in deep learning, 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{geeksforgeeks2026hyperparameter}
+{GeeksforGeeks}.
+\newblock Hyperparameter tuning, 2026.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{guo2025ctlpinn}
+Y.~Guo, Z.~Fu, J.~Min, S.~Lin, X.~Liu, Y.~F. Rashed, and X.~Zhuang.
+\newblock Long-term simulation of physical and mechanical behaviors using curriculum-transfer-learning based physics-informed neural networks.
+\newblock 2025.
+\newblock Accessed: 2026-05-07.
+
 \end{thebibliography}
