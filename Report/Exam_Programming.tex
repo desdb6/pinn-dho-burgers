@@ -29,8 +29,7 @@
 \usepackage{subcaption}
 \usepackage{booktabs}
 \usepackage{tcolorbox}
-\usepackage{transparent}
-\usepackage{svg}
+\usepackage{scrhack}
 
 \usepackage[english]{babel} % or english if your text is in English
 \usepackage{amsmath}
@@ -58,7 +57,7 @@
 
 \title{Exam Programming: PINN} % either don't split titles, or do so with hypen
                      % and a newline
-\subtitle{Using Physics Informed Neural Networks to solve nonlineair Partial Differential Equations}
+\subtitle{Using Physics Informed Neural Networks to solve nonlinear Partial Differential Equations}
 \author{Des De Borger}
 
 \academicyear{2025 - 2026}
@@ -164,11 +163,13 @@ A dense network is used in this specific case. The parameters for the hidden lay
 n ={}& \text{First layer weights} + \text{First layer bias} \\
      &+ \text{Hidden layer weights} + \text{Hidden layer bias} \\
      &+ \text{Last layer weights} + \text{Last layer bias} \\
-     ={}&(1\cdot32 + 32) + 4(32\cdot32+32) + (1\cdot32 + 1)=3265\ \text{parameters} 
+     ={}&(1\cdot32 + 32) + 3(32\cdot32+32) + (1\cdot32 + 1)=3265\ \text{parameters} 
 \end{split}
 \end{equation}
 
 The dimensions of the network (the depth and layer size) are hyperparameters which should be tuned according to the specific problem needs to be solved by the model. Defining the optimal value for hyperparameters such as the dimensions is a relatively subjective and empirical process, since there are no general formulas that give the optimal hyperparameter set for every problem.\\
+
+The activation function used is a $\tanh$ function. This choice is important; we will be calculating the first and second derivatives of the output $y$ with respect to the input $t$, which means the activation function needs to be differentiable at least twice. for this reason, ex. ReLu is not suitable for this network.\\
 
 Judging from the predicted solution, the model is large enough to make an accurate prediction for the solution to the equation. To optimise the network dimensions further, one can choose to implement an optimising algorithm which tunes the hyperparameters based on a validation set. This way, the acuraccy and training time can be optimised in a reproducible way \cite{geeksforgeeks2026hyperparameter}. Examples possible methods include:
 \begin{itemize}
@@ -242,7 +243,7 @@ In this specific case, StepRL or ExponentialLR are good choices to effectively t
 \begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     How many epochs is the network trained for? How would you determine whether you have trained for too little or too many epochs?
 \end{tcolorbox}
-The model is trained for $8000$ epochs. In order to determine if this is too many/too little, we need to compare the test and training loss function curves as a function of the number of epochs. When these two curves start to diverge, it means the model is overfitting on the test set. The model is then learning meaningless details in the test set.
+The model is trained for $8000$ epochs. In order to determine if this is too many/too little, we need to compare the test and training loss function curves as a function of the number of epochs. When these two curves start to diverge, it means the model is overfitting on the training set. The model is then learning meaningless details in the test set. In the provided script no validation dataset is implemented, which makes it impossible to detect overfitting in this way. A proper implementation would reserve a separate set of points, unseen during training, against which the loss is evaluated each epoch.
 
 \begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Would it make sense to have a set of validation points? How would these look like? How would you use them?
@@ -325,19 +326,36 @@ The order of these commands are crucial. The gradients must be set to zero first
 \end{tcolorbox}
 The collocation points are used to calculate the MSR of the ODE as shown in equation \ref{eq:loss_physics_DHO}, and the initial conditions are used to calculate the deviation from the predicted initial conditions as shown in equation \ref{eq:loss_i.c._DHO}. In both expressions of the loss function, the derivatives of $y(t)$ show up, so these need to be calculated.\\
 
-Rather than using finite differences to calculate the derivatives at the collocation points and at $t=0$, we can directly use the gradients calculated during the forward pass through the model. This is both more efficient since it allows for the simultaneous prediction and calculation of the derivatives of $y(t)$. However, we need to tell the model which derivatives with respect to $t$ are required, which is done by the \verb|requires_grad=True| statement. For the calculation of the MSE of the noisy observation points as in equation \ref{eq:loss_data_DHO}, no derivatives are needed, so the statement is omitted and \verb|requires_grad| is set to the standard value \verb|False|. \cite{pytorch2025}
+Rather than using finite differences to calculate the derivatives at the collocation points and at $t=0$, we can calculate the gradients during the forward pass through the model using \verb|torch.autograd.grad|. This is more efficient since it allows for the simultaneous prediction of $y(t)$ and the calculation of the derivatives. However, we need to tell the model which derivatives with respect to $t$ are required, which is done by the \verb|requires_grad=True| statement. For the calculation of the MSE of the noisy observation points as in equation \ref{eq:loss_data_DHO}, no derivatives are needed, so the statement is omitted and \verb|requires_grad| is set to the standard value \verb|False|. \cite{pytorch2025}
 
 \begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
-    When presenting arrays of time points to the input of my neural network, I need to convert them into a pytorch tensor, using this helper function:
-    \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
-        \begin{verbatim}
-        def to_tensor(arr, requires_grad=False):
-            return torch.tensor(arr, dtype=torch.float32,
-                                requires_grad=requires_grad).unsqueeze(1)
-        \end{verbatim}
-    \end{tcolorbox}
-    What does the \verb|unsqueeze(1)| method of the torch.tensor class do, and why do I need to do this?
+When presenting arrays of time points to the input of my neural network, I need to convert them into a pytorch tensor, using this helper function:
+\begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
+\begin{verbatim}
+def to_tensor(arr, requires_grad=False):
+    return torch.tensor(arr, dtype=torch.float32,
+                        requires_grad=requires_grad).unsqueeze(1)
+\end{verbatim}
 \end{tcolorbox}
+What does the \verb|unsqueeze(1)| method of the torch.tensor class do, and why do I need to do this?
+\end{tcolorbox}
+The \verb|unsqueeze()| method takes a pytorch tensor of rank $n$ and adds a dimension of depth $1$ at a specified index, as shown on Figure \ref{fig:unsqueeze}. In this case, the helper function takes in a one-dimensional array of length $n$ and returns a $(n, 1)$ \verb|torch.tensor| class. This is necessary for two different reasons:
+\begin{enumerate}
+    \item The time arrays (\verb|t_obs_t| and \verb|t_col_t|) which are used as inputs for forward passes through the network need to be $(n, 1)$ shaped in order to do matrix multiplication. The first \verb|nn.Linear(1, 32)| layer of the network performs the following matrix multiplication:
+    \begin{equation}
+        y=xW^T+b
+    \end{equation}
+    where $x$ is the $n\times 1$ input of the first layer, consisting of $n$ samples with $1$ feature, which is the time value $t$. $W$ and $b$ are $(32\times 1)$ column matrices containing the weights and biases\footnote{$b$ cannot actually be added directly to $xW^T$ since the dimensions do not match. $b$ is actually added to each row of the $xW^T$ matrix.} of the layer and $y$ is the $n\times 32$ output. If we do not unsqueeze the time arrays, which correspond to $x$ in this case, \verb|nn.Linear(1, 32)| will interpret the $(n,)$ tensors as $(1, n)$ tensors, consisting of $1$ sample with $n$ features. This makes the matrix multiplication $xW^T$, which is $(1, n)\times(1, n)$ impossible. Note that the \verb|t_ic_t| tensor does not need to be unsqueezed, since it is a $(1,)$ shaped tensor which cannot be interpreted incorrectly by the \verb|nn.Linear(1, 32)| layer.
+    \item The \verb|y_obs_t| unsqueezed tensor is not passed through the network, but rather is used to calculate the data loss $\mathcal{L}_{data}$ (see equation \ref{eq:loss_data_DHO}). When predicting the $y$ values for the \verb|t_obs_t| values, the model returns a $(n, 1)$ tensor (\verb|y_pred|). In the code, the residual is calculated as \verb|l_data = torch.mean((y_pred - y_obs_t) ** 2)|. If \verb|y_obs_t| is not unsqueezed ($(n,)$ tensor), the $(n, 1)-(n,)$ operation will return a $(n, n)$ tensor, containing \textit{all} differences $\hat y_i-y_j$, instead of only the relevant errors $\hat y_i-y_i$. When averaging over these elements using \verb|torch.mean|, it is averaging over differences and returns a loss which is not correct.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/unsqueeze.png}
+    \caption{Unsqueezing of a $2\times2$ tensor into $1\times2\times2$,  $2\times1\times2$, and $2\times2\times1$ tensors by using the  \texttt{unsqueeze()} method of the \texttt{torch.tensor} class.  \cite{so_unsqueeze2019}}
+    \label{fig:unsqueeze}
+\end{figure}
+
 
 \begin{tcolorbox}[title=Question 9, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     When computing the first and second derivatives of $y(t)$ we use the \verb|torch.autograd| method. Explain why the \verb|grad_outputs| are set to ones and why we need to take the zero-th element \verb|[0]| of this output in the statements below:
@@ -348,6 +366,17 @@ Rather than using finite differences to calculate the derivatives at the colloca
         \verb|    create_graph=True)[0]|
     \end{tcolorbox}
 \end{tcolorbox}
+The \verb|torch.autograd.grad| differentiates an output vector $y=(y_1, \ldots, y_n)$ with respect to an input vector $t=(t_1, \ldots, t_n)$ and returns a vector-Jacobian product:
+\begin{equation}
+    v^TJ =  v^T
+    \begin{pmatrix}
+        \frac{\partial y_1}{\partial t_1} & \cdots & \frac{\partial y_1}{\partial t_n} \\
+        \vdots & \ddots & \vdots \\
+        \frac{\partial y_n}{\partial t_1} & \cdots & \frac{\partial y_n}{\partial t_n}
+    \end{pmatrix}
+\end{equation}
+where $v$ is set by \verb|grad_outputs|. In our specific case, every value $y_i$ only depends on the corresponding time value $t_i$, which makes the Jacobian a diagonal matrix. In order to contract the Jacobian to a column vector, $v$ can be set to a row vector of ones with \verb|grad_outputs=torch.ones_like(y_hat)|. The \verb|torch.autograd.grad| acutally returns a tuple $(dy,)$ per input, so to unpack it we can simply select the first and only element using \verb|[0]|.
+
 
 \chapter{Burger's Equation}
 

@@ -1,0 +1,52 @@
+\begin{thebibliography}{1}
+
+\bibitem{geeksforgeeks2024lossfunctions}
+{GeeksforGeeks}.
+\newblock Loss function for linear regression in machine learning, 2024.
+\newblock Accessed: 2026-05-06.
+
+\bibitem{geeksforgeeks2025adam}
+{GeeksforGeeks}.
+\newblock Adam optimizer, 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{geeksforgeeks2025momentum}
+{GeeksforGeeks}.
+\newblock Momentum-based gradient optimizer, 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{geeksforgeeks2025rmsprop}
+{GeeksforGeeks}.
+\newblock Rmsprop optimizer in deep learning, 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{geeksforgeeks2026hyperparameter}
+{GeeksforGeeks}.
+\newblock Hyperparameter tuning, 2026.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{guo2025ctlpinn}
+Y.~Guo, Z.~Fu, J.~Min, S.~Lin, X.~Liu, Y.~F. Rashed, and X.~Zhuang.
+\newblock Long-term simulation of physical and mechanical behaviors using
+  curriculum-transfer-learning based physics-informed neural networks.
+\newblock 2025.
+\newblock Accessed: 2026-05-07.
+
+\bibitem{pytorch2025}
+{PyTorch Contributors}.
+\newblock {\em {PyTorch} Documentation, Version 2.11}.
+\newblock PyTorch, 2025.
+\newblock Accessed: 2026-05-12.
+
+\bibitem{so_unsqueeze2019}
+{Stack Overflow contributors}.
+\newblock What does \texttt{unsqueeze} do in {PyTorch}?, 2019.
+\newblock Accessed: 2026-05-12.
+
+\bibitem{pep484}
+G.~van Rossum, J.~Lehtosalo, and {\L}.~Langa.
+\newblock {PEP} 484 -- type hints.
+\newblock Python Enhancement Proposal 484, Python Software Foundation, 2015.
+\newblock Status: Final. Python version: 3.5.
+
+\end{thebibliography}

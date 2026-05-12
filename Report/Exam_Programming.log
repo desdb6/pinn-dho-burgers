@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.10) (preloaded format=pdflatex 2026.4.12)  12 MAY 2026 13:05
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 23.10) (preloaded format=pdflatex 2026.4.12)  12 MAY 2026 19:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -538,10 +538,7 @@ Package caption Info: New subtype `subtable' on input line 238.
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/booktabs\booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen292
-\lightrulewidth=\dimen293
-\cmidrulewidth=\dimen294
-\belowrulesep=\dimen295
-\belowbottomsep=\dimen296
+\lightrulewidth=\dimenmsep=\dimen296
 \aboverulesep=\dimen297
 \abovetopsep=\dimen298
 \cmidrulesep=\dimen299
@@ -554,16 +551,20 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \@thisruleclass=\count302
 \@lastruleclass=\count303
 \@thisrulewidth=\dimen304
-) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcolorbox.sty
+)
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/tcolorbox\tcolorbox.sty
 Package: tcolorbox 2023/09/26 version 6.1.0 text color boxes
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/tools\verbatim.sty
 Package: verbatim 2022-07-02 v1.5u LaTeX2e package for verbatim enhancements
 \every@verbatim=\toks40
 \verbatim@line=\toks41
 \verbatim@in@stream=\read3
-) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/environ\environ.sty
+)
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/environ\environ.sty
 Package: environ 2014/05/04 v0.3 A new way to define environments
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/trimspaces\trimspaces.sty
+
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/trimspaces\trimspaces.s
+ty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 )
 \@envbody=\toks42
@@ -579,37 +580,15 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 \tcb@temp=\box72
 \tcb@temp=\box73
 \tcb@temp=\box74
-) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/transparent\transparent.sty
-Package: transparent 2025-06-23 v1.6 Transparency with color stacks
-
-C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/transparent\transparent.sty:42: Undefined control sequence.
-l.42 \IfPDFManagementActiveF
-                             {\RequirePackage{transparent-nometadata}}
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/transparent\transparent-nometadata.sty
-Package: transparent-nometadata 2025-06-23 v1.6 Transparency via pdfTeX's color stack (HO)
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/auxhook\auxhook.sty
-Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
-))
-C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/transparent\transparent.sty:43: Undefined control sequence.
-l.43 \IfPDFManagementActiveF
-                             {\endinput}
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/svg\svg.sty
 Package: svg 2020/11/26 v2.02k (include SVG pictures)
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.sty
-Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
+
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds
+.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
+)
+
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
 Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
 )
 Package pdftexcmds Info: \pdf@primitive is available.
@@ -619,21 +598,15 @@ Package pdftexcmds Info: \pdfdraftmode found.
 \c@svg@param@lastpage=\count307
 \svg@box=\box75
 \c@svg@param@currpage=\count308
-) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/babel\babel.sty
-Package: babel 2023/09/29 v3.95 The Babel package
-\babel@savecnt=\count309
-\U@D=\dimen305
-\l@unhyphenated=\language79
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/babel\txtbabel.def)
-\bbl@readstream=\read4
-\bbl@dirlevel=\count310
+)
+(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/transparent\transparent
+.sty
+Package: transparent 2025-06-23 v1.6 Transparency with color stacks
 
-*************************************
-* Local config file bblopts.cfg used
-*
-(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/arabi\bblopts.cfg
-File: bblopts.cfg 2005/09/08 v0.1 add Arabic and Farsi to "declared" options of babel
-) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/babel-english\english.ldf
+! Undefined control sequence.
+l.42 \IfPDFManagementActiveF
+                             {\RequirePackage{transparent-nometadata}}
+? \tex/latex/babel-english\english.ldf
 Language: english 2017/06/06 v3.3r English support from the babel system
 Package babel Info: Hyphen rules for 'canadian' set to \l@english
 (babel)             (\language0). Reported on input line 102.
@@ -661,19 +634,19 @@ Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/amsmath\amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
-\inf@bad=\count311
+\inf@bad=\count309
 LaTeX Info: Redefining \frac on input line 234.
-\uproot@=\count312
-\leftroot@=\count313
+\uproot@=\count310
+\leftroot@=\count311
 LaTeX Info: Redefining \overline on input line 399.
 LaTeX Info: Redefining \colon on input line 410.
-\classnum@=\count314
-\DOTSCASE@=\count315
+\classnum@=\count312
+\DOTSCASE@=\count313
 LaTeX Info: Redefining \ldots on input line 496.
 LaTeX Info: Redefining \dots on input line 499.
 LaTeX Info: Redefining \cdots on input line 620.
-\Mathstrutbox@=\box76
-\strutbox@=\box77
+\Mathstrutbox@=\box75
+\strutbox@=\box76
 LaTeX Info: Redefining \big on input line 722.
 LaTeX Info: Redefining \Big on input line 723.
 LaTeX Info: Redefining \bigg on input line 724.
@@ -681,20 +654,20 @@ LaTeX Info: Redefining \Bigg on input line 725.
 \big@size=\dimen308
 LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
-\macc@depth=\count316
+\macc@depth=\count314
 LaTeX Info: Redefining \bmod on input line 905.
 LaTeX Info: Redefining \pmod on input line 910.
 LaTeX Info: Redefining \smash on input line 940.
 LaTeX Info: Redefining \relbar on input line 970.
 LaTeX Info: Redefining \Relbar on input line 971.
-\c@MaxMatrixCols=\count317
+\c@MaxMatrixCols=\count315
 \dotsspace@=\muskip16
-\c@parentequation=\count318
-\dspbrk@lvl=\count319
+\c@parentequation=\count316
+\dspbrk@lvl=\count317
 \tag@help=\toks44
-\row@=\count320
-\column@=\count321
-\maxfields@=\count322
+\row@=\count318
+\column@=\count319
+\maxfields@=\count320
 \andhelp@=\toks45
 \eqnshift@=\dimen309
 \alignsep@=\dimen310
@@ -708,9 +681,20 @@ LaTeX Info: Redefining \Relbar on input line 971.
 \mathdisplay@stack=\toks47
 LaTeX Info: Redefining \[ on input line 2953.
 LaTeX Info: Redefining \] on input line 2954.
-) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
+)
+Package scrhack Info: hyperref hack deactivated because of
+(scrhack)             detection of KOMA-Script class, that doesn't
+(scrhack)             need that hack, on input line 41.
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hyperref.sty
 Package: hyperref 2023-07-08 v7.01b Hypertext links for LaTeX
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/ltxcmds\ltxcmds.sty
+Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
+) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/pdftexcmds\pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/kvsetkeys\kvsetkeys.sty
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/kvdefinekeys\kvdefinekeys.sty
 Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
@@ -720,6 +704,8 @@ Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
 Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/letltxmacro\letltxmacro.sty
 Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
+) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/auxhook\auxhook.sty
+Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\nameref.sty
 Package: nameref 2023-08-07 v2.53 Cross-referencing by name of section
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/refcount\refcount.sty
@@ -729,11 +715,11 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/kvoptions\kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count323
+\c@section@level=\count321
 )
 \@linkdim=\dimen315
-\Hy@linkcounter=\count324
-\Hy@pagecounter=\count325
+\Hy@linkcounter=\count322
+\Hy@pagecounter=\count323
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\pd1enc.def
 File: pd1enc.def 2023-07-08 v7.01b Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
@@ -741,7 +727,7 @@ Now handling font encoding PD1 ...
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/intcalc\intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count326
+\Hy@SavedSpaceFactor=\count324
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\puenc.def
 File: puenc.def 2023-07-08 v7.01b Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
@@ -769,7 +755,7 @@ Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 285.
 ))
-\c@Hy@tempcnt=\count327
+\c@Hy@tempcnt=\count325
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/url\url.sty
 \Urlmuskip=\muskip17
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
@@ -779,7 +765,7 @@ LaTeX Info: Redefining \url on input line 4772.
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/generic/bitset\bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 )
-\Fld@menulength=\count328
+\Fld@menulength=\count326
 \Field@Width=\dimen317
 \Fld@charsize=\dimen318
 Package hyperref Info: Hyper figures OFF on input line 6051.
@@ -793,15 +779,15 @@ Package hyperref Info: PDF/A mode OFF on input line 6081.
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
-\Hy@abspage=\count329
-\c@Item=\count330
-\c@Hfootnote=\count331
+\Hy@abspage=\count327
+\c@Item=\count328
+\c@Hfootnote=\count329
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/hyperref\hpdftex.def
 File: hpdftex.def 2023-07-08 v7.01b Hyperref driver for pdfTeX
-\Fld@listcount=\count332
-\c@bookmark@seq@number=\count333
+\Fld@listcount=\count330
+\c@bookmark@seq@number=\count331
 \Hy@SectionHShift=\skip84
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\mathptmx.sty
 Package: mathptmx 2020/03/25 PSNFSS-v9.3 Times w/ Math, improved (SPQR, WaS) 
@@ -839,31 +825,32 @@ LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 (Font)                  OT1/cmr/bx/it --> OT1/ptm/m/it on input line 35.
 LaTeX Info: Redefining \hbar on input line 50.
 )
-LaTeX Font Info:    Redeclaring math alphabet \mathcal on input line 44.
+LaTeX Font Info:    Redeclaring math alphabet \mathcal on input line 43.
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/tools\multicol.sty
 Package: multicol 2023/03/30 v1.9f multicolumn formatting (FMi)
-\c@tracingmulticols=\count334
-\mult@box=\box78
+\c@tracingmulticols=\count332
+\mult@box=\box77
 \multicol@leftmargin=\dimen319
-\c@unbalance=\count335
-\c@collectmore=\count336
-\doublecol@number=\count337
-\multicoltolerance=\count338
-\multicolpretolerance=\count339
+\c@unbalance=\count333
+\c@collectmore=\count334
+\doublecol@number=\count335
+\multicoltolerance=\count336
+\multicolpretolerance=\count337
 \full@width=\dimen320
 \page@free=\dimen321
 \premulticols=\dimen322
 \postmulticols=\dimen323
 \multicolsep=\skip85
 \multicolbaselineskip=\skip86
-\partial@page=\box79
-\last@line=\box80
-\mc@boxedresult=\box81
+\partial@page=\box78
+\last@line=\box79
+\mc@boxedresult=\box80
 \maxbalancingoverflow=\dimen324
-\mult@rightbox=\box82
-\mult@grightbox=\box83
-\mult@firstbox=\box84
-\mult@gfirstbox=\box85
+\mult@rightbox=\box81
+\mult@grightbox=\box82
+\mult@firstbox=\box83
+\mult@gfirstbox=\box84
+\@tempa=\box85
 \@tempa=\box86
 \@tempa=\box87
 \@tempa=\box88
@@ -899,25 +886,31 @@ Package: multicol 2023/03/30 v1.9f multicolumn formatting (FMi)
 \@tempa=\box118
 \@tempa=\box119
 \@tempa=\box120
-\@tempa=\box121
-\c@minrows=\count340
-\c@columnbadness=\count341
-\c@finalcolumnbadness=\count342
+\c@minrows=\count338
+\c@columnbadness=\count339
+\c@finalcolumnbadness=\count340
 \last@try=\dimen325
 \multicolovershoot=\dimen326
 \multicolundershoot=\dimen327
-\mult@nat@firstbox=\box122
-\colbreak@box=\box123
-\mc@col@check@num=\count343
+\mult@nat@firstbox=\box121
+\colbreak@box=\box122
+\mc@col@check@num=\count341
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/float\float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count344
+\c@float@type=\count342
 \float@exts=\toks48
-\float@box=\box124
+\float@box=\box123
 \@float@everytoks=\toks49
-\@floatcapt=\box125
+\@floatcapt=\box124
 )
-LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 66.
+Package scrhack Info: loading float hack on input line 55.
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/koma-script\float.hak
+File: float.hak 2023/07/07 v3.41 KOMA-Script scrhack part (hacking package float)
+Package scrhack Info: redefining \newfloat on input line 163.
+Package scrhack Info: redefining \listof on input line 163.
+Package scrhack Info: undefining \float@addtolists on input line 163.
+)
+LaTeX Font Info:    Trying to load font information for OT1+ptm on input line 65.
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
@@ -928,43 +921,43 @@ LaTeX Warning: Unused global option(s):
 (Exam_Programming.aux)
 \openout1 = `Exam_Programming.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 66.
-LaTeX Font Info:    ... okay on input line 66.
-\smallogo=\box126
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 65.
+LaTeX Font Info:    ... okay on input line 65.
+\smallogo=\box125
 <Logos/logo-uantwerpen-we-en-rgb-pos.pdf, id=4, 391.4625pt x 103.38625pt>
 File: Logos/logo-uantwerpen-we-en-rgb-pos.pdf Graphic file (type pdf)
 <use Logos/logo-uantwerpen-we-en-rgb-pos.pdf>
-Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 66.
+Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 65.
 (pdftex.def)             Requested size: 71.13188pt x 18.7854pt.
-Package hyperref Info: Option `breaklinks' set `true' on input line 66.
-Package hyperref Info: Option `colorlinks' set `true' on input line 66.
-Package hyperref Info: Option `pageanchor' set `true' on input line 66.
-Package scrbase Info: activating english \partname on input line 66.
-Package scrbase Info: activating english \chaptername on input line 66.
-Package scrbase Info: activating english \appendixname on input line 66.
-Package scrbase Info: activating english \figurename on input line 66.
-Package scrbase Info: activating english \tablename on input line 66.
-Package scrbase Info: activating english \contentsname on input line 66.
-Package scrbase Info: activating english \listfigurename on input line 66.
-Package scrbase Info: activating english \listtablename on input line 66.
-Package scrbase Info: activating english \bibname on input line 66.
-Package scrbase Info: activating english \indexname on input line 66.
+Package hyperref Info: Option `breaklinks' set `true' on input line 65.
+Package hyperref Info: Option `colorlinks' set `true' on input line 65.
+Package hyperref Info: Option `pageanchor' set `true' on input line 65.
+Package scrbase Info: activating english \partname on input line 65.
+Package scrbase Info: activating english \chaptername on input line 65.
+Package scrbase Info: activating english \appendixname on input line 65.
+Package scrbase Info: activating english \figurename on input line 65.
+Package scrbase Info: activating english \tablename on input line 65.
+Package scrbase Info: activating english \contentsname on input line 65.
+Package scrbase Info: activating english \listfigurename on input line 65.
+Package scrbase Info: activating english \listtablename on input line 65.
+Package scrbase Info: activating english \bibname on input line 65.
+Package scrbase Info: activating english \indexname on input line 65.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1002,16 +995,16 @@ Package scrbase Info: activating english \indexname on input line 66.
 
 (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count345
+\scratchcounter=\count343
 \scratchdimen=\dimen328
-\scratchbox=\box127
-\nofMPsegments=\count346
-\nofMParguments=\count347
+\scratchbox=\box126
+\nofMPsegments=\count344
+\nofMParguments=\count345
 \everyMPshowfont=\toks50
-\MPscratchCnt=\count348
+\MPscratchCnt=\count346
 \MPscratchDim=\dimen329
-\MPnumerator=\count349
-\makeMPintoPDFobject=\count350
+\MPnumerator=\count347
+\makeMPintoPDFobject=\count348
 \everyMPtoPDFconversion=\toks51
 ) (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
@@ -1023,7 +1016,8 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring ON on input line 66.
+Package hyperref Info: Link coloring ON on input line 65.
+ (Exam_Programming.out) (Exam_Programming.out)
 \@outlinefile=\write4
 \openout4 = `Exam_Programming.out'.
 
@@ -1034,16 +1028,16 @@ Class scrbook Info: loading recommended package `bookmark'.
 (scrbook)           `bookmarkpackage=false' before \begin{document} and
 (scrbook)           you can avoid this message adding:
 (scrbook)             \usepackage{bookmark}
-(scrbook)           before \begin{document} on input line 66.
+(scrbook)           before \begin{document} on input line 65.
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bookmark.sty
 Package: bookmark 2023-12-10 v1.31 PDF bookmarks (HO)
  (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/bookmark\bkm-pdftex.def
 File: bkm-pdftex.def 2023-12-10 v1.31 bookmark driver for pdfTeX and luaTeX (HO)
-\BKM@id=\count351
+\BKM@id=\count349
 ))
 File: Logos/logo-uantwerpen-we-en-rgb-pos.pdf Graphic file (type pdf)
 <use Logos/logo-uantwerpen-we-en-rgb-pos.pdf>
-Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 69.
+Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input line 68.
 (pdftex.def)             Requested size: 176.407pt x 46.58963pt.
  [1{C:/Users/desde/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
@@ -1053,12 +1047,34 @@ Package pdftex.def Info: Logos/logo-uantwerpen-we-en-rgb-pos.pdf  used on input 
 
 
 
-]
-No file Exam_Programming.toc.
+] (Exam_Programming.toc
+LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line 5.
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ztmcm.fd
+File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line 5.
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omlztmcm.fd
+File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line 5.
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsztmcm.fd
+File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
+)
+LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line 5.
+ (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxztmcm.fd
+File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 5.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 5.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 5.
+)
 \tf@toc=\write5
 \openout5 = `Exam_Programming.toc'.
 
-[1
+ [1
 
 
 ] [2
@@ -1067,25 +1083,10 @@ No file Exam_Programming.toc.
 ]
 chapter 1.
 
-Class scrbook Warning: \float@addtolists detected!
-(scrbook)              Implementation of \float@addtolist became
-(scrbook)              deprecated in KOMA-Script v3.01 2008/11/14 and
-(scrbook)              has been replaced by several more flexible
-(scrbook)              features of package `tocbasic`.
-(scrbook)              Since Version 3.12 support for deprecated
-(scrbook)              \float@addtolist interface has been
-(scrbook)              restricted to only some of the KOMA-Script
-(scrbook)              features and been removed from others.
-(scrbook)              Loading of package `scrhack' may help to
-(scrbook)              avoid this warning, if you are using a
-(scrbook)              a package that still implements the
-(scrbook)              deprecated \float@addtolist interface.
-
-
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.78 \chapter
+l.77 \chapter
              {Theoretical background} [1
 
 
@@ -1093,7 +1094,7 @@ l.78 \chapter
 pdfTeX warning (ext4): destination with the same identifier (name{page.2}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.78 \chapter
+l.77 \chapter
              {Theoretical background} [2
 
 
@@ -1104,65 +1105,34 @@ chapter 2.
 
 ]
 chapter 3.
-LaTeX Font Info:    Trying to load font information for OT1+ztmcm on input line 81.
-(C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ot1ztmcm.fd
-File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OML+ztmcm on input line 81.
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omlztmcm.fd
-File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OMS+ztmcm on input line 81.
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omsztmcm.fd
-File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
-)
-LaTeX Font Info:    Trying to load font information for OMX+ztmcm on input line 81.
- (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\omxztmcm.fd
-File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
-)
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
 
-Underfull \hbox (badness 10000) in paragraph at lines 100--102
+Underfull \hbox (badness 10000) in paragraph at lines 99--101
 
  []
 
 
-LaTeX Warning: Reference `eq:damped_harmonic_oscillator' on page 5 undefined on input line 103.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 106--108
+Underfull \hbox (badness 10000) in paragraph at lines 105--107
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 112--114
+Underfull \hbox (badness 10000) in paragraph at lines 111--113
 
  []
-
-
-LaTeX Warning: Reference `fig:ic_comp' on page 5 undefined on input line 122.
 
 [5]
-<Images/ic_effect.png, id=70, 1156.32pt x 578.16pt>
+<Images/ic_effect.png, id=87, 1156.32pt x 578.16pt>
 File: Images/ic_effect.png Graphic file (type png)
 <use Images/ic_effect.png>
-Package pdftex.def Info: Images/ic_effect.png  used on input line 126.
+Package pdftex.def Info: Images/ic_effect.png  used on input line 125.
 (pdftex.def)             Requested size: 452.39865pt x 226.19608pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 137--138
+Underfull \hbox (badness 10000) in paragraph at lines 136--137
 
  []
 
 
-LaTeX Warning: Citation `geeksforgeeks2024lossfunctions' on page 6 undefined on input line 139.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 139--140
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
 
  []
 
@@ -1170,126 +1140,95 @@ Underfull \hbox (badness 10000) in paragraph at lines 139--140
 Underfull \vbox (badness 7047) has occurred while \output is active []
 
  [6 <./Images/ic_effect.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 159--160
+Underfull \hbox (badness 10000) in paragraph at lines 158--159
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 171--172
+Underfull \hbox (badness 10000) in paragraph at lines 170--171
 
  []
 
 
-LaTeX Warning: Citation `geeksforgeeks2026hyperparameter' on page 7 undefined on input line 173.
+Underfull \hbox (badness 10000) in paragraph at lines 172--173
 
-LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 175.
+ []
+
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 176.
 (C:\Users\desde\AppData\Local\Programs\MiKTeX\tex/latex/psnfss\ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [7]
-
-LaTeX Warning: Reference `eq:damped_harmonic_oscillator' on page 8 undefined on input line 185.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 185--186
+Underfull \hbox (badness 10000) in paragraph at lines 186--187
 
  []
 
-
-LaTeX Warning: Citation `guo2025ctlpinn' on page 8 undefined on input line 187.
-
-
-LaTeX Warning: Citation `geeksforgeeks2025adam' on page 8 undefined on input line 193.
-
-
-LaTeX Warning: Citation `geeksforgeeks2025momentum' on page 8 undefined on input line 195.
-
-
-LaTeX Warning: Citation `geeksforgeeks2025rmsprop' on page 8 undefined on input line 203.
-
 [8]
-Underfull \hbox (badness 10000) in paragraph at lines 231--232
+Underfull \hbox (badness 10000) in paragraph at lines 232--233
 
  []
 
 [9]
-Underfull \hbox (badness 10000) in paragraph at lines 250--251
+Underfull \hbox (badness 10000) in paragraph at lines 251--252
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 262--263
+Underfull \hbox (badness 10000) in paragraph at lines 263--264
+
+ []
+
+[10]
+Underfull \hbox (badness 10000) in paragraph at lines 284--285
 
  []
 
 
-LaTeX Warning: Citation `pep484' on page 10 undefined on input line 273.
-
-
-Underfull \vbox (badness 3250) has occurred while \output is active []
-
- [10]
-Underfull \hbox (badness 10000) in paragraph at lines 283--284
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 309--310
+Underfull \hbox (badness 10000) in paragraph at lines 310--311
 
  []
 
 [11]
-
-LaTeX Warning: Reference `eq:adam_update' on page 12 undefined on input line 311.
-
-
-Overfull \hbox (25.54597pt too wide) in paragraph at lines 311--312
-\OT1/ptm/m/n/10.95 and up-date the pa-ram-e-ters ac-cord-ingly (see eq. []). $\OML/ztmcm/m/it/10.95 m[]$ \OT1/ptm/m/n/10.95 and $\OML/ztmcm/m/it/10.95 v[]$ \OT1/ptm/m/n/10.95 are not ze-roed by the [][]\OT1/cmtt/m/n/10.95 optimiser.zero_grad()
+Overfull \hbox (33.75845pt too wide) in paragraph at lines 312--313
+\OT1/ptm/m/n/10.95 and up-date the pa-ram-e-ters ac-cord-ingly (see eq. [][]3.14[][]). $\OML/ztmcm/m/it/10.95 m[]$ \OT1/ptm/m/n/10.95 and $\OML/ztmcm/m/it/10.95 v[]$ \OT1/ptm/m/n/10.95 are not ze-roed by the [][]\OT1/cmtt/m/n/10.95 optimiser.zero_grad()
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 311--312
+Underfull \hbox (badness 10000) in paragraph at lines 312--313
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 313--314
+Underfull \hbox (badness 10000) in paragraph at lines 314--315
 
  []
 
 
-LaTeX Warning: Citation `pytorch2025' on page 12 undefined on input line 315.
-
-
-LaTeX Warning: Reference `eq:loss_physics_DHO' on page 12 undefined on input line 326.
-
-
-LaTeX Warning: Reference `eq:loss_i.c._DHO' on page 12 undefined on input line 326.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 326--327
+Underfull \hbox (badness 10000) in paragraph at lines 327--328
 
  []
 
-
-LaTeX Warning: Reference `eq:loss_data_DHO' on page 12 undefined on input line 328.
-
-
-LaTeX Warning: Citation `pytorch2025' on page 12 undefined on input line 328.
-
-
-Overfull \hbox (29.85144pt too wide) in paragraph at lines 336--336
-[]                                \OT1/cmtt/m/n/10.95 requires_grad=requires_grad).unsqueeze(1)[] 
+[12]
+Overfull \hbox (4.51942pt too wide) in paragraph at lines 344--345
+\OT1/ptm/m/n/10.95 net-work need to be $\OT1/ztmcm/m/n/10.95 (\OML/ztmcm/m/it/10.95 n; \OT1/ztmcm/m/n/10.95 1)$ \OT1/ptm/m/n/10.95 shaped in or-der to do ma-trix mul-ti-pli-ca-tion. The first [][]\OT1/cmtt/m/n/10.95 nn.Linear(1, 32)
  []
 
-
-Underfull \vbox (badness 2653) has occurred while \output is active []
-
- [12] [13] [14
-
-
-]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 348.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 348.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 348.
+<Images/unsqueeze.png, id=166, 758.835pt x 473.77pt>
+File: Images/unsqueeze.png Graphic file (type png)
+<use Images/unsqueeze.png>
+Package pdftex.def Info: Images/unsqueeze.png  used on input line 354.
+(pdftex.def)             Requested size: 452.39865pt x 282.45691pt.
+[13 <./Images/unsqueeze.png>] [14]
 chapter 4.
-[15] [16
+[15
+
+
+] [16
 
 
 ]
@@ -1304,61 +1243,35 @@ chapter A.
 
 ]
 chapter B.
-(Exam_Programming.bbl)
-c:/Users/desde/Documents/GitHub/ExProgrammeren/Report/Exam_Programming.tex:365: Undefined control sequence.
-\__hook enddocument ...o\endcsname }}\ifTRP@rerun 
-                                                  \PackageWarningNoLine {tra...
-l.365 \end{document}
-                    
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
+(Exam_Programming.bbl (Exam_Programming.brf)
+\tf@brf=\write6
+\openout6 = `Exam_Programming.brf'.
+
+ [21] [22
 
 
-Package transparent Warning: Rerun to get transparencies right.
-
-c:/Users/desde/Documents/GitHub/ExProgrammeren/Report/Exam_Programming.tex:365: Extra \fi.
-\__hook enddocument ...t transparencies right}\fi 
-                                                  \def \mc@set@col@status ##...
-l.365 \end{document}
-                    
-I'm ignoring this; it doesn't match any \if.
-
-[21] (Exam_Programming.aux)
+]) [23] (Exam_Programming.aux)
  ***********
 LaTeX2e <2023-06-01> patch level 1
-L3 programming layer <2023-08-29>
+L3 programming layer <2020/03/25>
  ***********
-
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `Exam_Programming.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `Exam_Programming.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  D41D8CD98F00B204E9800998ECF8427E;0.
+Package rerunfilecheck Info: File `Exam_Programming.out' has not changed.
+(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+Package rerunfilecheck Info: File `Exam_Programming.brf' has not changed.
+(rerunfilecheck)             Checksum: E369CE37283199EEC5861EA26A74416A;587.
  ) 
 Here is how much of TeX's memory you used:
- 31630 strings out of 475247
- 628227 string characters out of 5757792
+ 31600 strings out of 475247
+ 627186 string characters out of 5757792
  1934785 words of memory out of 5000000
- 52537 multiletter control sequences out of 15000+600000
- 592522 words of font info for 106 fonts, out of 8000000 for 9000
+ 52471 multiletter control sequences out of 15000+600000
+ 606302 words of font info for 134 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  122i,18n,131p,11016b,1433s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmss17.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmssbx10.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/urw/symbol/usyr.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/urw/symbol/usyr.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmb8a.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><C:/Users/desde/AppData/Local/Programs/MiKTeX/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Exam_Programming.pdf (25 pages, 594776 bytes).
+Output written on Exam_Programming.pdf (27 pages, 641974 bytes).
 PDF statistics:
- 266 PDF objects out of 1000 (max. 8388607)
- 60 named destinations out of 1000 (max. 500000)
- 103 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 336 PDF objects out of 1000 (max. 8388607)
+ 78 named destinations out of 1000 (max. 500000)
+ 108 words of extra memory for PDF output out of 10000 (max. 10000000)
 

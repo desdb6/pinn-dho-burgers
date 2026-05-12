@@ -183,7 +183,7 @@ y_true_full  = analytic(t_plot_full)
 y_true_train = analytic(t_plot_train)
 
 # ── convert to tensors and move to DEVICE ────────────────────────────────────
-def to_tensor(arr: np.ndarray, requires_grad: bool = False) -> torch.Tensor:
+def to_tensor(arr: np.ndarray, requires_grad: bool = False, unsqueeze: bool = True) -> torch.Tensor:
     """
     Convert a 1-D numpy array to a (N, 1) float32 tensor on DEVICE.
 
@@ -191,13 +191,15 @@ def to_tensor(arr: np.ndarray, requires_grad: bool = False) -> torch.Tensor:
     with respect to in autograd.grad (collocation and IC points).
     """
     t = torch.tensor(arr, dtype=torch.float32).unsqueeze(1).to(DEVICE)
+    if unsqueeze == False:
+        t = torch.tensor(arr, dtype=torch.float32).to(DEVICE)
     if requires_grad:
         t.requires_grad_(True)
     return t
 
 # Training tensors -- all reside on DEVICE for the entire run
 t_obs_t = to_tensor(t_obs)
-y_obs_t = to_tensor(y_obs)
+y_obs_t = to_tensor(y_obs, unsqueeze=False)
 t_col_t = to_tensor(t_col, requires_grad=True)   # grad needed: ODE residual
 t_ic_t  = to_tensor(t_ic,  requires_grad=True)   # grad needed: y'(0)
 
