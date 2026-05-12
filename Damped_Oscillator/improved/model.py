@@ -1,0 +1,64 @@
+"""
+Neural network architecture and inference helpers for the damped
+spring-mass PINN.
+
+Contains:
+    FCNet        -- fully-connected network with Tanh activations
+    predict      -- predict y-values for array of t-values
+    predict_from_state -- restore a snapshot and predict
+
+Author          : Des De Borger
+Email           : des.deborger@student.uantwerpen.be
+Last modified   : 12/05/2026
+"""
+
+import torch
+import torch.nn as nn
+import numpy as np
+from config import Config
+
+class FCNet(nn.Module):
+    """
+    Fully-connected network: 1 -> [hidden]*n_layers -> 1
+    Tanh activations throughout.
+
+    Tanh is mandatory (not ReLU) because we differentiate the network output
+    twice via autograd.  ReLU has zero second derivative everywhere, which
+    would make the physics residual carry no gradient signal.
+
+    The model is instantiated on CPU and moved to DEVICE via .to(DEVICE)
+    after construction (see training section).
+    """
+    def __init__(self, cfg: Config):
+        super().__init__()
+        layers = [nn.Linear(1, cfg.hidden), nn.Tanh()]
+        for _ in range(cfg.n_layers - 1):
+            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh()]
+        layers += [nn.Linear(cfg.hidden, 1)]
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, t: torch.Tensor) -> torch.Tensor:
+        return self.net(t)
+
+    def param_count(self) -> int:
+        return sum(p.numel() for p in self.parameters())
+    
+def predict(model: nn.Module, t: np.ndarray) -> np.ndarray:
+    """
+    Run inference on CPU.  The model must already be on CPU.
+    No gradients needed -- torch.no_grad() saves memory and time.
+    """
+    t_t = torch.tensor(t, dtype=torch.float32).unsqueeze(1)
+    with torch.no_grad():
+        return model(t_t).squeeze().numpy()
+
+def predict_from_state(state_dict: dict, t: np.ndarray, cfg: Config) -> np.ndarray:
+    """
+    Restore a CPU snapshot and predict.
+    Snapshots were saved as CPU state_dicts in train(), so no device
+    transfer is needed here.
+    """
+    tmp = FCNet(cfg)
+    tmp.load_state_dict(state_dict)
+    tmp.eval()
+    return predict(tmp, t)

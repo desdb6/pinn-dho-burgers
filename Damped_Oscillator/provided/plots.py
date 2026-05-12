@@ -8,8 +8,8 @@ Last modified: 06/05/26
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from pinn_spring_damper_des import FCNet, train, analytic, predict, SNAPSHOT_EPOCHS
-import pinn_spring_damper_des as PSN
+from Damped_Oscillator.provided.pinn_spring_damper_des import FCNet, train, analytic, predict, SNAPSHOT_EPOCHS
+import Damped_Oscillator.provided.pinn_spring_damper_des as PSN
 
 # ── Plot settings ──────────────────────────────────────────────────────────
 DPI=360
