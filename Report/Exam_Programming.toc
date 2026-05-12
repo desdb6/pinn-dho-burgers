@@ -7,8 +7,8 @@
 \contentsline {paragraph}{\nonumberline Mean Absolute Error}{7}{paragraph*.4}%
 \contentsline {paragraph}{\nonumberline Huber Loss}{7}{paragraph*.6}%
 \contentsline {subsection}{\numberline {3.1.2}Questions on the code}{10}{subsection.3.1.2}%
-\contentsline {chapter}{\numberline {4}Burger's Equation}{13}{chapter.4}%
-\contentsline {chapter}{\numberline {5}Conclusion}{15}{chapter.5}%
-\contentsline {chapter}{\numberline {A}Equation derivations}{17}{appendix.A}%
-\contentsline {chapter}{\numberline {B}Figures}{19}{appendix.B}%
+\contentsline {chapter}{\numberline {4}Burger's Equation}{15}{chapter.4}%
+\contentsline {chapter}{\numberline {5}Conclusion}{17}{chapter.5}%
+\contentsline {chapter}{\numberline {A}Equation derivations}{19}{appendix.A}%
+\contentsline {chapter}{\numberline {B}Figures}{21}{appendix.B}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

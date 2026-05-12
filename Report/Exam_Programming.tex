@@ -29,6 +29,7 @@
 \usepackage{subcaption}
 \usepackage{booktabs}
 \usepackage{tcolorbox}
+\usepackage{transparent}
 \usepackage{svg}
 
 \usepackage[english]{babel} % or english if your text is in English
@@ -57,7 +58,7 @@
 
 \title{Exam Programming: PINN} % either don't split titles, or do so with hypen
                      % and a newline
-\subtitle{Using Physics Informed Neural Networks to solve Partial Differential Equations}
+\subtitle{Using Physics Informed Neural Networks to solve nonlineair Partial Differential Equations}
 \author{Des De Borger}
 
 \academicyear{2025 - 2026}
@@ -219,7 +220,7 @@ Both $m$ and $v$ are biased towards zero since they are initialized at zero. The
 \end{equation}
 
 The Adam optimiser combines these two techniques and updates the weights as follows:
-\begin{equation}
+\begin{equation}\label{eq:adam_update}
     w_t=w_{t-1}-\frac{\alpha}{\sqrt{\hat v_t}+\epsilon} \hat m_t
 \end{equation}
 The Adam optimiser is widely used since it generally has an efficient performance with relative little hyperparameters; only $\alpha$, $\beta$, and $\gamma$ need to be defined. Both the learning rate and the gradient itself are made adaptive which helps to find the global minimum of the loss function more effectively. Anternative optimisers inlcude the momentum-based and RMSprop techniques as discussed above, or Adamax (a variant of Adam based on the infinity norm) and Adagrad (which accumulated the gradients instead of using the weighted average).
@@ -269,7 +270,7 @@ It is however also important to occasionally test the script with different seed
     \end{tcolorbox}
 \end{tcolorbox}
 
-It tells the user which datatypes the input and output need to be. This is good practise to avoid TypeErrors.
+This is Python's type annotation syntax, as prescribed by PEP484 \cite{pep484}. It tells the user which datatypes the input and output need to be. No typechecking happens at runtime, so this statement doesn't explicitly raise a TypeError if an object of the wrong type is passed. It serves as dowumentation and can help the developer to keep track of the precise definitions of every variable.
 
 \begin{tcolorbox}[title=Question 3, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The data points are created randomly and then sorted before being offered to the neural net, using this statement:
@@ -290,16 +291,14 @@ The sorting of the points has no effect, since we are taking the MSE between the
     \end{tcolorbox}
     Is this good or bad?
 \end{tcolorbox}
+
 Using a uniform grid for the collocation points is not optimal, the model can fine-tune to the specific spacing of the collocation grid which is not desirable. It is better practise to generate the collocation points randomly at every epoch. By constantly regenerating a set of collocation points, any bias towards one region is also avoided.
 
-\begin{tcolorbox}[title=Question 5, colback=blue!10!white, colframe=blue!40!white, sharp corners]
+\begin{tcolorbox}[title=Questions 5 and 6, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What is this statement doing? Is it necessary?
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|optimiser.zero_grad()|
     \end{tcolorbox}
-\end{tcolorbox}
-
-\begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     What are these statements doing in the training cycle? Is their order important?
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
         \verb|loss_total.backward()|\\
@@ -307,6 +306,13 @@ Using a uniform grid for the collocation points is not optimal, the model can fi
         \verb|scheduler.step()|
     \end{tcolorbox}
 \end{tcolorbox}
+This sequence of commands updates the model weights by calculating the gradients through backpropagation. \verb|loss_total| is a $0$-dimensional PyTorch tensor representing the loss function. The \verb|loss_total.backward()| command will do a backward pass to see how the loss function changes with the model parameters (weights and biases), and apply the chain rule at every step in the calculation of \verb|loss_total|. This results in a gradient which is \textit{added} to the \verb|.grad| attribute of every parameter. In other words, \verb|loss_total.backward()| does not \textit{save} the gradient, but \textit{accumulates} the gradient. This means that the \verb|.grad| attributes need to be set to zero before every backwards pass, which is exaclty what \verb|optimiser.zero_grad()| accomplishes. This statement is absolutely necessary, without it the gradients would be accumulated in the \verb|.grad| attributes which causes the weights and biases to be updated incorrectly.\\
+
+\verb|optimiser.step()| will read the \verb|.grad| attributes and update the $m_t$ and $v_t$ values for every parameter and update the parameters accordingly (see eq. \ref{eq:adam_update}). $m_t$ and $v_t$ are not zeroed by the \verb|optimiser.zero_grad()| command, because otherwise it would be impossible to implement the Adam optimiser since the gradients at previous epochs are needed.\\
+
+\verb|scheduler.step()| changes the learning rate according to the specific scheduler used. In this case, an internal counter of the number of epochs is kept, and once this counter reaches a multiple of $3000$, the learning rate is halved.\\
+
+The order of these commands are crucial. The gradients must be set to zero first to avoid accumulation of gradients. The gradients must then be calculated to avoid using the gradients of the previous epoch to update the parameters. Finally, the fresh gradients are used to update the parameters. \cite{pytorch2025}
 
 \begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     Why do the collocation time input tensor and the initial condition time input tensor require the gradient option, while the input data tensors do not require a gradient?
@@ -317,13 +323,18 @@ Using a uniform grid for the collocation points is not optimal, the model can fi
         \verb|t_ic_t  = to_tensor(t_ic,  requires_grad=True)|
     \end{tcolorbox}
 \end{tcolorbox}
+The collocation points are used to calculate the MSR of the ODE as shown in equation \ref{eq:loss_physics_DHO}, and the initial conditions are used to calculate the deviation from the predicted initial conditions as shown in equation \ref{eq:loss_i.c._DHO}. In both expressions of the loss function, the derivatives of $y(t)$ show up, so these need to be calculated.\\
+
+Rather than using finite differences to calculate the derivatives at the collocation points and at $t=0$, we can directly use the gradients calculated during the forward pass through the model. This is both more efficient since it allows for the simultaneous prediction and calculation of the derivatives of $y(t)$. However, we need to tell the model which derivatives with respect to $t$ are required, which is done by the \verb|requires_grad=True| statement. For the calculation of the MSE of the noisy observation points as in equation \ref{eq:loss_data_DHO}, no derivatives are needed, so the statement is omitted and \verb|requires_grad| is set to the standard value \verb|False|. \cite{pytorch2025}
 
 \begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     When presenting arrays of time points to the input of my neural network, I need to convert them into a pytorch tensor, using this helper function:
     \begin{tcolorbox}[colback=gray!10!white, colframe=gray!40!white]
-        \verb|def to_tensor(arr, requires_grad=False):|\\
-        \verb|    return torch.tensor(arr, dtype=torch.float32,|\\
-        \verb|                       requires_grad=requires_grad).unsqueeze(1)|
+        \begin{verbatim}
+        def to_tensor(arr, requires_grad=False):
+            return torch.tensor(arr, dtype=torch.float32,
+                                requires_grad=requires_grad).unsqueeze(1)
+        \end{verbatim}
     \end{tcolorbox}
     What does the \verb|unsqueeze(1)| method of the torch.tensor class do, and why do I need to do this?
 \end{tcolorbox}
