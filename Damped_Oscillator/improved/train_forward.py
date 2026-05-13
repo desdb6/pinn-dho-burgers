@@ -29,6 +29,7 @@ from config import Config
 from data import generate_data, analytic
 from model import FCNet, predict
 from trainer import train
+from plot import plot_summary, plot_epoch_figure
 from utils import get_device
 
 
@@ -41,10 +42,12 @@ def main():
     print(f"Device : {device}")
 
     cfg = Config(
-        n_epochs        = 500,
+        n_epochs        = 10,
         log_every       = 10,
         patience        = 999,
-        snapshot_epochs = (1, 25, 50),
+        snapshot_epochs = (1, 100, 200, 300, 400, 500),
+        strata_splitting = 5,
+        test_train_split = 0.2
     )
     print(f"Config : {cfg}")
 
@@ -55,8 +58,7 @@ def main():
         data        = data,
         cfg         = cfg,
         device      = device,
-        use_physics = True,
-        label       = "smoke test"
+        label       = "Model"
     )
 
     # -- quick sanity checks ------------------------------------------------
@@ -67,29 +69,23 @@ def main():
     # -- plot ---------------------------------------------------------------
     model.to("cpu")
     t_plot = np.linspace(0.0, cfg.t_extrap, 500)
-    y_true = analytic(t_plot, cfg)
     y_pred = predict(model, t_plot)
 
-    plt.figure(figsize=(10, 4))
-    plt.axvspan(cfg.t_dom, cfg.t_extrap, color="gray", alpha=0.15,
-                label="Extrapolation")
-    plt.axvline(cfg.t_dom, color="gray", lw=0.8, ls="--")
-    plt.plot(t_plot, y_true, color="gray", lw=1.5, label="Analytic")
-    plt.plot(t_plot, y_pred, color="green", lw=2.0, label="PINN")
-    plt.scatter(data["t_train"], data["y_train"],
-                color="blue", s=30, zorder=5, label="Train")
-    plt.scatter(data["t_val"], data["y_val"],
-                color="red", s=30, zorder=5, marker="^", label="Val")
-    plt.scatter([0.0], [cfg.y0],
-                color="purple", s=150, marker="*", zorder=7, label="IC")
-    plt.xlabel("t [s]")
-    plt.ylabel("y(t)")
-    plt.title("Smoke test — PINN vs analytic")
-    plt.legend(fontsize=8)
-    plt.tight_layout()
-    plt.savefig("outputs/smoke_test.png", dpi=150)
-    plt.show()
-    print("All checks passed.")
+    plot_summary(
+        hist=history,
+        data=data,
+        cfg=cfg,
+        y_pinn_full=y_pred,
+        t_plot_full=t_plot,
+        device=device
+        )
+    
+    plot_epoch_figure(
+        data=data,
+        cfg=cfg,
+        snapshots=snapshots,
+        t_plot_full=t_plot,
+        )
 
 
 if __name__ == "__main__":

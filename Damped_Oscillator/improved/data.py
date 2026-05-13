@@ -69,36 +69,82 @@ def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
 def make_observations(cfg: Config) -> tuple[np.ndarray, np.ndarray,
                                             np.ndarray, np.ndarray]:
     """
-    Generate noisy observation points and stratify split into test and train sets.
+    Generate noisy observation points and stratified train/validation sets.
     """
-    t = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
-    y = analytic(t, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
 
-    t_obs_train, t_obs_val, y_obs_train, y_obs_val = train_test_split(t, y, test_size=cfg.test_train_split)
+    if cfg.strata_splitting < 2:
+        t = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
+        y = analytic(t, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
 
-    return t_obs_train, y_obs_train, t_obs_val, y_obs_val
+        t_train, t_val, y_train, y_val = train_test_split(
+            t, y, test_size=cfg.test_train_split
+        )
+
+    else:
+        t_train_list = []
+        t_val_list = []
+        y_train_list = []
+        y_val_list = []
+
+        stratum_total = int(cfg.strata_splitting)
+        stratum_width = cfg.t_dom / stratum_total
+        stratum_points = int(cfg.n_obs / stratum_total)
+
+        for i in range(stratum_total):
+
+            low = 0.1 + i * stratum_width
+            high = 0.1 + (i + 1) * stratum_width
+
+            stratum_t = np.random.uniform(low, high, stratum_points)
+
+            stratum_y = (
+                analytic(stratum_t, cfg)
+                + np.random.normal(0.0, cfg.sigma, stratum_points)
+            )
+
+            stratum_t_train, stratum_t_val, stratum_y_train, stratum_y_val = (
+                train_test_split(
+                    stratum_t,
+                    stratum_y,
+                    test_size=cfg.test_train_split
+                )
+            )
+
+            t_train_list.append(stratum_t_train)
+            t_val_list.append(stratum_t_val)
+            y_train_list.append(stratum_y_train)
+            y_val_list.append(stratum_y_val)
+
+        t_train = np.concatenate(t_train_list)
+        t_val = np.concatenate(t_val_list)
+        y_train = np.concatenate(y_train_list)
+        y_val = np.concatenate(y_val_list)
+
+    return t_train, y_train, t_val, y_val
 
 def make_collocation(cfg: Config) -> np.ndarray:
     """
     Generate collocation points.
     """
-    t_col = np.linspace(0.1, cfg.t_extrap, cfg.n_col)
-    return t_col
+    t_col_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
+    t_col_extrap = np.linspace(0.1, cfg.t_dom, int(cfg.n_col_dom * ((cfg.t_extrap - cfg.t_dom) / cfg.t_dom)))
+    return t_col_dom, t_col_extrap
 
 def generate_data(cfg: Config) -> dict:
     """
     Generate all data and return as a dict.
     """
     t_train, y_train, t_val, y_val = make_observations(cfg)
-    t_col = make_collocation(cfg)
+    t_col_dom, t_col_extrap = make_collocation(cfg)
 
     return {
-        "t_train": t_train,
-        "y_train": y_train,
-        "t_val":   t_val,
-        "y_val":   y_val,
-        "t_col":   t_col,
-        "t_ic":    np.array([0.0]),
+        "t_train":      t_train,
+        "y_train":      y_train,
+        "t_val":        t_val,
+        "y_val":        y_val,
+        "t_col_dom":    t_col_dom,
+        "t_col_extrap": t_col_extrap,
+        "t_ic":         np.array([0.0]),
     }
 
 if __name__ == "__main__":

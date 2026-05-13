@@ -8,6 +8,7 @@ Last modified   : 12/05/2026
 
 import torch
 import numpy as np
+from config import Config
 
 def get_device() -> torch.device:
     """Return device."""
@@ -32,3 +33,8 @@ def to_tensor(arr: np.ndarray, requires_grad: bool = False, unsqueeze: bool = Tr
 def rmse(pred: np.ndarray, true: np.ndarray) -> float:
     """Calculate RMSE"""
     return float(np.sqrt(np.mean((pred - true) ** 2)))
+
+def pointwise_residual(y: np.ndarray, t: np.ndarray, cfg: Config):
+    dy  = np.gradient(y, t)
+    d2y = np.gradient(dy, t)
+    return np.abs(cfg.m * d2y + cfg.c * dy + cfg.k * y)

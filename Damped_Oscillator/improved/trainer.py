@@ -24,15 +24,10 @@ def train(
     data: dict,
     cfg: Config,
     device: torch.device,
-    use_physics: bool = True,
     label: str = "Model"
 ) -> tuple[dict, dict]:
     """
     Train the PINN or standard ML model.
-
-    Early stopping monitors the validation loss and halts training if no
-    improvement is seen for cfg.patience epochs. The best model state is
-    saved to outputs/best_model.pt whenever validation loss improves.
 
     Parameters
     ----------
@@ -43,50 +38,51 @@ def train(
         Output of generate_data(). Must contain keys:
         t_train, y_train, t_val, y_val, t_col, t_ic.
     cfg : Config
-        All hyperparameters and physical constants.
+        All hyperparameters, physical constants, and loss terms.
     device : torch.device
         Device to train on.
-    use_physics : bool
-        If True, adds physics and IC loss terms to the total loss.
     label : str
-        Label used in printed progress output.
+        Label used in printed output.
 
     Returns
     -------
     history : dict
         Loss values logged every cfg.log_every epochs. Keys:
-        epoch, loss_data, loss_phys_train, loss_phys_extrap,
+        epoch, loss_data, loss_phys,
         loss_ic, loss_val, loss_total.
     snapshots : dict
         Maps epoch number to CPU state_dict at cfg.snapshot_epochs.
+
+    Saves
+    -----
+    best_model.pt : 
+        The weights that correspond to the lowest validation loss
     """
     # -- move model and tensors to device ------------------------------------
     model.to(device)
 
-    t_train_t = to_tensor(data["t_train"])
-    y_train_t = to_tensor(data["y_train"])
-    t_val_t   = to_tensor(data["t_val"])
-    y_val_t   = to_tensor(data["y_val"])
-    t_col_t   = to_tensor(data["t_col"], requires_grad=True)
-    t_ic_t    = to_tensor(data["t_ic"], requires_grad=True)
+    t_train_t       = to_tensor(data["t_train"])
+    y_train_t       = to_tensor(data["y_train"])
+    t_val_t         = to_tensor(data["t_val"])
+    y_val_t         = to_tensor(data["y_val"])
+    t_col_dom_t     = to_tensor(data["t_col_dom"], requires_grad=True)
+    t_col_extrap_t  = to_tensor(data["t_col_extrap"], requires_grad=True)
+    t_ic_t          = to_tensor(data["t_ic"], requires_grad=True)
 
-    # -- optimiser and scheduler --------------------------------------------
-    optimiser = torch.optim.Adam(model.parameters(), lr=cfg.lr)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimiser, T_max=cfg.n_epochs, eta_min=cfg.lr * 1e-2
-    )
+    # -- initialize optimiser and scheduler --------------------------------------------
+    optimiser = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas = (cfg.adam_beta1, cfg.adam_beta2))
+    scheduler = torch.optim.lr_scheduler.StepLR(optimiser, step_size=cfg.scheduler_step, gamma=cfg.scheduler_gamma)
 
     # -- history and snapshot storage ---------------------------------------
     history = {
         "epoch":            [],
         "loss_data":        [],
-        "loss_phys":  [],
+        "loss_phys":        [],
         "loss_ic":          [],
         "loss_val":         [],
         "loss_total":       [],
     }
     snapshots             = {}
-    snapshot_set          = set(cfg.snapshot_epochs)
     best_val_loss         = float("inf")
     epochs_no_improvement = 0
 
@@ -97,29 +93,28 @@ def train(
         model.train()
         optimiser.zero_grad()
 
-        # data loss
+        # -- data loss ------------------------------------
         y_pred = model(t_train_t)
         l_data = loss_data(y_pred, y_train_t)
 
-        if use_physics:
-            # full collocation physics loss
-            l_phys = loss_physics(
-                cfg, model, t_col_t
-            )
-            l_ic         = loss_ic(cfg, model, t_ic_t)
-            loss_total   = (l_data
-                            + cfg.lambda_phys * l_phys
-                            + cfg.lambda_ic   * l_ic)
+        if cfg.use_physics:
+            if cfg.train_extrap:
+                l_phys = loss_physics(cfg, model, torch.cat([t_col_dom_t, t_col_extrap_t]))
+            else:
+                l_phys = loss_physics(cfg, model, t_col_dom_t)
         else:
-            l_phys  = torch.zeros(1, device=device)
-            l_ic          = torch.zeros(1, device=device)
-            loss_total    = l_data
+            l_phys = torch.zeros(1, device=device)
+            
+        l_ic   = loss_ic(cfg, model, t_ic_t) if cfg.use_ic else torch.zeros(1, device=device)
 
+        loss_total   = (l_data + cfg.lambda_phys * l_phys + cfg.lambda_ic   * l_ic)
+
+        # -- update weights ------------------------------------
         loss_total.backward()
         optimiser.step()
         scheduler.step()
 
-        # -- validation (no grad needed) ------------------------------------
+        # -- validation ------------------------------------
         model.eval()
         with torch.no_grad():
             y_val_pred = model(t_val_t)
@@ -135,11 +130,11 @@ def train(
             epochs_no_improvement += 1
 
         if epochs_no_improvement >= cfg.patience:
-            print(f"  [{label}] early stopping at epoch {epoch}")
+            print(f"  [{label}] early stopping at epoch {epoch}, improvement stalled.")
             break
 
         # -- snapshots ------------------------------------------------------
-        if epoch in snapshot_set:
+        if epoch in cfg.snapshot_epochs:
             snapshots[epoch] = {
                 k: v.cpu() for k, v in model.state_dict().items()
             }
@@ -164,7 +159,7 @@ def train(
             history["loss_total"].append(loss_total.item())
 
     total_time = time.perf_counter() - t0
-    print(f"  [{label}] done in {total_time:.1f}s "
+    print(f"  [{label}] finished in {total_time:.1f}s "
           f"({total_time / epoch * 1000:.2f} ms/epoch)")
 
     return history, snapshots

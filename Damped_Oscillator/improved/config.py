@@ -34,34 +34,38 @@ class Config:
         return float(self.omega_0*np.sqrt(max(0.0, 1.0-self.zeta**2)))
 
     # Initial conditions
-    y0: float = 1.0      # initial displacement
-    dy0: float = 0.0     # initial velocity
+    y0: float = 1.0                 # initial displacement
+    dy0: float = 0.0                # initial velocity
 
     # Time domain
-    t_dom: float = 6.0      # End time of known domain
-    t_extrap: float = 10.0   # End time of extrapolated domain
+    t_dom: float = 6.0              # End time of known domain
+    t_extrap: float = 10.0          # End time of extrapolated domain
 
     # Loss weights
     use_physics: bool = True
     lambda_phys: float = 1e-2
+    use_ic: bool = True
     lambda_ic: float = 1e1
+    train_extrap: bool = True
 
     # Number of data points
     n_obs: float = 50                # Noisy observation points
+    strata_splitting: int = 0        # Strata for stratified splitting
     test_train_split: float = 0.2    # Fraction of train set(t)
-    n_col: float = 100               # ODE residual collocation points
+    n_col_dom: float = 100           # ODE residual collocation points
     sigma: float = 0.05              # Standard deviation for n_obs
 
     # Network architecture
-    hidden: int = 64
-    n_layers: int = 6
+    hidden: int = 32
+    n_layers: int = 4
 
     # Hyperparameters
     n_epochs: int = 8000            # Number of epochs
     lr: float = 1e-3                # Starting learning rate
     patience: int = 500             # Patience for model stop
-    adam_beta: float = 0.9          # Adam optimiser: moment hyperparameter
-    adam_gamma: float = 0.999       # Adam optimiser: RMSprop hyperparameter
+    dropout_rate: float = 0         # Dropout rate for every layer
+    adam_beta1: float = 0.9         # Adam optimiser: moment hyperparameter
+    adam_beta2: float = 0.999       # Adam optimiser: RMSprop hyperparameter
     scheduler_gamma: float = 0.5    # StepRL: scheduler decay factor
     scheduler_step: int = 3000      # StepRL: decay after this many epochs
 

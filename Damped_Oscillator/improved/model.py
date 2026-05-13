@@ -31,9 +31,9 @@ class FCNet(nn.Module):
     """
     def __init__(self, cfg: Config):
         super().__init__()
-        layers = [nn.Linear(1, cfg.hidden), nn.Tanh()]
+        layers = [nn.Linear(1, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
         for _ in range(cfg.n_layers - 1):
-            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh()]
+            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
