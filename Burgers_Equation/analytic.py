@@ -26,24 +26,24 @@ def compute_stable_dt(u: np.ndarray, cfg: Config, cfl: float = 0.4) -> float:
 
     return min(dt_adv, dt_diff)
 
-def gauss(height: float, sigma: float, cfg: Config) -> np.ndarray:
+def gauss(cfg: Config) -> np.ndarray:
     """
     Generate a gauss curve.
     """
     x = np.arange(cfg.n_x)
     mean = cfg.n_x / 2
-    return height * np.exp(-((x - mean) ** 2) / (2 * sigma ** 2))
+    return cfg.height * np.exp(-((x - mean) ** 2) / (2 * cfg.sigma_ic ** 2))
 
-def step_up(height: float, cfg: Config) -> np.ndarray:
+def step_up(cfg: Config) -> np.ndarray:
     """
     Generate a step-up function.
     """
     u = np.zeros(cfg.n_x)
     mid = cfg.n_x // 2
-    u[mid:] = height
+    u[mid:] = cfg.height
     return u
 
-def n_wave(width: float, height: float, cfg: Config) -> np.ndarray:
+def n_wave(cfg: Config) -> np.ndarray:
     """
     Generate an N-wave.
     """
@@ -51,31 +51,33 @@ def n_wave(width: float, height: float, cfg: Config) -> np.ndarray:
 
     center = cfg.n_x // 2
 
+    with_rel = cfg.width // (2 * cfg.delta_x)
+
     # Positive triangle
-    start1 = center - width
+    start1 = center - with_rel
     peak1  = center
 
     # Negative triangle
     peak2  = center
-    end2   = center + width
+    end2   = center + with_rel
 
     # Rising positive slope
-    u[start1:peak1] = np.linspace(0, height, peak1 - start1)
+    u[start1:peak1] = np.linspace(0, cfg.height, peak1 - start1)
 
     # Falling negative slope
-    u[peak2:end2] = np.linspace(-height, 0, end2 - peak2)
+    u[peak2:end2] = np.linspace(-cfg.height, 0, end2 - peak2)
 
     return -u
 
-def negative_slope(width: float, height: float, cfg: Config) -> np.ndarray:
+def negative_slope(cfg: Config) -> np.ndarray:
     """
     Generate a slope.
     """
     u = np.zeros(cfg.n_x)
     center = cfg.n_x // 2
-    width_rel = width // (2 * cfg.delta_x)
-    u[:int(center-width_rel)] = height
-    u[int(center-width_rel):int(center+width_rel)] = np.linspace(height, 0, int(2 * width_rel))
+    width_rel = cfg.width // (2 * cfg.delta_x)
+    u[:int(center-width_rel)] = cfg.height
+    u[int(center-width_rel):int(center+width_rel)] = np.linspace(cfg.height, 0, int(2 * width_rel))
     return u
 
 def forward_euler(u: np.ndarray, cfg: Config) -> np.ndarray:
@@ -100,6 +102,8 @@ def forward_euler_upwind(u: np.ndarray, dt: float, cfg: Config) -> np.ndarray:
 
     u_right = np.roll(u, -1)   # u[i+1]
     u_left  = np.roll(u,  1)   # u[i-1]
+    u_right[-1]  = cfg.bc_right
+    u_left[0]    = cfg.bc_left
 
     # Upwind advection: use backward difference where u > 0, forward where u < 0
     adv_pos = u * (u - u_left)  / dx   # u >= 0: backward difference
@@ -122,6 +126,8 @@ def forward_lax_wendroff(u: np.ndarray, dt: float, cfg: Config) -> np.ndarray:
 
     u_right = np.roll(u, -1)
     u_left  = np.roll(u,  1)
+    u_right[-1]  = cfg.bc_right
+    u_left[0]    = cfg.bc_left
 
     # Lax-Wendroff for advection (second-order)
     f       = 0.5 * u**2               # flux f(u) = u²/2
@@ -211,17 +217,17 @@ def lax_wendroff(u_init: np.ndarray, t_end: float, cfg: Config,
 
     return np.array(sol), np.array(t_arr)
 
-def gauss_solution_grid(sigma: float, height: float, t_end: float, cfg: Config) -> np.ndarray:
-    return lax_wendroff(gauss(sigma = sigma, height=height, cfg=cfg), t_end=t_end, cfg=cfg)
+def gauss_solution_grid(cfg: Config) -> np.ndarray:
+    return lax_wendroff(gauss(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
 
-def step_up_solution_grid(height: float, t_end: float, cfg: Config) -> np.ndarray:
-    return lax_wendroff(step_up(height = height, cfg=cfg), t_end=t_end, cfg=cfg)
+def step_up_solution_grid(cfg: Config) -> np.ndarray:
+    return lax_wendroff(step_up(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
 
-def n_wave_solution_grid(width: float, height: float, t_end: float, cfg: Config) -> np.ndarray:
-    return lax_wendroff(n_wave(width=width, height=height, cfg=cfg), t_end=t_end, cfg=cfg)
+def n_wave_solution_grid(cfg: Config) -> np.ndarray:
+    return lax_wendroff(n_wave(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
 
-def slope_solution_grid(width: float, height: float, t_end: float, cfg: Config) -> np.ndarray:
-    return lax_wendroff(negative_slope(width=width, height=height, cfg=cfg), t_end=t_end, cfg=cfg)
+def slope_solution_grid(cfg: Config) -> np.ndarray:
+    return lax_wendroff(negative_slope(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
 
 def interpolate_solution(sol: np.ndarray, t_arr: np.ndarray, x: float, t: float, cfg: Config) -> float:
     """
@@ -354,10 +360,10 @@ def plot_anim(sol: np.ndarray, plot_pause: float = 1) -> None:
 
 if __name__ == "__main__":
     cfg = Config()
-    # u_init = gauss(height = 5, sigma = 25, cfg=cfg)
-    # u_init = n_wave(height = 0.03, width = 100, cfg=cfg)
-    # u_init = step_up(height = 1, cfg=cfg)
-    u_init = negative_slope(0.4, 0.1, cfg)
+    # u_init = gauss(cfg=cfg)
+    # u_init = n_wave(cfg=cfg)
+    u_init = step_up(cfg=cfg)
+    # u_init = negative_slope(cfg)
     sol, dt_arr = lax_wendroff(u_init, t_end=5, cfg=cfg)
-    # plot_anim(sol, 1)
-    plot_anim(residual(sol, dt_arr, cfg))
+    plot_anim(sol, 1)
+    # plot_anim(residual(sol, dt_arr, cfg))

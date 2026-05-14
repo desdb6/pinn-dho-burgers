@@ -17,14 +17,18 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     # Physical parameters
-    nu: float = 1                   # viscosity
+    nu: float = 0.01                   # viscosity
 
     # Initial conditions
-    y0: float = 1.0                 # initial displacement
-    dy0: float = 0.0                # initial velocity
+    ic: str = "Slope"              # Initial condition type: "Gauss", "N_wave", "Step_up", "Slope"
+    height: float = None
+    sigma_ic: float = None
+    width: float = None
+    bc_left: float = None
+    bc_right: float = None
 
     # Time domain
-    t_dom: float = 6.0              # End time of known domain
+    t_dom: float = 5.0              # End time of known domain
     t_extrap: float = 10.0          # End time of extrapolated domain
 
     # Loss weights
@@ -43,15 +47,15 @@ class Config:
     def delta_x(self) -> float:
         return self.L/self.n_x
 
-    n_obs: float = 200                    # Noisy observation points
-    n_val: float = 10000                  # Validation points
+    n_obs: float = 300                     # Noisy observation points
+    n_grid_val: float = 100               # Validation grid size
     randomise_observation: bool = True    # Randomise observation points every epoch
     # strata_splitting: int = 8           # Strata for stratified splitting
     # test_train_split: float = 0.4       # Fraction of train set(t)
     
 
     n_col_dom: float = 200              # ODE residual collocation points
-    sigma: float = 0.05                 # Standard deviation for n_obs
+    sigma: float = 0.01                 # Standard deviation for n_obs
     randomise_collocation: bool = True  # Randomise collocation points every epoch
 
     # Network architecture
@@ -73,3 +77,31 @@ class Config:
     # Epoch snapshots
     snapshot_epochs: tuple = (1, 50, 300, 1000, 2000, 4000, 10000, 20000)
     log_every: int = 50
+
+    # IC specific parameters
+    def __post_init__(self):
+        if self.ic == "Gauss":
+            self.height     = self.height     or 1.0
+            self.sigma_ic   = self.sigma_ic   or 25.0
+            self.bc_left    = self.bc_left    or 0.0
+            self.bc_right   = self.bc_right   or 0.0
+
+        elif self.ic == "Step_up":
+            self.height     = self.height     or 1.0
+            self.bc_left    = self.bc_left    or 0.0
+            self.bc_right   = self.height     or 1.0
+
+        elif self.ic == "N_wave":
+            self.height     = self.height     or 0.03
+            self.width      = self.width      or 3.0
+            self.bc_left    = self.bc_left    or 0.0
+            self.bc_right   = self.bc_right   or 0.0
+
+        elif self.ic == "Slope":
+            self.height     = self.height     or 0.5
+            self.width      = self.width      or 3.0
+            self.bc_left    = self.height     or 0.5
+            self.bc_right   = self.bc_right   or 0.0
+
+        else:
+            raise ValueError(f"Unknown IC type: {self.ic}")

@@ -61,14 +61,16 @@ def train(
         The weights that correspond to the lowest validation loss
     """
     # -- detect inverse mode -------------------------------------------------
-    inverse_mode = hasattr(model, "zeta_hat")
+    inverse_mode = hasattr(model, "nu_hat")
 
     # -- move model and tensors to device ------------------------------------
     model.to(device)
 
+    x_val_t         = to_tensor(data["x_val"])
     t_val_t         = to_tensor(data["t_val"])
-    y_val_t         = to_tensor(data["y_val"])
-    t_ic_t          = to_tensor(data["t_ic"], requires_grad=True)
+    u_val_t         = to_tensor(data["u_val"])
+    t_ic_t          = to_tensor(data["t_ic"])
+    t_ic_t          = to_tensor(data["t_ic"])
 
     if not cfg.randomise_observation:
         t_obs_t       = to_tensor(data["t_obs"])      # Only make observation points once
