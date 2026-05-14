@@ -73,8 +73,8 @@ import matplotlib.gridspec as gridspec
 from matplotlib.lines import Line2D
 
 # ── reproducibility ──────────────────────────────────────────────────────────
-torch.manual_seed(42)
-np.random.seed(42)
+torch.manual_seed(44)
+np.random.seed(44)
 
 # =============================================================================
 # 0.  DEVICE SELECTION

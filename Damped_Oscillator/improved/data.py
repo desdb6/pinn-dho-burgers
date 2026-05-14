@@ -66,7 +66,7 @@ def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
 
         return a * np.exp(r1 * t) + b * np.exp(r2 * t)
 
-def make_observations(cfg: Config) -> tuple[np.ndarray, np.ndarray,
+def make_observations_strata(cfg: Config) -> tuple[np.ndarray, np.ndarray,
                                             np.ndarray, np.ndarray]:
     """
     Generate noisy observation points and stratified train/validation sets.
@@ -122,24 +122,36 @@ def make_observations(cfg: Config) -> tuple[np.ndarray, np.ndarray,
 
     return t_train, y_train, t_val, y_val
 
+def make_train_observation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
+    t_obs= np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
+    y_obs = analytic(t_obs, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
+    return t_obs, y_obs
+
+def make_validation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
+    t_val= np.linspace(0.1, cfg.t_dom, cfg.n_val)
+    y_val = analytic(t_val, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_val)
+    return t_val, y_val
+
 def make_collocation(cfg: Config) -> np.ndarray:
     """
     Generate collocation points.
     """
     t_col_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
-    t_col_extrap = np.linspace(0.1, cfg.t_dom, int(cfg.n_col_dom * ((cfg.t_extrap - cfg.t_dom) / cfg.t_dom)))
+    t_col_extrap = np.linspace(cfg.t_dom, cfg.t_extrap,
+                            int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
     return t_col_dom, t_col_extrap
 
 def generate_data(cfg: Config) -> dict:
     """
     Generate all data and return as a dict.
     """
-    t_train, y_train, t_val, y_val = make_observations(cfg)
+    t_obs, y_obs = make_train_observation(cfg)
+    t_val, y_val = make_validation(cfg)
     t_col_dom, t_col_extrap = make_collocation(cfg)
 
     return {
-        "t_train":      t_train,
-        "y_train":      y_train,
+        "t_obs":        t_obs,
+        "y_obs":        y_obs,
         "t_val":        t_val,
         "y_val":        y_val,
         "t_col_dom":    t_col_dom,

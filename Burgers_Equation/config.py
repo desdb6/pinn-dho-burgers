@@ -1,5 +1,5 @@
 """
-Configuration for the damped spring-mass PINN.
+Configuration for the Burger's equation PINN.
 
 All physical constants, hyperparameters, and runtime settings 
 for the PINN are defined as a single config class. 
@@ -17,21 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     # Physical parameters
-    m: float = 1.0       # mass  [kg]
-    c: float = 0.5       # damping coefficient
-    k: float = 4.0       # spring stiffness  [N/m]
-
-    @property
-    def omega_0(self) -> float:
-        return float(np.sqrt(self.k / self.m))
-
-    @property
-    def zeta(self) -> float:
-        return float(self.c / (2 * np.sqrt(self.m * self.k)))
-
-    @property
-    def omega_d(self) -> float:
-        return float(self.omega_0 * np.sqrt(max(0.0, 1.0 - self.zeta**2)))
+    nu: float = 1                   # viscosity
 
     # Initial conditions
     y0: float = 1.0                 # initial displacement
@@ -49,14 +35,22 @@ class Config:
     train_extrap: bool = True
 
     # Data generation parameters
-    n_obs: float = 15                   # Noisy observation points
-    n_val: float = 200                  # Validation points
-    randomise_observation: bool = True  # Randomise observation points every epoch
+    n_x: int = 1000                     # Spatial resolution for numerical solution
+    delta_t = 1e-4                      # Time step for numerical solution if adaptive stepping is disabled
+    L: float = 5                        # System length
+
+    @property
+    def delta_x(self) -> float:
+        return self.L/self.n_x
+
+    n_obs: float = 200                    # Noisy observation points
+    n_val: float = 10000                  # Validation points
+    randomise_observation: bool = True    # Randomise observation points every epoch
     # strata_splitting: int = 8           # Strata for stratified splitting
     # test_train_split: float = 0.4       # Fraction of train set(t)
     
 
-    n_col_dom: float = 500              # ODE residual collocation points
+    n_col_dom: float = 200              # ODE residual collocation points
     sigma: float = 0.05                 # Standard deviation for n_obs
     randomise_collocation: bool = True  # Randomise collocation points every epoch
 
@@ -68,7 +62,7 @@ class Config:
     n_epochs: int = 30000               # Number of epochs
     lr: float = 1e-3                    # Starting learning rate
     lr_inverse: float = 1e-2            # Learning rate for inverse problem; parameter estimation  
-    patience: int = 500             # Patience for model stop
+    patience: int = 500                 # Patience for model stop
     patience_thershold: float = 1e-4    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter

@@ -33,17 +33,3 @@ def to_tensor(arr: np.ndarray, requires_grad: bool = False, unsqueeze: bool = Tr
 def rmse(pred: np.ndarray, true: np.ndarray) -> float:
     """Calculate RMSE"""
     return float(np.sqrt(np.mean((pred - true) ** 2)))
-
-def pointwise_residual(y: np.ndarray, t: np.ndarray, cfg: Config):
-    dy  = np.gradient(y, t)
-    d2y = np.gradient(dy, t)
-    return np.abs(cfg.m * d2y + cfg.c * dy + cfg.k * y)
-
-def convert_to_mck(zeta, omega_0):
-    """
-    Convert zeta and omega into c and k values for inverse problem.
-    """
-    m = 1
-    c = 2 * omega_0 * zeta
-    k = omega_0 ** 2
-    return m, c, k
