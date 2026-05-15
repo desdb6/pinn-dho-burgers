@@ -16,10 +16,10 @@ from config import Config
 from data import generate_data
 from model import FCNet, predict
 from trainer import train
-from plot import plot_solution_grid
-from utils import get_device
+from plot import save_plots_from_file
+from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "outputs"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_step_up_long"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():
@@ -27,20 +27,15 @@ def main():
     print(f"Device : {device}")
 
     cfg = Config(
-        hidden=96,
-        n_layers=7,
-        lr=0.005,
-        scheduler_gamma=0.35,
-        scheduler_step=2500,
-        lambda_phys=0.005,
-        lambda_ic=14,
-        lambda_bc=40
-        )
+        ic="Step_up"
+    )
+
     print(f"Config : {cfg}")
 
+    # -- train model ------------------------------------------------
     data     = generate_data(cfg)
     model    = FCNet(cfg)
-    history, snapshots = train(
+    history, snapshots, best_state = train(
         model       = model,
         data        = data,
         cfg         = cfg,
@@ -48,9 +43,12 @@ def main():
         label       = "Model",
     )
 
-    # -- plot ---------------------------------------------------------------
-    model.to("cpu")
-    plot_solution_grid(model, data, cfg, data["u_grid"], data["t_arr"])
+    # -- save model ------------------------------------------------
+    save_model(best_state, history, snapshots, cfg, OUTPUT_PATH)
+    print(f"Model saved to {OUTPUT_PATH}")
+
+    # -- make plots ------------------------------------------------
+    save_plots_from_file(OUTPUT_PATH)
 
 
 if __name__ == "__main__":

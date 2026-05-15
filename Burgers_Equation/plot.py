@@ -12,6 +12,7 @@ Last modified   : 12/05/2026
 """
 
 import os
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -19,11 +20,19 @@ from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pathlib import Path
+import torch
 import torch.nn as nn
 from config import Config
-from model import predict, predict_from_state
-from utils import rmse
-from analytic import interpolate_solution
+from data import generate_data
+from model import predict, predict_from_state, FCNet, InverseFCNet
+from utils import save_show, get_device, load_model
+from analytic import interpolate_solution, interpolate_solution_arr
+
+# -- LaTeX font ------------------------------------------------
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
 
 # -- Color palette ------------------------------------------------
 BLUE   = "#378ADD"   # noisy training observations
@@ -36,19 +45,171 @@ LGRAY  = "#D3D1C7"   # spine colour
 BG     = "#FAFAF8"   # figure background
 PANEL  = "#F1EFE8"   # axes background
 
+def style_ax(ax: Axes) -> None:
+    ax.set_facecolor(PANEL)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(LGRAY)
+
+def plot_gt_1D(
+    cfg:         Config,
+    u_grid:      np.ndarray,
+    t_arr:       np.ndarray,
+    times:       list[float] = None,
+    output_path: Path        = None,
+    show:        bool        = True
+) -> None:
+    """
+    Plot the ground truth solution u(x, t) at four different times.
+
+    Parameters
+    ----------
+    cfg         : Config
+    u_grid      : solution grid from lax_wendroff
+    t_arr       : time array from lax_wendroff
+    times       : list of 4 times to plot; defaults to 4 evenly spaced values in [0, t_dom]
+    output_path : path to save the figure
+    show        : whether to display the figure
+    """
+    if times is None:
+        times = np.linspace(0, cfg.t_dom, 4, endpoint=False).tolist()
+    if len(times) != 4:
+        raise ValueError(f"Expected 4 times, got {len(times)}")
+
+    x = np.linspace(0, cfg.L, 500)
+
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    fig.patch.set_facecolor(BG)
+    axes_flat = axes.flatten()
+
+    for ax, t_val in zip(axes_flat, times):
+        t_arr_plot = np.full_like(x, t_val)
+        u = interpolate_solution_arr(u_grid, t_arr, x, t_arr_plot, cfg)
+        style_ax(ax)
+
+        ax.plot(x, u, lw=2, color=GRAY, label="Ground truth $u(x, t)$")
+        ax.set_xlabel("$x$",                         fontsize=11)
+        ax.set_ylabel(rf"$u(x,\ t={t_val:.3f})$",   fontsize=11)
+        ax.set_title(
+            rf"$t = {t_val:.3f}$",
+            fontsize=10, loc="left", pad=4, color="#444441"
+        )
+        ax.grid(True, linestyle="--", alpha=0.6)
+        ax.legend(fontsize=8, framealpha=0.5)
+
+    fig.suptitle(
+        rf"Ground truth solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
+        fontsize=13, color="#2C2C2A"
+    )
+    fig.tight_layout()
+    save_show(output_path=output_path, show=show)
+
+def plot_pred_1D(
+    model:       nn.Module,
+    cfg:         Config,
+    u_grid:      np.ndarray,
+    t_arr:       np.ndarray,
+    n_times:     int        = 8,
+    times:       list[float] = None,    # ← added
+    model_color: str        = GREEN,
+    model_label: str        = "PINN",
+    clip_u:      bool       = False,
+    output_path: Path       = None,
+    show:        bool       = True
+) -> None:
+    # -- time slices -------------------------------------------------------
+    if times is not None:
+        times  = list(times)
+        n_times = len(times)
+    else:
+        times = np.linspace(0, cfg.t_extrap, n_times).tolist()
+    x_plot = np.linspace(0, cfg.L, 300)
+
+    n_cols = 2
+    n_rows = (n_times + 1) // n_cols
+
+    fig, axes = plt.subplots(n_rows, n_cols,
+                             figsize=(12, n_rows * 3.2),
+                             sharex=True)
+    fig.patch.set_facecolor(BG)
+    axes_flat = axes.flatten()
+
+    for idx, t_val in enumerate(times):
+        ax = axes_flat[idx]
+        style_ax(ax)
+
+        # -- numerical solution --------------------------------------------
+        u_true = interpolate_solution_arr(
+            u_grid, t_arr,
+            x_plot, np.full_like(x_plot, t_val),
+            cfg
+        )
+
+        # -- model prediction ----------------------------------------------
+        u_pred = predict(model, np.full_like(x_plot, t_val), x_plot)
+        if clip_u:
+            u_pred = np.clip(u_pred, -3, 3)
+
+        err = np.sqrt(np.mean((u_pred - u_true) ** 2))
+
+        ax.plot(x_plot, u_true,
+                color=GRAY, lw=1.4, alpha=0.9)
+        ax.plot(x_plot, u_pred,
+                color=model_color, lw=2.0)
+
+        # -- extrapolation shading -----------------------------------------
+        if t_val > cfg.t_dom:
+            ax.set_title(
+                rf"$t = {t_val:.3f}$ [extrap]   |   RMSE = {err:.4f}",
+                fontsize=9, loc="left", pad=4, color="#444441"
+            )
+        else:
+            ax.set_title(
+                rf"$t = {t_val:.3f}$   |   RMSE = {err:.4f}",
+                fontsize=9, loc="left", pad=4, color="#444441"
+            )
+
+        ax.set_xlim(0, cfg.L)
+        ax.set_ylabel(f"$u(x, t={t_val:.3f})$", fontsize=8)
+        ax.grid(True, linestyle="--", alpha=0.6)
+
+        if idx >= (n_rows - 1) * n_cols:
+            ax.set_xlabel("$x$", fontsize=8)
+
+    for idx in range(n_times, len(axes_flat)):
+        axes_flat[idx].set_visible(False)
+
+    # -- shared legend -----------------------------------------------------
+    legend_elements = [
+        Line2D([0], [0], color=GRAY,        lw=1.4,
+               label="ground truth solution $u(x, t)$"),
+        Line2D([0], [0], color=model_color, lw=2.0,
+               label=rf"{model_label} prediction $\hat{{u}}(x, t)$"),
+    ]
+    fig.legend(handles=legend_elements, loc="lower center",
+               ncol=2, fontsize=8, framealpha=0.6,
+               bbox_to_anchor=(0.5, 0.0))
+
+    fig.suptitle(
+        rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
+        fontsize=16, color="#2C2C2A"
+    )
+    fig.tight_layout(rect=[0, 0.05, 1, 1])
+    save_show(output_path=output_path, show=show)
+
 def plot_solution_grid(
     model:       nn.Module,
     data:        dict,
     cfg:         Config,
     u_grid:      np.ndarray,
     t_arr:       np.ndarray,
-    n_times:     int = 8,
-    model_color: str = "#2196F3",
-    model_label: str = "PINN",
-    fig_title:   str = "PINN — spatial solution at different times",
-    clip_y:      bool = False,
-    save_path:   Path = Path("outputs/solution_grid.png"),
-    show_plot:   bool = True
+    n_times:     int        = 8,
+    times:       list[float] = None,
+    model_color: str        = GREEN,
+    model_label: str        = "PINN",
+    fig_title:   str        = r"PINN -- spatial solution at different times",
+    clip_y:      bool       = False,
+    output_path: Path       = None,
+    show:        bool       = True
 ) -> None:
     """
     Build a 2-column grid of panels, one per time slice.
@@ -61,90 +222,602 @@ def plot_solution_grid(
 
     Parameters
     ----------
-    model       : trained PINN (on CPU)
+    model       : trained PINN on CPU
     data        : output of generate_data()
     cfg         : Config
     u_grid      : numerical solution, shape (n_t, n_x)
-    t_arr       : time array from euler_method, shape (n_t,)
-    n_times     : number of time slices to plot
+    t_arr       : time array from lax_wendroff
+    n_times     : number of time slices (ignored if times is provided)
+    times       : optional explicit list of times to plot
     """
-    times  = np.linspace(0, cfg.t_extrap, n_times)
-    x_plot = np.linspace(0, cfg.L, 300)
+    if times is not None:
+        times   = list(times)
+        n_times = len(times)
+    else:
+        times = np.linspace(0, cfg.t_extrap, n_times).tolist()
 
+    x_plot = np.linspace(0, cfg.L, 300)
     n_cols = 2
     n_rows = (n_times + 1) // n_cols
 
     fig, axes = plt.subplots(n_rows, n_cols,
                              figsize=(14, n_rows * 3.2),
                              sharex=True)
+    fig.patch.set_facecolor(BG)
     axes_flat = axes.flatten()
 
-    for idx, t in enumerate(times):
+    for idx, t_val in enumerate(times):
         ax = axes_flat[idx]
+        style_ax(ax)
 
-        # -- numerical solution (interpolated onto x_plot) ------------------
-        u_true = np.array([
-            interpolate_solution(u_grid, t_arr, x, t, cfg) for x in x_plot
-        ])
+        # -- numerical solution --------------------------------------------
+        u_true = interpolate_solution_arr(
+            u_grid, t_arr,
+            x_plot, np.full_like(x_plot, t_val),
+            cfg
+        )
 
-        # -- model prediction -----------------------------------------------
-        t_arr_plot = np.full_like(x_plot, t)
-        u_pred = predict(model, t_arr_plot, x_plot)
+        # -- model prediction ----------------------------------------------
+        u_pred = predict(model, np.full_like(x_plot, t_val), x_plot)
         if clip_y:
             u_pred = np.clip(u_pred, -3, 3)
 
         err = np.sqrt(np.mean((u_pred - u_true) ** 2))
 
-        # -- numerical solution ---------------------------------------------
-        ax.plot(x_plot, u_true,
-                color="#888888", lw=1.4, alpha=0.9, label="Numerical u(x,t)")
+        ax.plot(x_plot, u_true,  color=GRAY,        lw=1.4, alpha=0.9)
+        ax.plot(x_plot, u_pred,  color=model_color,  lw=2.0)
 
-        # -- model prediction -----------------------------------------------
-        ax.plot(x_plot, u_pred,
-                color=model_color, lw=2.0, label=f"{model_label}  û(x,t)")
-
-        # -- observations near this time slice ------------------------------
-        dt_window = (cfg.t_extrap) / (2 * n_times)
-        mask = np.abs(data["t_obs"] - t) < dt_window
+        # -- observations near this time slice -----------------------------
+        dt_window = cfg.t_extrap / (2 * n_times)
+        mask = np.abs(data["t_obs"] - t_val) < dt_window
         if mask.any():
             ax.scatter(data["x_obs"][mask], data["u_obs"][mask],
-                       color="#2155CD", s=28, marker="o", zorder=5,
-                       alpha=0.85, label=f"Observations")
+                       color=BLUE, s=28, marker="o", zorder=5, alpha=0.85)
 
-        # -- extrapolation shading ------------------------------------------
-        if t > cfg.t_dom:
-            ax.set_facecolor("#f5f5f5")
-
-        ax.set_title(f"t = {t:.3f}{'  [extrap]' if t > cfg.t_dom else ''}   |   RMSE = {err:.4f}",
+        extrap_tag = "  [extrap]" if t_val > cfg.t_dom else ""
+        ax.set_title(rf"$t = {t_val:.3f}${extrap_tag}   |   RMSE = {err:.4f}",
                      fontsize=9, loc="left", pad=4, color="#444441")
         ax.set_xlim(0, cfg.L)
-        ax.set_ylabel("u(x, t)", fontsize=8)
+        ax.set_ylabel("$u(x, t)$", fontsize=8)
+        ax.grid(True, linestyle="--", alpha=0.6)
 
         if idx >= (n_rows - 1) * n_cols:
-            ax.set_xlabel("x", fontsize=8)
-
-        ax.grid(True, alpha=0.3)
+            ax.set_xlabel("$x$", fontsize=8)
 
     for idx in range(n_times, len(axes_flat)):
         axes_flat[idx].set_visible(False)
 
-    # -- shared legend ------------------------------------------------------
+    # -- shared legend -----------------------------------------------------
     legend_elements = [
-        Line2D([0], [0], color="#888888",   lw=1.4, label="Numerical solution"),
-        Line2D([0], [0], color=model_color, lw=2.0, label=f"{model_label} prediction"),
-        Line2D([0], [0], color="#2155CD", lw=0, marker="o",
-               markersize=5, label=f"Observations (N={len(data['t_obs'])})"),
+        Line2D([0], [0], color=GRAY,        lw=1.4,
+               label="Numerical solution $u(x, t)$"),
+        Line2D([0], [0], color=model_color, lw=2.0,
+               label=rf"{model_label} prediction $\hat{{u}}(x, t)$"),
+        Line2D([0], [0], color=BLUE, lw=0, marker="o", markersize=5,
+               label=rf"Observations (N={len(data['t_obs'])})"),
     ]
     fig.legend(handles=legend_elements, loc="lower center",
-               ncol=3, fontsize=8, framealpha=0.6,
+               ncol=3, fontsize=12, framealpha=0.6,
                bbox_to_anchor=(0.5, 0.0))
 
-    fig.suptitle(fig_title, fontsize=10, y=1.01, color="#2C2C2A")
+    fig.suptitle(
+        rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
+        fontsize=16, color="#2C2C2A"
+    )
     fig.tight_layout(rect=[0, 0.05, 1, 1])
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    fig.savefig(save_path, dpi=150, bbox_inches="tight")
-    print(f"Saved to {save_path}")
-    if show_plot:
-        plt.show()
-    else:
-        plt.close()
+    save_show(output_path=output_path, show=show)
+
+def plot_losses(
+    history:     dict,
+    cfg:         Config,
+    output_path: Path = None,
+    show: bool = True
+) -> None:
+    """
+    Plot all training loss curves on a single log-scale figure.
+
+    Parameters
+    ----------
+    history   : dict from train(), keys: epoch, loss_data, loss_phys,
+                loss_ic, loss_val, loss_total
+    cfg       : Config, used for snapshot epoch markers
+    output_path : Path to save the figure
+    show : Whether to display the figure
+    """
+    loss_style = {
+        "loss_data":  (BLUE,   "-",  r"$\mathcal{L}_{data}$"),
+        "loss_phys":  (GREEN,  "-",  r"$\mathcal{L}_{phys}$"),
+        "loss_ic":    (PURPLE, "-",  r"$\mathcal{L}_{ic}$"),
+        "loss_bc":    (ORANGE, "-",  r"$\mathcal{L}_{bc}$"),
+        "loss_val":   (RED,    "--", r"$\mathcal{L}_{val}$"),
+        "loss_total": (GRAY,   ":",  r"$\mathcal{L}_{total}$"),
+    }
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    style_ax(ax)
+    fig.patch.set_facecolor(BG)
+
+    epochs = history["epoch"]
+    for key, (color, ls, label) in loss_style.items():
+        if key in history and any(v > 0 for v in history[key]):
+            ax.semilogy(epochs, history[key], color=color, ls=ls, lw=1.8, label=label)
+
+    # snapshot epoch markers
+    for ep in cfg.snapshot_epochs:
+        if ep <= max(epochs):
+            ax.axvline(ep, color=LGRAY, lw=0.8, ls=":", zorder=0)
+
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("Loss (log scale)")
+    ax.set_title("Training loss curves", fontsize=11, loc="left", color="#444441")
+    ax.legend(fontsize=9, framealpha=0.5)
+    ax.set_xlim(min(epochs), max(epochs))
+
+    plt.tight_layout()
+    save_show(output_path=output_path, show=show)
+
+def plot_gt_2D(
+    cfg:         Config,
+    u_grid:      np.ndarray,
+    t_arr:       np.ndarray,
+    output_path: Path = None,
+    show:        bool = True
+) -> None:
+    x = np.linspace(0, cfg.L, 500)
+    t = np.linspace(0, cfg.t_extrap, 500)
+    x_matrix, t_matrix = np.meshgrid(x, t)
+
+    u_flat   = interpolate_solution_arr(
+        u_grid, t_arr,
+        x_matrix.ravel(),
+        t_matrix.ravel(),
+        cfg
+    )
+    u_matrix = u_flat.reshape(x_matrix.shape)
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    fig.patch.set_facecolor(BG)
+    ax.set_facecolor(PANEL)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(LGRAY)
+
+    im = ax.imshow(
+        u_matrix,
+        origin  = "lower",
+        extent  = [0, cfg.L, 0, cfg.t_extrap],
+        aspect  = "auto",
+        cmap    = "RdBu_r",
+        vmin    = -np.max(np.abs(u_matrix)),
+        vmax    =  np.max(np.abs(u_matrix)),
+    )
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04)
+    cbar.set_label("$u(x, t)$", fontsize=16)
+
+    ax.set_xlabel("$x$",  fontsize=14)
+    ax.set_ylabel("$t$",  fontsize=14)
+    ax.set_xticks(np.linspace(0, cfg.L,        6))
+    ax.set_yticks(np.linspace(0, cfg.t_extrap, 6))
+    ax.set_title(
+        rf"Ground truth $u(x, t)$  --  $\nu = {cfg.nu:.4f}$",
+        fontsize=16, loc="left", pad=6, color="#444441"
+    )
+
+    fig.tight_layout()
+    save_show(output_path=output_path, show=show)
+
+def plot_pred_2D(
+    model:       nn.Module,
+    cfg:         Config,
+    output_path: Path = None,
+    show:        bool = True
+) -> None:
+    x = np.linspace(0, cfg.L, 500)
+    t = np.linspace(0, cfg.t_extrap, 500)
+    x_matrix, t_matrix = np.meshgrid(x, t)
+
+    u_flat = predict(model, t_matrix.ravel(), x_matrix.ravel())
+
+    u_matrix = u_flat.reshape(x_matrix.shape)
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    fig.patch.set_facecolor(BG)
+    ax.set_facecolor(PANEL)
+    for spine in ax.spines.values():
+        spine.set_edgecolor(LGRAY)
+
+    im = ax.imshow(
+        u_matrix,
+        origin  = "lower",
+        extent  = [0, cfg.L, 0, cfg.t_extrap],
+        aspect  = "auto",
+        cmap    = "RdBu_r",
+        vmin    = -np.max(np.abs(u_matrix)),
+        vmax    =  np.max(np.abs(u_matrix)),
+    )
+
+    cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04)
+    cbar.set_label("$u(x, t)$", fontsize=16)
+
+    ax.set_xlabel("$x$",  fontsize=14)
+    ax.set_ylabel("$t$",  fontsize=14)
+    ax.set_xticks(np.linspace(0, cfg.L,        6))
+    ax.set_yticks(np.linspace(0, cfg.t_extrap, 6))
+    ax.set_title(
+        rf"Predicted $u(x, t)$  --  $\nu = {cfg.nu:.4f}$",
+        fontsize=16, loc="left", pad=6, color="#444441"
+    )
+
+    fig.tight_layout()
+    save_show(output_path=output_path, show=show)
+
+def plot_epoch_figure_2D(
+    cfg:         Config,
+    snapshots:   dict,
+    model_color: str  = GREEN,
+    model_label: str  = "PINN",
+    fig_title:   str  = r"PINN -- predicted $u(x, t)$ after training epochs",
+    output_path: Path = None,
+    show:        bool = True
+) -> None:
+    """
+    Grid of 2D heatmaps of the predicted solution, one per snapshot epoch.
+
+    Parameters
+    ----------
+    cfg         : Config
+    snapshots   : dict mapping epoch -> CPU state_dict
+    model_color : unused, kept for API consistency
+    model_label : label prefix in panel titles
+    fig_title   : figure suptitle
+    output_path : path to save the figure
+    show        : whether to display the figure
+    """
+    epochs  = sorted(snapshots.keys())
+    n_snap  = len(epochs)
+    n_cols  = 2
+    n_rows  = (n_snap + 1) // n_cols
+
+    x = np.linspace(0, cfg.L,        200)
+    t = np.linspace(0, cfg.t_extrap, 200)
+    x_matrix, t_matrix = np.meshgrid(x, t)
+
+    # detect model type once
+    inverse   = any("nu_hat" in k or "zeta_hat" in k
+                    for k in snapshots[epochs[0]].keys())
+
+    fig, axes = plt.subplots(n_rows, n_cols,
+                             figsize=(14, n_rows * 4.5),
+                             sharex=True, sharey=True)
+    fig.patch.set_facecolor(BG)
+    axes_flat = axes.flatten()
+
+    # shared colour scale across all panels
+    v = None
+
+    # first pass — compute all predictions and find global vmax
+    u_matrices = {}
+    for epoch in epochs:
+        tmp = InverseFCNet(cfg) if inverse else FCNet(cfg)
+        tmp.load_state_dict(snapshots[epoch])
+        tmp.eval()
+        u_flat = predict(tmp, t_matrix.ravel(), x_matrix.ravel())
+        u_matrices[epoch] = u_flat.reshape(x_matrix.shape)
+
+    v = max(np.max(np.abs(m)) for m in u_matrices.values())
+
+    # second pass — plot
+    for idx, epoch in enumerate(epochs):
+        ax       = axes_flat[idx]
+        u_matrix = u_matrices[epoch]
+
+        ax.set_facecolor(PANEL)
+        for spine in ax.spines.values():
+            spine.set_edgecolor(LGRAY)
+
+        im = ax.imshow(
+            u_matrix,
+            origin = "lower",
+            extent = [0, cfg.L, 0, cfg.t_extrap],
+            aspect = "auto",
+            cmap   = "RdBu_r",
+            vmin   = -v,
+            vmax   =  v,
+        )
+        fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04, label="$u(x,t)$")
+
+        # training domain boundary
+        ax.axhline(cfg.t_dom, color=GRAY, lw=1.0, ls="--", alpha=0.7)
+
+        ax.set_title(rf"Epoch = {epoch}",
+                     fontsize=9, loc="left", pad=4, color="#444441")
+        ax.set_xticks(np.linspace(0, cfg.L,        5))
+        ax.set_yticks(np.linspace(0, cfg.t_extrap, 5))
+
+        if idx % n_cols == 0:
+            ax.set_ylabel("$t$", fontsize=10)
+        if idx >= (n_rows - 1) * n_cols:
+            ax.set_xlabel("$x$", fontsize=10)
+
+        if idx == 0:
+            ax.annotate("training", xy=(0.02, cfg.t_dom / cfg.t_extrap - 0.04),
+                        xycoords="axes fraction", fontsize=7, color=GRAY)
+            ax.annotate("extrap",   xy=(0.02, cfg.t_dom / cfg.t_extrap + 0.01),
+                        xycoords="axes fraction", fontsize=7, color=GRAY)
+
+    for idx in range(n_snap, len(axes_flat)):
+        axes_flat[idx].set_visible(False)
+
+    fig.suptitle(fig_title, fontsize=12, color="#2C2C2A")
+    fig.tight_layout()
+    save_show(output_path=output_path, show=show)
+
+def plot_summary_2D(
+    model:       nn.Module,
+    history:     dict,
+    cfg:         Config,
+    data:        dict,
+    u_grid:      np.ndarray,
+    t_arr:       np.ndarray,
+    output_path: Path = None,
+    show:        bool = True
+) -> None:
+    """
+    Six-panel summary figure for the Burgers PINN.
+
+    Panels
+    ------
+    1. Ground truth u(x,t)          — 2D heatmap
+    2. PINN prediction û(x,t)       — 2D heatmap
+    3. Physics residual |r(x,t)|    — 2D heatmap
+    4. Data residual |û - u|²       — 2D heatmap
+    5. 3D ground truth surface      — with observation scatter
+    6. Training loss curves         — log scale
+    """
+    # -- grid for 2D panels ------------------------------------------------
+    x      = np.linspace(0, cfg.L,        200)
+    t      = np.linspace(0, cfg.t_extrap, 200)
+    x_mat, t_mat = np.meshgrid(x, t)
+
+    u_true_flat = interpolate_solution_arr(
+        u_grid, t_arr, x_mat.ravel(), t_mat.ravel(), cfg
+    )
+    u_true = u_true_flat.reshape(x_mat.shape)
+
+    u_pred = predict(model, t_mat.ravel(), x_mat.ravel()).reshape(x_mat.shape)
+
+    # -- physics residual (finite difference on prediction grid) -----------
+    dt   = t[1] - t[0]
+    dx   = x[1] - x[0]
+    u_t  = np.gradient(u_pred, dt, axis=0)
+    u_x  = np.gradient(u_pred, dx, axis=1)
+    u_xx = np.gradient(u_x,    dx, axis=1)
+    phys_res = np.abs(u_t + u_pred * u_x - cfg.nu * u_xx)
+
+    # -- data residual -----------------------------------------------------
+    data_res = (u_pred - u_true) ** 2
+
+    # -- layout ------------------------------------------------------------
+    fig = plt.figure(figsize=(18, 11))
+    fig.patch.set_facecolor(BG)
+
+    ax1 = fig.add_subplot(2, 3, 1)
+    ax2 = fig.add_subplot(2, 3, 2)
+    ax3 = fig.add_subplot(2, 3, 3)
+    ax4 = fig.add_subplot(2, 3, 4)
+    ax5 = fig.add_subplot(2, 3, 5, projection="3d")
+    ax6 = fig.add_subplot(2, 3, 6)
+
+    extent = [0, cfg.L, 0, cfg.t_extrap]
+    v      = np.max(np.abs(u_true))
+
+    def style_2d(ax):
+        ax.set_facecolor(PANEL)
+        for spine in ax.spines.values():
+            spine.set_edgecolor(LGRAY)
+        ax.set_xlabel("$x$",  fontsize=10)
+        ax.set_ylabel("$t$",  fontsize=10)
+        ax.axhline(cfg.t_dom, color=GRAY, lw=0.8, ls="--", alpha=0.6)
+        ax.set_xticks(np.linspace(0, cfg.L,        5))
+        ax.set_yticks(np.linspace(0, cfg.t_extrap, 5))
+
+    def add_cbar(fig, im, ax, label):
+        cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+        cbar.set_label(label, fontsize=9)
+
+    # -- panel 1: ground truth ---------------------------------------------
+    style_2d(ax1)
+    im1 = ax1.imshow(u_true, origin="lower", extent=extent,
+                     aspect="auto", cmap="RdBu_r", vmin=-v, vmax=v)
+    add_cbar(fig, im1, ax1, "$u$")
+    ax1.set_title(r"Panel 1 -- Ground truth $u(x,t)$",
+                  fontsize=9, loc="left", color="#444441")
+
+    # -- panel 2: prediction -----------------------------------------------
+    style_2d(ax2)
+    im2 = ax2.imshow(u_pred, origin="lower", extent=extent,
+                     aspect="auto", cmap="RdBu_r", vmin=-v, vmax=v)
+    add_cbar(fig, im2, ax2, r"$\hat{u}$")
+    ax2.set_title(rf"Panel 2 -- PINN prediction $\hat{{u}}(x,t)$  |  $\nu={cfg.nu:.4f}$",
+                  fontsize=9, loc="left", color="#444441")
+
+    # -- panel 3: physics residual -----------------------------------------
+    style_2d(ax3)
+    im3 = ax3.imshow(phys_res, origin="lower", extent=extent,
+                     aspect="auto", cmap="Reds", vmin=0)
+    add_cbar(fig, im3, ax3, "$|r|$")
+    ax3.set_title(r"Panel 3 -- Physics residual $|u_t + u\,u_x - \nu u_{xx}|$",
+                  fontsize=9, loc="left", color="#444441")
+
+    # -- panel 4: data residual --------------------------------------------
+    style_2d(ax4)
+    im4 = ax4.imshow(data_res, origin="lower", extent=extent,
+                     aspect="auto", cmap="Reds", vmin=0)
+    add_cbar(fig, im4, ax4, r"$|\hat{u}-u|^2$")
+    ax4.set_title(r"Panel 4 -- Data residual $|\hat{u}(x,t) - u(x,t)|^2$",
+                  fontsize=9, loc="left", color="#444441")
+
+    # -- panel 5: 3D surface + observation scatter -------------------------
+    x_3d = np.linspace(0, cfg.L,        200)
+    t_3d = np.linspace(0, cfg.t_extrap, 200)
+    x_3d_mat, t_3d_mat = np.meshgrid(x_3d, t_3d)
+    u_3d = interpolate_solution_arr(
+        u_grid, t_arr, x_3d_mat.ravel(), t_3d_mat.ravel(), cfg
+    ).reshape(x_3d_mat.shape)
+
+    ax5.plot_surface(x_3d_mat, t_3d_mat, u_3d,
+                     cmap="RdBu_r", alpha=0.7, linewidth=0, antialiased=True,
+                     vmin=-v, vmax=v)
+    ax5.scatter(data["x_obs"], data["t_obs"], data["u_obs"],
+                color=BLUE, s=8, zorder=5, alpha=0.6, label="Observations")
+    ax5.set_xlabel("$x$",    fontsize=9, labelpad=4)
+    ax5.set_ylabel("$t$",    fontsize=9, labelpad=4)
+    ax5.set_zlabel("$u$",    fontsize=9, labelpad=4)
+    ax5.set_title("Panel 5 -- Ground truth + observations",
+                  fontsize=9, loc="left", color="#444441")
+    ax5.tick_params(labelsize=7)
+    ax5.legend()
+
+    # -- panel 6: loss curves ----------------------------------------------
+    ax6.set_facecolor(PANEL)
+    for spine in ax6.spines.values():
+        spine.set_edgecolor(LGRAY)
+
+    LOSS_STYLE = {
+        "loss_data":  (BLUE,   "-",  r"$\mathcal{L}_{data}$"),
+        "loss_phys":  (GREEN,  "-",  r"$\mathcal{L}_{phys}$"),
+        "loss_ic":    (PURPLE, "-",  r"$\mathcal{L}_{ic}$"),
+        "loss_bc":    (ORANGE, "-",  r"$\mathcal{L}_{bc}$"),
+        "loss_val":   (RED,    "--", r"$\mathcal{L}_{val}$"),
+        "loss_total": (GRAY,   ":",  r"$\mathcal{L}_{total}$"),
+    }
+    epochs = history["epoch"]
+    for key, (color, ls, label) in LOSS_STYLE.items():
+        if key in history and any(v > 0 for v in history[key]):
+            ax6.semilogy(epochs, history[key], color=color, ls=ls, lw=1.6, label=label)
+    for ep in cfg.snapshot_epochs:
+        if ep <= max(epochs):
+            ax6.axvline(ep, color=LGRAY, lw=0.6, ls=":", zorder=0)
+    ax6.set_xlabel("Epoch",          fontsize=10)
+    ax6.set_ylabel("Loss (log)",     fontsize=10)
+    ax6.set_xlim(min(epochs), max(epochs))
+    ax6.legend(fontsize=8, framealpha=0.5, ncol=2)
+    ax6.set_title("Panel 6 -- Training loss curves",
+                  fontsize=9, loc="left", color="#444441")
+
+    # -- suptitle ----------------------------------------------------------
+    fig.suptitle(
+        rf"Burgers PINN summary  |  $\nu={cfg.nu:.4f}$  |  "
+        rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom}$  $t_{{extrap}}={cfg.t_extrap}$",
+        fontsize=11, color="#2C2C2A"
+    )
+
+    fig.tight_layout()
+    save_show(output_path=output_path, show=show)
+    
+def save_model_plots(
+    model:       nn.Module,
+    history:     dict,
+    snapshots:   dict,
+    data:        dict,
+    cfg:         Config,
+    device:      torch.device,
+    output_path: Path
+) -> None:
+    """
+    Generate and save all summary and epoch figures for a trained model.
+    """
+    model.to('cpu')
+
+    plot_gt_1D(
+        cfg=cfg,
+        u_grid=data["u_grid"],
+        t_arr=data["t_arr"],
+        times=[0, 2, 4, 6],
+        output_path=output_path / "gt_solution.png",
+        show=False
+    )
+
+    plot_pred_1D(
+        model=model,
+        cfg=cfg,
+        u_grid=data["u_grid"],
+        t_arr=data["t_arr"],
+        times=[0, 2, 4, 6],
+        output_path=output_path / "pred_solution.png",
+        show=False
+    )
+
+    plot_solution_grid(
+        model=model,
+        data=data,
+        cfg=cfg,
+        u_grid=data["u_grid"],
+        t_arr=data["t_arr"],
+        output_path=output_path / "pred_grid.png",
+        show=False
+    )
+
+    plot_losses(
+        history=history,
+        cfg=cfg,
+        output_path=output_path / "losses.png",
+        show=False
+    )
+
+    plot_gt_2D(
+        cfg=cfg,
+        u_grid=data["u_grid"],
+        t_arr=data["t_arr"],
+        output_path=output_path / "gt_2D.png",
+        show=False
+    )
+
+    plot_pred_2D(
+        model=model,
+        cfg=cfg,
+        output_path=output_path / "pred_2D.png",
+        show=False
+    )
+
+    plot_epoch_figure_2D(
+        cfg=cfg,
+        snapshots=snapshots,
+        output_path=output_path / "epochs_2D.png",
+        show=False
+    )
+
+    plot_summary_2D(
+        model=model,
+        history=history,
+        cfg=cfg,
+        data=data,
+        u_grid=data["u_grid"],
+        t_arr=data["t_arr"],
+        output_path=output_path / "summary.png",
+        show=False
+    )
+
+def save_plots_from_file(
+        folder_path: str
+        ) -> None:
+    """
+    Load a model als export all plots.
+    """
+    folder_path = Path(folder_path)
+    device      = get_device()
+
+    # -- detect model type before loading ----------------------------------
+    state_dict  = torch.load(folder_path / "best_model.pt", map_location="cpu")
+    inverse     = any("nu_hat" in k or "zeta_hat" in k or "omega_0_hat" in k
+                      for k in state_dict.keys())
+
+    with open(folder_path / "config.json") as f:
+        cfg = Config(**json.load(f))
+
+    model = InverseFCNet(cfg) if inverse else FCNet(cfg)
+    model, history, snapshots, cfg = load_model(model, folder_path)
+
+    data = generate_data(cfg)
+    save_model_plots(model, history, snapshots, data, cfg, device, folder_path)
+    print(f"Plots saved to {folder_path}")

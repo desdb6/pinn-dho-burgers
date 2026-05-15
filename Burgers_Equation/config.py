@@ -34,7 +34,7 @@ class Config:
     # Space domain
     n_x: int = 1000                     # Spatial resolution for numerical solution
     delta_t = 1e-4                      # Time step for numerical solution if adaptive stepping is disabled
-    L: float = 5                        # System length
+    L: float = 15                        # System length
 
     @property
     def delta_x(self) -> float:
@@ -42,15 +42,15 @@ class Config:
 
     # Loss weights
     use_physics: bool = True
-    lambda_phys: float = 1e-1
+    lambda_phys: float = 1e0
     use_ic: bool = True
-    lambda_ic: float = 5e1
+    lambda_ic: float = 1e1
     use_bc: bool = True
     lambda_bc: float = 1e1
     train_extrap: bool = True
 
     # Data generation parameters
-    n_obs: float = 200                     # Noisy observation points
+    n_obs: float = 30                     # Noisy observation points
     randomise_observation: bool = True    # Randomise observation points every epoch
     n_col_dom: float = 200                # ODE residual collocation points
     sigma: float = 0.01                   # Standard deviation for n_obs
@@ -60,14 +60,14 @@ class Config:
     n_grid_val: float = 100               # Validation grid size
 
     # Network architecture
-    hidden: int = 32
-    n_layers: int = 6
+    hidden: int = 128
+    n_layers: int = 10
 
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
     lr: float = 1e-3                    # Starting learning rate
     lr_inverse: float = 1e-2            # Learning rate for inverse problem; parameter estimation  
-    patience: int = 500                 # Patience for model stop
+    patience: int = 2000                # Patience for model stop
     patience_thershold: float = 1e-4    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter

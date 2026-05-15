@@ -26,7 +26,7 @@ from utils import pointwise_residual, rmse, convert_to_mck, get_device, load_mod
 from data import analytic, generate_data
 from model import FCNet, InverseFCNet  
 
-# -- Color palette ------------------------------------------------
+# -- LaTeX font ------------------------------------------------
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "Helvetica"
@@ -410,7 +410,7 @@ def plot_losses(
     output_path : Path to save the figure
     show : Whether to display the figure
     """
-    LOSS_STYLE = {
+    loss_style = {
         "loss_data":  (BLUE,   "-",  r"$\mathcal{L}_{data}$"),
         "loss_phys":  (GREEN,  "-",  r"$\mathcal{L}_{phys}$"),
         "loss_ic":    (PURPLE, "-",  r"$\mathcal{L}_{ic}$"),
@@ -423,7 +423,7 @@ def plot_losses(
     style_ax(ax)
 
     epochs = history["epoch"]
-    for key, (color, ls, label) in LOSS_STYLE.items():
+    for key, (color, ls, label) in loss_style.items():
         if key in history and any(v > 0 for v in history[key]):
             ax.semilogy(epochs, history[key], color=color, ls=ls, lw=1.8, label=label)
 

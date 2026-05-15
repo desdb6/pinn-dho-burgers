@@ -27,6 +27,7 @@ def main():
 
     cfg = Config()
 
+    # -- train model ------------------------------------------------
     data     = generate_data(cfg)
     model    = FCNet(cfg)
     history, snapshots, best_state = train(
@@ -41,6 +42,7 @@ def main():
     save_model(best_state, history, snapshots, cfg, OUTPUT_PATH)
     print(f"Model saved to {OUTPUT_PATH}")
 
+    # -- make plots ------------------------------------------------
     save_plots_from_file(OUTPUT_PATH)
 
 if __name__ == "__main__":

@@ -275,6 +275,15 @@ def interpolate_solution(sol: np.ndarray, t_arr: np.ndarray, x: float, t: float,
         f11 * dx       * dt
     )
 
+def interpolate_solution_arr(sol: np.ndarray, t_arr: np.ndarray, x: np.ndarray, t: np.ndarray, cfg: Config) -> np.ndarray:
+    """
+    Vectorised wrapper around interpolate_solution for arrays of (x, t) pairs.
+    """
+    u_obs = []
+    for x_i, t_i in zip(x, t):
+        u_obs.append(interpolate_solution(sol, t_arr, x_i, t_i, cfg))
+    return np.array(u_obs)
+
 def residual(sol: np.ndarray, t_arr: np.ndarray, cfg: Config) -> np.ndarray:
     """
     Compute PDE residual |ut + u*ux - nu*uxx| on the solution grid.
