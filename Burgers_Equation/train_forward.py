@@ -19,7 +19,7 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_step_up_long"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_step_up"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():

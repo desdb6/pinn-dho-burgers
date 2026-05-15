@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from config import Config
-from analytic import gauss_solution_grid, n_wave_chop_solution_grid, n_wave_solution_grid, step_up_solution_grid, slope_solution_grid, interpolate_solution
+from analytic import cole_hopf_grid, interpolate_solution
 
 def make_observation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     t_obs = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
@@ -60,16 +60,7 @@ def generate_data(cfg: Config) -> dict:
     """
     print("Generating data...")
 
-    if cfg.ic == "Gauss":
-        u_grid, t_arr = gauss_solution_grid(cfg)
-    elif cfg.ic == "N_wave":
-        u_grid, t_arr = n_wave_solution_grid(cfg)
-    elif cfg.ic == "N_wave_chop":
-        u_grid, t_arr = n_wave_chop_solution_grid(cfg)
-    elif cfg.ic == "Step_up":
-        u_grid, t_arr = step_up_solution_grid(cfg)
-    elif cfg.ic == "Slope":
-        u_grid, t_arr = slope_solution_grid(cfg)
+    u_grid, t_arr = cole_hopf_grid(cfg, pad = 600 if cfg.ic in ["Step_up", "Step_down", "Slope"] else 200)
 
     t_obs, x_obs, u_obs = make_observation(cfg, u_grid, t_arr)
     t_col_dom, x_col_dom, t_col_extrap, x_col_extrap = make_collocation(cfg)

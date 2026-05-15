@@ -7,24 +7,10 @@ Last modified   : 12/05/2026
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.signal import convolve
 import matplotlib.animation as animation
+from tqdm import tqdm
 from config import Config
-
-def compute_stable_dt(u: np.ndarray, cfg: Config, cfl: float = 0.4) -> float:
-    """
-    Compute a stable time step satisfying both the advection CFL condition
-    and the diffusion (von Neumann) stability condition.
-
-    CFL (advection) : dt <= cfl * dx / max(|u|)
-    Von Neumann (diffusion): dt <= dx^2 / (2 * nu)
-    """
-    dx = cfg.delta_x
-    max_u = np.max(np.abs(u))
-
-    dt_adv  = cfl * dx / max_u if max_u > 1e-12 else np.inf
-    dt_diff = 0.4 * dx**2 / cfg.nu   # safety factor 0.4 < 0.5
-
-    return min(dt_adv, dt_diff)
 
 def gauss(cfg: Config) -> np.ndarray:
     """
@@ -41,6 +27,15 @@ def step_up(cfg: Config) -> np.ndarray:
     u = np.zeros(cfg.n_x)
     mid = cfg.n_x // 2
     u[mid:] = cfg.height
+    return u
+
+def step_down(cfg: Config) -> np.ndarray:
+    """
+    Generate a step-down function.
+    """
+    u = np.zeros(cfg.n_x)
+    mid = cfg.n_x // 2
+    u[:mid] = cfg.height
     return u
 
 def n_wave(cfg: Config) -> np.ndarray:
@@ -89,6 +84,89 @@ def negative_slope(cfg: Config) -> np.ndarray:
     u[:int(center-width_rel)] = cfg.height
     u[int(center-width_rel):int(center+width_rel)] = np.linspace(cfg.height, 0, int(2 * width_rel))
     return u
+
+# -- Cole-Hopf transformation ------------------------------------------------
+def cole_hopf_trans(u_0: np.ndarray, cfg: Config) -> np.ndarray:
+    """
+    Transform to phi using Cole-Hopf tranformation.
+    phi_0 = exp(-1/2nu int^x_0 u(x)dx)
+    """
+    phi_0 = np.zeros_like(u_0, dtype=float)
+    for i in range(len(phi_0)):
+        integral = np.sum(u_0[:i]) * cfg.delta_x
+        phi_0[i] = np.exp(-1.0 / (2.0 * cfg.nu) * integral)
+    return phi_0
+
+def heat_convolution(phi_0: np.ndarray, t: float, cfg: Config, x_grid: np.ndarray) -> np.ndarray:
+    if t == 0.0:
+        return phi_0.copy()
+
+    diff = x_grid[:, None] - x_grid[None, :]
+    conv = np.exp(-diff**2 / (4.0 * cfg.nu * t))
+    phi  = (conv @ phi_0) * cfg.delta_x / np.sqrt(4.0 * np.pi * cfg.nu * t)
+    return phi
+
+def reverse_cole_hopf_trans(phi: np.ndarray, cfg: Config) -> np.ndarray:
+    """
+    Recover u from phi.
+    u(x, t) = -2\nu \frac{dphi}{phi}
+    """
+    u = -2.0 * cfg.nu * (np.gradient(phi, cfg.delta_x) / phi)
+    return u
+
+def solve_burgers_padded(u_0: np.ndarray, t: float, cfg: Config, pad: int) -> np.ndarray:
+    u_0_padded    = np.pad(u_0, pad_width=pad, mode='edge')
+    x_grid_padded = np.arange(len(u_0_padded)) * cfg.delta_x - pad * cfg.delta_x
+
+    phi_0  = cole_hopf_trans(u_0_padded, cfg)            # no x_grid needed
+    phi_t  = heat_convolution(phi_0, t, cfg, x_grid_padded)
+    u_full = reverse_cole_hopf_trans(phi_t, cfg)
+
+    return u_full[pad:-pad]
+
+def cole_hopf_grid(cfg: Config, pad: int = 200) -> tuple:
+    if cfg.ic == "Gauss":
+        u_0 = gauss(cfg)
+    elif cfg.ic == "Step_up":
+        u_0 = step_up(cfg)
+    elif cfg.ic == "N_wave":
+        u_0 = n_wave(cfg)
+    elif cfg.ic == "N_wave_chop":
+        u_0 = n_wave_chop(cfg)
+    elif cfg.ic == "Slope":
+        u_0 = negative_slope(cfg)
+    elif cfg.ic == "Step_down":
+        u_0 = step_down(cfg)
+    else:
+        raise ValueError(f"Unknown initial condition type: {cfg.ic}")
+    u_grid = np.zeros(shape=(cfg.n_t, cfg.n_x))
+    u_grid[0] = u_0
+
+    for i, t in tqdm(enumerate(np.linspace(cfg.delta_t, cfg.t_extrap, cfg.n_t - 1)), 
+                     total = cfg.n_t - 1,
+                     desc="Computing ground truth solution with Cole-Hopf"):
+        u_grid[i + 1] = solve_burgers_padded(u_0, t, cfg, pad)
+
+    t_arr = np.linspace(0, cfg.t_extrap, cfg.n_t)
+    return u_grid, t_arr
+
+
+# -- Numerical schemes ------------------------
+def compute_stable_dt(u: np.ndarray, cfg: Config, cfl: float = 0.4) -> float:
+    """
+    Compute a stable time step satisfying both the advection CFL condition
+    and the diffusion (von Neumann) stability condition.
+
+    CFL (advection) : dt <= cfl * dx / max(|u|)
+    Von Neumann (diffusion): dt <= dx^2 / (2 * nu)
+    """
+    dx = cfg.delta_x
+    max_u = np.max(np.abs(u))
+
+    dt_adv  = cfl * dx / max_u if max_u > 1e-12 else np.inf
+    dt_diff = 0.4 * dx**2 / cfg.nu   # safety factor 0.4 < 0.5
+
+    return min(dt_adv, dt_diff)
 
 def forward_euler(u: np.ndarray, cfg: Config) -> np.ndarray:
     """
@@ -242,6 +320,7 @@ def n_wave_chop_solution_grid(cfg: Config) -> np.ndarray:
 def slope_solution_grid(cfg: Config) -> np.ndarray:
     return lax_wendroff(negative_slope(cfg=cfg), t_end=cfg.t_extrap, cfg=cfg)
 
+# -- Interpolation ------------------------
 def interpolate_solution(sol: np.ndarray, t_arr: np.ndarray, x: float, t: float, cfg: Config) -> float:
     """
     Bilinear interpolation of the solution at physical coordinates (x, t).
@@ -284,6 +363,7 @@ def interpolate_solution_arr(sol: np.ndarray, t_arr: np.ndarray, x: np.ndarray, 
         u_obs.append(interpolate_solution(sol, t_arr, x_i, t_i, cfg))
     return np.array(u_obs)
 
+# -- Residuals ------------------------
 def residual(sol: np.ndarray, t_arr: np.ndarray, cfg: Config) -> np.ndarray:
     """
     Compute PDE residual |ut + u*ux - nu*uxx| on the solution grid.
@@ -301,6 +381,10 @@ def residual(sol: np.ndarray, t_arr: np.ndarray, cfg: Config) -> np.ndarray:
 
     return np.abs(ut + u_mid * ux - cfg.nu * uxx)
 
+def rmse(sol: np.ndarray, t_arr: np.ndarray, cfg: Config) -> np.ndarray:
+    return np.mean(residual(sol, t_arr, cfg) ** 2)
+
+# -- Characteristics ------------------------
 def predict_shock_time(u: np.ndarray, cfg: Config) -> float:
     """
     Predict when shockwave will occur using method of characteristics.
@@ -346,6 +430,7 @@ def plot_method_of_characteristics(u: np.ndarray, cfg: Config, samples: int = 50
     plt.tight_layout()
     plt.show()
 
+# -- Plotting ------------------------
 def plot_anim(sol: np.ndarray, plot_pause: float = 1) -> None:
     """
     Make an animation of the numerical solution.
@@ -386,6 +471,9 @@ if __name__ == "__main__":
     # u_init = n_wave(cfg=cfg)
     u_init = step_up(cfg=cfg)
     # u_init = negative_slope(cfg)
-    sol, dt_arr = lax_wendroff(u_init, t_end=5, cfg=cfg)
-    plot_anim(sol, 1)
-    # plot_anim(residual(sol, dt_arr, cfg))
+    # sol, dt_arr = lax_wendroff(u_init, t_end=5, cfg=cfg)
+    # plot_anim(sol, 1)
+    for ic in ["Step_up", "Gauss", "N_wave", "N_wave_chop", "Slope", "Step_down"]:
+        cfg=Config(ic=ic)
+        sol, t_arr = cole_hopf_grid(cfg=cfg, pad = 1000 if ic in ["Step_up", "Step_down"] else 200)
+        print(f"{ic}: {rmse(sol, t_arr, cfg)}")

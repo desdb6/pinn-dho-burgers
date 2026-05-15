@@ -17,7 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     # Physical parameters
-    nu: float = 0.01                   # viscosity
+    nu: float = 0.1                   # viscosity
 
     # Initial conditions
     ic: str = "Gauss"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
@@ -33,16 +33,20 @@ class Config:
 
     # Space domain
     n_x: int = 1000                     # Spatial resolution for numerical solution
-    delta_t = 1e-4                      # Time step for numerical solution if adaptive stepping is disabled
+    delta_t = 1.5e-2                      # Time step for numerical solution if adaptive stepping is disabled
     L: float = 15                        # System length
 
     @property
     def delta_x(self) -> float:
         return self.L/self.n_x
+    
+    @property
+    def n_t(self) -> float:
+        return int(self.t_extrap // self.delta_t)
 
     # Loss weights
     use_physics: bool = True
-    lambda_phys: float = 1e0
+    lambda_phys: float = 3e0
     use_ic: bool = True
     lambda_ic: float = 1e1
     use_bc: bool = True
@@ -83,7 +87,7 @@ class Config:
     def __post_init__(self):
         if self.ic == "Gauss":
             self.height     = self.height     or 1.0
-            self.sigma_ic   = self.sigma_ic   or 0.5
+            self.sigma_ic   = self.sigma_ic   or 1.0
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.bc_right   or 0.0
 
@@ -92,9 +96,14 @@ class Config:
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.height     or 1.0
 
+        elif self.ic == "Step_down":
+            self.height     = self.height     or 1.0
+            self.bc_left    = self.bc_left    or 1.0
+            self.bc_right   = self.bc_right   or 0.0
+
         elif self.ic == "N_wave":
             self.height     = self.height     or 1.0
-            self.width      = self.width      or 3.0
+            self.width      = self.width      or 6.0
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.bc_right   or 0.0
 

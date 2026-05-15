@@ -483,8 +483,7 @@ def plot_epoch_figure_2D(
     x_matrix, t_matrix = np.meshgrid(x, t)
 
     # detect model type once
-    inverse   = any("nu_hat" in k or "zeta_hat" in k
-                    for k in snapshots[epochs[0]].keys())
+    inverse   = any("_nu_raw" in k for k in snapshots[epochs[0]].keys())
 
     fig, axes = plt.subplots(n_rows, n_cols,
                              figsize=(14, n_rows * 4.5),
@@ -809,8 +808,7 @@ def save_plots_from_file(
 
     # -- detect model type before loading ----------------------------------
     state_dict  = torch.load(folder_path / "best_model.pt", map_location="cpu")
-    inverse     = any("nu_hat" in k or "zeta_hat" in k or "omega_0_hat" in k
-                      for k in state_dict.keys())
+    inverse     = any("_nu_raw" in k for k in state_dict.keys())
 
     with open(folder_path / "config.json") as f:
         cfg = Config(**json.load(f))
