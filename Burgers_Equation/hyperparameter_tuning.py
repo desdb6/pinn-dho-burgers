@@ -29,6 +29,9 @@ def set_seed(seed: int):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
+base_cfg = Config()
+base_data = generate_data(base_cfg)
+
 def objective(trial: optuna.Trial) -> float:
     set_seed(SEED)
 
@@ -46,9 +49,8 @@ def objective(trial: optuna.Trial) -> float:
     )
 
     device = get_device()
-    data   = generate_data(cfg)
     model  = FCNet(cfg)
-    history, _ = train(model, data, cfg, device, verbatim=False)
+    history, _ = train(model, base_data, cfg, device, verbatim=False)
 
     best_val = min(history["loss_val"])
 
@@ -89,7 +91,7 @@ study = optuna.create_study(
     pruner       = optuna.pruners.MedianPruner(n_warmup_steps=20),
     sampler      = optuna.samplers.TPESampler(seed=SEED),   # fixed sampler seed
     storage      = "sqlite:///optuna.db",
-    study_name   = "burgers_pinn",
+    study_name   = "burgers_pinn_N_wave",
     load_if_exists=True,
 )
 study.optimize(objective, n_trials=100, timeout=3600)
