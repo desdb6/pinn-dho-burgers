@@ -1,4 +1,0 @@
-- Add boolean to turn on/off ic loss
-- Save model parameters to path
-- Add verbatim boolean
-- Moved functions outside of main loop

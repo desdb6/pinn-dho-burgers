@@ -27,14 +27,24 @@ def main():
     print(f"Device : {device}")
 
     # -- randomise viscosity ------------------------------------------------
-    nu = np.random.uniform(0.005, 0.01) # Low viscosity
-    # nu = np.random.uniform(0.05, 0.1)   # High viscosity
+    # nu = np.random.uniform(0.005, 0.01) # Low viscosity
+    nu = np.random.uniform(0.05, 0.1)   # High viscosity
     print("------------------------------------------------"
           f"\nRandomised viscosity : {nu:.4f}"
           "\n------------------------------------------------")
+    
     cfg = Config(
-        nu=nu
-    )
+        nu=nu,
+        hidden=96,
+        n_layers=7,
+        lr=0.005,
+        scheduler_gamma=0.8,
+        scheduler_step=2500,
+        lambda_phys=0.01,
+        lambda_ic=14,
+        lambda_bc=40
+        )
+    
     print(f"Config : {cfg}")
 
     data     = generate_data(cfg)

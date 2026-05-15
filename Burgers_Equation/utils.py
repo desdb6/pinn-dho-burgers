@@ -8,6 +8,7 @@ Last modified   : 12/05/2026
 
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
 from config import Config
 
 def get_device() -> torch.device:
@@ -34,3 +35,10 @@ def to_tensor(arr: np.ndarray, requires_grad: bool = False, unsqueeze: bool = Tr
 def rmse(pred: np.ndarray, true: np.ndarray) -> float:
     """Calculate RMSE"""
     return float(np.sqrt(np.mean((pred - true) ** 2)))
+
+def save_show(output_path: str = None, show: bool = True) -> None:
+    """Save the current figure and/or show it."""
+    if output_path is not None:
+        plt.savefig(output_path, dpi=300)
+    if show:
+        plt.show()

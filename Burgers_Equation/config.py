@@ -20,7 +20,7 @@ class Config:
     nu: float = 0.01                   # viscosity
 
     # Initial conditions
-    ic: str = "N_wave"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
+    ic: str = "Gauss"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
     height: float = None
     sigma_ic: float = None
     width: float = None
@@ -50,7 +50,7 @@ class Config:
     train_extrap: bool = True
 
     # Data generation parameters
-    n_obs: float = 50                     # Noisy observation points
+    n_obs: float = 200                     # Noisy observation points
     randomise_observation: bool = True    # Randomise observation points every epoch
     n_col_dom: float = 200                # ODE residual collocation points
     sigma: float = 0.01                   # Standard deviation for n_obs
