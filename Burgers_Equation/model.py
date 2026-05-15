@@ -62,7 +62,11 @@ class InverseFCNet(nn.Module):
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
-        self.nu_hat = nn.Parameter (torch.tensor([0.01], requires_grad = True ))
+        self._nu_raw = nn.Parameter(torch.tensor([0.0]))  # unconstrained
+
+    @property
+    def nu_hat(self):
+        return torch.nn.functional.softplus(self._nu_raw)  # always > 0
 
     def forward(self, t: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
         return self.net(torch.cat([t, x], dim=1))

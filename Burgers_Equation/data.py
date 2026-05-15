@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from config import Config
-from analytic import gauss_solution_grid, n_wave_solution_grid, step_up_solution_grid, slope_solution_grid, interpolate_solution
+from analytic import gauss_solution_grid, n_wave_chop_solution_grid, n_wave_solution_grid, step_up_solution_grid, slope_solution_grid, interpolate_solution
 
 def make_observation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     t_obs = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
@@ -25,7 +25,7 @@ def make_observation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tupl
 
     return t_obs, x_obs, np.array(u_obs)
 
-def make_collocation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def make_collocation(cfg: Config) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     t_obs_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
     x_obs_dom = np.random.uniform(0, cfg.L, cfg.n_col_dom)
 
@@ -34,16 +34,25 @@ def make_collocation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tupl
 
     return t_obs_dom, x_obs_dom, t_obs_extrap, x_obs_extrap
 
-def make_validation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    t_val = np.linspace(0.1, cfg.t_extrap, cfg.n_grid_val)
-    x_val = np.linspace(0, cfg.L, cfg.n_grid_val)
-    
-    u_val = np.zeros((len(x_val), len(t_val)))
-    for i, x in enumerate(x_val):
-        for j, t in enumerate(t_val):
-            u_val[i, j] = interpolate_solution(u_grid, t_arr, x, t, cfg)
-    
+def make_validation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray):
+    t_val_1d = np.linspace(0.1, cfg.t_dom, cfg.n_grid_val)
+    x_val_1d = np.linspace(0, cfg.L, cfg.n_grid_val)
+
+    # Flatten into (N,) arrays of (x, t) pairs
+    tt, xx = np.meshgrid(t_val_1d, x_val_1d)
+    t_val = tt.ravel()
+    x_val = xx.ravel()
+
+    u_val = np.array([
+        interpolate_solution(u_grid, t_arr, x, t, cfg)
+        for x, t in zip(x_val, t_val)
+    ])
+
     return t_val, x_val, u_val
+
+def make_bc_points(cfg: Config) -> np.ndarray:
+    t_bc = np.random.uniform(0, cfg.t_dom, cfg.n_bc)
+    return t_bc
 
 def generate_data(cfg: Config) -> dict:
     """
@@ -55,16 +64,21 @@ def generate_data(cfg: Config) -> dict:
         u_grid, t_arr = gauss_solution_grid(cfg)
     elif cfg.ic == "N_wave":
         u_grid, t_arr = n_wave_solution_grid(cfg)
+    elif cfg.ic == "N_wave_chop":
+        u_grid, t_arr = n_wave_chop_solution_grid(cfg)
     elif cfg.ic == "Step_up":
         u_grid, t_arr = step_up_solution_grid(cfg)
     elif cfg.ic == "Slope":
         u_grid, t_arr = slope_solution_grid(cfg)
 
     t_obs, x_obs, u_obs = make_observation(cfg, u_grid, t_arr)
-    t_col_dom, x_col_dom, t_col_extrap, x_col_extrap = make_collocation(cfg, u_grid, t_arr)
+    t_col_dom, x_col_dom, t_col_extrap, x_col_extrap = make_collocation(cfg)
     t_val, x_val, u_val = make_validation(cfg, u_grid, t_arr)
+    t_bc = make_bc_points(cfg)
 
     return {
+        "u_grid":       u_grid,
+        "t_arr":        t_arr,
         "t_obs":        t_obs,
         "x_obs":        x_obs,
         "u_obs":        u_obs,
@@ -75,11 +89,10 @@ def generate_data(cfg: Config) -> dict:
         "x_col_dom":    x_col_dom,
         "t_col_extrap": t_col_extrap,
         "x_col_extrap": x_col_extrap,
-        "x_arr":        np.linspace(0, cfg.L, u_grid.shape[0]),
-        "t_arr":        t_arr, 
-        "u_grid":       u_grid,
+        "t_bc":         t_bc,
+        "x_ic":         np.linspace(0, cfg.L, u_grid.shape[1]),
+        "t_ic":         np.zeros(u_grid.shape[1]),
         "u_ic":         u_grid[0],
-        "t_ic":         np.array([0.0]),
     }
 
 def plot_observations_3D(data: dict) -> None:

@@ -20,7 +20,7 @@ class Config:
     nu: float = 0.01                   # viscosity
 
     # Initial conditions
-    ic: str = "Slope"              # Initial condition type: "Gauss", "N_wave", "Step_up", "Slope"
+    ic: str = "N_wave"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
     height: float = None
     sigma_ic: float = None
     width: float = None
@@ -29,16 +29,9 @@ class Config:
 
     # Time domain
     t_dom: float = 5.0              # End time of known domain
-    t_extrap: float = 10.0          # End time of extrapolated domain
+    t_extrap: float = 7.0           # End time of extrapolated domain
 
-    # Loss weights
-    use_physics: bool = True
-    lambda_phys: float = 1e-2
-    use_ic: bool = True
-    lambda_ic: float = 1e1
-    train_extrap: bool = True
-
-    # Data generation parameters
+    # Space domain
     n_x: int = 1000                     # Spatial resolution for numerical solution
     delta_t = 1e-4                      # Time step for numerical solution if adaptive stepping is disabled
     L: float = 5                        # System length
@@ -47,20 +40,28 @@ class Config:
     def delta_x(self) -> float:
         return self.L/self.n_x
 
-    n_obs: float = 300                     # Noisy observation points
-    n_grid_val: float = 100               # Validation grid size
-    randomise_observation: bool = True    # Randomise observation points every epoch
-    # strata_splitting: int = 8           # Strata for stratified splitting
-    # test_train_split: float = 0.4       # Fraction of train set(t)
-    
+    # Loss weights
+    use_physics: bool = True
+    lambda_phys: float = 1e-1
+    use_ic: bool = True
+    lambda_ic: float = 5e1
+    use_bc: bool = True
+    lambda_bc: float = 1e1
+    train_extrap: bool = True
 
-    n_col_dom: float = 200              # ODE residual collocation points
-    sigma: float = 0.01                 # Standard deviation for n_obs
-    randomise_collocation: bool = True  # Randomise collocation points every epoch
+    # Data generation parameters
+    n_obs: float = 50                     # Noisy observation points
+    randomise_observation: bool = True    # Randomise observation points every epoch
+    n_col_dom: float = 200                # ODE residual collocation points
+    sigma: float = 0.01                   # Standard deviation for n_obs
+    randomise_collocation: bool = True    # Randomise collocation points every epoch
+    n_bc: float = 50                      # Boundary condition points
+    randomise_bc_points: bool = True      # Randomise boundary condition loss points every epoch
+    n_grid_val: float = 100               # Validation grid size
 
     # Network architecture
     hidden: int = 32
-    n_layers: int = 4
+    n_layers: int = 6
 
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
@@ -82,7 +83,7 @@ class Config:
     def __post_init__(self):
         if self.ic == "Gauss":
             self.height     = self.height     or 1.0
-            self.sigma_ic   = self.sigma_ic   or 25.0
+            self.sigma_ic   = self.sigma_ic   or 0.5
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.bc_right   or 0.0
 
@@ -92,7 +93,13 @@ class Config:
             self.bc_right   = self.height     or 1.0
 
         elif self.ic == "N_wave":
-            self.height     = self.height     or 0.03
+            self.height     = self.height     or 1.0
+            self.width      = self.width      or 3.0
+            self.bc_left    = self.bc_left    or 0.0
+            self.bc_right   = self.bc_right   or 0.0
+
+        elif self.ic == "N_wave_chop":
+            self.height     = self.height     or 1.0
             self.width      = self.width      or 3.0
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.bc_right   or 0.0

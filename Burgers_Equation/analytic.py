@@ -30,8 +30,8 @@ def gauss(cfg: Config) -> np.ndarray:
     """
     Generate a gauss curve.
     """
-    x = np.arange(cfg.n_x)
-    mean = cfg.n_x / 2
+    x = np.linspace(0, cfg.L, cfg.n_x)
+    mean = cfg.L / 2
     return cfg.height * np.exp(-((x - mean) ** 2) / (2 * cfg.sigma_ic ** 2))
 
 def step_up(cfg: Config) -> np.ndarray:
@@ -48,10 +48,20 @@ def n_wave(cfg: Config) -> np.ndarray:
     Generate an N-wave.
     """
     u = np.zeros(cfg.n_x)
+    center = int(cfg.n_x // 2)
+    width_rel = int(cfg.width // (2 * cfg.delta_x))
+    u[int(center-width_rel):int(center+width_rel)] = np.linspace(-cfg.height, cfg.height, int(2 * width_rel))
+    return -u
 
-    center = cfg.n_x // 2
+def n_wave_chop(cfg: Config) -> np.ndarray:
+    """
+    Generate an N-wave chopped in half and rearranged.
+    """
+    u = np.zeros(cfg.n_x)
 
-    with_rel = cfg.width // (2 * cfg.delta_x)
+    center = int(cfg.n_x // 2)
+
+    with_rel = int(cfg.width // (2 * cfg.delta_x))
 
     # Positive triangle
     start1 = center - with_rel
@@ -74,8 +84,8 @@ def negative_slope(cfg: Config) -> np.ndarray:
     Generate a slope.
     """
     u = np.zeros(cfg.n_x)
-    center = cfg.n_x // 2
-    width_rel = cfg.width // (2 * cfg.delta_x)
+    center = int(cfg.n_x // 2)
+    width_rel = int(cfg.width // (2 * cfg.delta_x))
     u[:int(center-width_rel)] = cfg.height
     u[int(center-width_rel):int(center+width_rel)] = np.linspace(cfg.height, 0, int(2 * width_rel))
     return u
@@ -218,16 +228,19 @@ def lax_wendroff(u_init: np.ndarray, t_end: float, cfg: Config,
     return np.array(sol), np.array(t_arr)
 
 def gauss_solution_grid(cfg: Config) -> np.ndarray:
-    return lax_wendroff(gauss(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
+    return lax_wendroff(gauss(cfg=cfg), t_end=cfg.t_extrap, cfg=cfg)
 
 def step_up_solution_grid(cfg: Config) -> np.ndarray:
-    return lax_wendroff(step_up(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
+    return lax_wendroff(step_up(cfg=cfg), t_end=cfg.t_extrap, cfg=cfg)
 
 def n_wave_solution_grid(cfg: Config) -> np.ndarray:
-    return lax_wendroff(n_wave(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
+    return lax_wendroff(n_wave(cfg=cfg), t_end=cfg.t_extrap, cfg=cfg)
+
+def n_wave_chop_solution_grid(cfg: Config) -> np.ndarray:
+    return lax_wendroff(n_wave_chop(cfg=cfg), t_end=cfg.t_extrap, cfg=cfg)
 
 def slope_solution_grid(cfg: Config) -> np.ndarray:
-    return lax_wendroff(negative_slope(cfg=cfg), t_end=cfg.t_dom, cfg=cfg)
+    return lax_wendroff(negative_slope(cfg=cfg), t_end=cfg.t_extrap, cfg=cfg)
 
 def interpolate_solution(sol: np.ndarray, t_arr: np.ndarray, x: float, t: float, cfg: Config) -> float:
     """
