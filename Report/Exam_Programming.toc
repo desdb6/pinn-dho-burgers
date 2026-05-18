@@ -18,33 +18,33 @@
 \contentsline {subsubsection}{\numberline {2.3.1.4}Model saving}{17}{subsubsection.2.3.1.4}%
 \contentsline {subsubsection}{\numberline {2.3.1.5}Plotting improvements}{17}{subsubsection.2.3.1.5}%
 \contentsline {subsection}{\numberline {2.3.2}Code demonstration}{18}{subsection.2.3.2}%
-\contentsline {subsubsection}{\numberline {2.3.2.1}Overdamped demonstration}{19}{subsubsection.2.3.2.1}%
+\contentsline {subsubsection}{\numberline {2.3.2.1}Overdamped demonstration}{18}{subsubsection.2.3.2.1}%
 \contentsline {subsubsection}{\numberline {2.3.2.2}Critically damped demonstration}{19}{subsubsection.2.3.2.2}%
 \contentsline {subsubsection}{\numberline {2.3.2.3}Underdamped demonstration}{20}{subsubsection.2.3.2.3}%
-\contentsline {subsection}{\numberline {2.3.3}Comparison between blind and physics informed extrapolation}{20}{subsection.2.3.3}%
-\contentsline {subsection}{\numberline {2.3.4}Comparison with traditional ML model}{21}{subsection.2.3.4}%
-\contentsline {subsection}{\numberline {2.3.5}Hyperparameter optimisation}{22}{subsection.2.3.5}%
-\contentsline {section}{\numberline {2.4}Inverse problem}{22}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}Overdamped case}{22}{subsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.4.2}Critically damped case}{23}{subsection.2.4.2}%
-\contentsline {subsection}{\numberline {2.4.3}Underdamped case}{24}{subsection.2.4.3}%
-\contentsline {subsection}{\numberline {2.4.4}Statistical analysis}{25}{subsection.2.4.4}%
-\contentsline {subsection}{\numberline {2.4.5}Discussion}{26}{subsection.2.4.5}%
-\contentsline {chapter}{\numberline {3}Burger's Equation}{27}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Ground truth solving strategies}{27}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}Numerical PDE solvers}{27}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}Cole-Hopf Transformation}{27}{subsection.3.1.2}%
-\contentsline {section}{\numberline {3.2}PINNs for the Burger's equation}{27}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Code implementation}{27}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Code demonstration}{27}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Comparison between blind and physics informed extrapolation}{27}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Comparison with traditional ML model}{27}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Hyperparameter optimisation}{27}{subsection.3.2.5}%
-\contentsline {section}{\numberline {3.3}Inverse problem}{27}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Underdamped case}{27}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Critically damped case}{27}{subsection.3.3.2}%
-\contentsline {subsection}{\numberline {3.3.3}Overdamped case}{27}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}Statistical analysis}{27}{subsection.3.3.4}%
-\contentsline {subsection}{\numberline {3.3.5}Discussion}{27}{subsection.3.3.5}%
-\contentsline {chapter}{\numberline {4}Conclusion}{29}{chapter.4}%
+\contentsline {subsection}{\numberline {2.3.3}Comparison between blind and physics informed extrapolation}{21}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Comparison with traditional ML model}{22}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Hyperparameter optimisation}{23}{subsection.2.3.5}%
+\contentsline {section}{\numberline {2.4}Inverse problem}{23}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Overdamped case}{23}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Critically damped case}{24}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}Underdamped case}{25}{subsection.2.4.3}%
+\contentsline {subsection}{\numberline {2.4.4}Statistical analysis}{26}{subsection.2.4.4}%
+\contentsline {subsection}{\numberline {2.4.5}Discussion}{27}{subsection.2.4.5}%
+\contentsline {chapter}{\numberline {3}Burger's Equation}{29}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Ground truth solving strategies}{29}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Numerical PDE solvers}{29}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Cole-Hopf Transformation}{29}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}PINNs for the Burger's equation}{29}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Code implementation}{29}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Code demonstration}{29}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Comparison between blind and physics informed extrapolation}{29}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Comparison with traditional ML model}{29}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Hyperparameter optimisation}{29}{subsection.3.2.5}%
+\contentsline {section}{\numberline {3.3}Inverse problem}{29}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Underdamped case}{29}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Critically damped case}{29}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Overdamped case}{29}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Statistical analysis}{29}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}Discussion}{29}{subsection.3.3.5}%
+\contentsline {chapter}{\numberline {4}Conclusion}{31}{chapter.4}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

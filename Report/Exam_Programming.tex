@@ -539,7 +539,7 @@ Alternatively, one can choose to save the outputs of the training loop to a fold
 \subsection{Code demonstration}
 In this section, I will give a quick demonstration of three PINNs, used to predict the solution to each of the three damped cases. In all three examples, we will use the following hyperparameters:
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{PINN Hyperparameters}
 \begin{tabular}{llr}
@@ -556,27 +556,69 @@ In this section, I will give a quick demonstration of three PINNs, used to predi
 \end{tabular}
 \end{table}
 
-For now, these hyperparameters are chosen because they are observed to give good results. Section \ref{ch:hyperparameters_DHO} will give a more quantitative analysis of the effect of the hyperparameters. For brevity, I will only show the summary plots. All generated plots can be found in the \verb|outputs| directory
+For now, these hyperparameters are chosen because they are observed to give good results. Section \ref{ch:hyperparameters_DHO} will give a more quantitative analysis of the effect of the hyperparameters. Furthermore, the collocations points are chosen in the training \textit{and} extrapolated domain. In this way, we are not actually making a fully blind prediction about the extrapolated domain, rather a physics informed prediction. This distinction will be further analysed in section \ref{ch:extrap_DHO}. For brevity, I will only show the summary plots. All generated plots can be found in the \verb|outputs| directory. Below, I will discuss each case separately.
 
 \subsubsection{Overdamped demonstration}
+For the overdamped case, I chose the following parameters:
+\begin{table}[H]
+\centering
+\caption{Overdamped parameters}
+\begin{tabular}{llr}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+\texttt{$\zeta$}             & $1.5$ \\
+\texttt{$\omega_0$}          & $2$   \\
+\bottomrule
+\end{tabular}
+\end{table}
+The training was stopped early after $\sim1600$ epochs and the final prediction yields $RMSE=0.00485$. The results of the training are shown on Figure \ref{fig:demo_forward_model_overdamped/summary}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_forward_model_overdamped/summary.png}
-    \caption{Summary plot for the underdamped case.}
+    \caption{Summary plot for the overdamped case.}
     \label{fig:demo_forward_model_overdamped/summary}
 \end{figure}
 
 \subsubsection{Critically damped demonstration}
+For the critically damped case, I chose the following parameters:
+\begin{table}[H]
+\centering
+\caption{Overdamped parameters}
+\begin{tabular}{llr}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+\texttt{$\zeta$}             & $1$ \\
+\texttt{$\omega_0$}          & $2$   \\
+\bottomrule
+\end{tabular}
+\end{table}
+The training was stopped early after $\sim1400$ epochs and the final prediction yields $RMSE=0.00480$. The results of the training are shown on Figure \ref{fig:demo_forward_model_criticallydamped/summary}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_forward_model_criticallydamped/summary.png}
-    \caption{Summary plot for the underdamped case.}
+    \caption{Summary plot for the critically damped case.}
     \label{fig:demo_forward_model_criticallydamped/summary}
 \end{figure}
 
 \subsubsection{Underdamped demonstration}
+For the overdamped case, I chose the following parameters:
+\begin{table}[H]
+\centering
+\caption{Overdamped parameters}
+\begin{tabular}{llr}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+\texttt{$\zeta$}             & $0.125$ \\
+\texttt{$\omega_0$}          & $2$   \\
+\bottomrule
+\end{tabular}
+\end{table}
+The training was stopped early after $\sim4700$ epochs and the final prediction yields $RMSE=0.00562$. The results of the training are shown on Figure \ref{fig:demo_forward_model_underdamped/summary}.
 
 \begin{figure}[H]
     \centering
@@ -585,7 +627,7 @@ For now, these hyperparameters are chosen because they are observed to give good
     \label{fig:demo_forward_model_underdamped/summary}
 \end{figure}
 
-\subsection{Comparison between blind and physics informed extrapolation}
+\subsection{Comparison between blind and physics informed extrapolation}\label{ch:extrap_DHO}
 
 \begin{figure}[H]
     \centering
