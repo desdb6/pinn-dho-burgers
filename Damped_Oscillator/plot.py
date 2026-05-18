@@ -22,7 +22,7 @@ import torch
 import torch.nn as nn
 from config import Config
 from model import predict, predict_from_state
-from utils import pointwise_residual, rmse, convert_to_mck, get_device, load_model, save_show
+from utils import pointwise_residual, rmse, convert_to_mck, get_device, load_model, save_show, rmse
 from data import analytic, generate_data
 from model import FCNet, InverseFCNet  
 
@@ -93,7 +93,7 @@ def plot_predicted(
         show: bool = True
         ) -> None:
     """
-    Plot the analytic solution to the differential equation.
+    Plot the analytic and predicted solution to the differential equation.
     """
     # -- detect inverse mode ----------------------------------------------
     inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
@@ -101,6 +101,9 @@ def plot_predicted(
 
     t = np.linspace(0, cfg.t_extrap, 500)
     y = analytic(t, cfg)
+
+    y_true = analytic(t_plot_full, cfg)
+    rmse_pinn = rmse(y_pinn_full, y_true)
 
     _, ax = plt.subplots(figsize=(8, 5))
     ax.set_facecolor(PANEL)
@@ -118,7 +121,9 @@ def plot_predicted(
             "\n"
             rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
             "\n"
-            rf"$\hat\zeta={model.zeta_hat.item():.3f}\  \hat\omega_0={model.omega_0_hat.item():.3f} rad/s$",
+            rf"$\hat\zeta={model.zeta_hat.item():.3f}\  \hat\omega_0={model.omega_0_hat.item():.3f} rad/s$"
+            "\n"
+            rf"$RMSE = {rmse_pinn:.5f}$",
             fontsize=12
             )
     else:
@@ -127,7 +132,9 @@ def plot_predicted(
             "\n"
             rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
             "\n"
-            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$",
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
+            "\n"
+            rf"$RMSE = {rmse_pinn:.5f}$",
             fontsize=12
             )
     ax.grid(True, linestyle="--", alpha=0.6)
@@ -145,7 +152,8 @@ def plot_summary(
     t_plot_full: np.ndarray,
     device: torch.device,
     output_path: Path = None,
-    show: bool = True
+    show: bool = True,
+    model_label: str = "PINN",
 ) -> None:
     """
     Five-panel summary figure for a PINN.
@@ -169,8 +177,6 @@ def plot_summary(
         Physical constants and domain settings.
     y_pinn_full : np.ndarray
         PINN predictions on t_plot_full.
-    y_ml_full : np.ndarray
-        ML predictions on t_plot_full.
     t_plot_full : np.ndarray
         Dense Timegrid over [0, t_extrap].
     device : torch.device
@@ -179,7 +185,17 @@ def plot_summary(
         Path to save the figure.
     show : bool
         Whether to display the figure.
+    model_color : str
+        Matplotlib color for the model prediction lines. Defaults to GREEN.
+    model_label : str
+        Display name for the model used in legends and suptitle. Defaults to "PINN".
     """
+    # -- detect standard ML algorithm ----------------------------------------------
+    if model_label == "ML":
+        model_color = RED
+    else:
+        model_color = GREEN
+
     # -- detect inverse mode ----------------------------------------------
     inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
 
@@ -229,8 +245,8 @@ def plot_summary(
     )
     ax_train.plot(t_plot_obs, y_true_train, color=GRAY, lw=1.5, label="True")
     ax_train.plot(t_plot_obs, y_pinn_full[mask_train],
-                  color=GREEN, lw=2,
-                  label=f"PINN         ($RMSE={rmse_pinn_train:.4f}$)")
+                  color=model_color, lw=2,
+                  label=f"{model_label}         ($RMSE={rmse_pinn_train:.4f}$)")
     ax_train.scatter(data["t_obs"], data["y_obs"],
                      color=BLUE, s=30, zorder=5, marker="o", alpha=0.6, label="Train observations")
     ax_train.scatter([0], [cfg.y0], color=PURPLE, s=120, marker="*", zorder=7,
@@ -244,7 +260,11 @@ def plot_summary(
     ax_loss.set_title("Panel 3 -- Training loss  (log scale)",
                       fontsize=10, loc="left", pad=6, color="#444441")
     ax_loss.semilogy(hist["epoch"], hist["loss_data"],
-                     color=GREEN, lw=1.5,           label="PINN  L_data")
+                     color=model_color, lw=1.5, label="L_data")
+    ax_loss.semilogy(hist["epoch"], hist["loss_phys"],
+                     color=model_color, lw=1.5, label="L_physics", linestyle="--")
+    ax_loss.semilogy(hist["epoch"], hist["loss_ic"],
+                     color=model_color, lw=1.5, label="L_ic", linestyle="-.")
     for ep in cfg.snapshot_epochs[:-1]:
         ax_loss.axvline(ep, color=GRAY, lw=0.5, ls=":", alpha=0.5)
     ax_loss.set_xlabel("Epoch")
@@ -259,8 +279,8 @@ def plot_summary(
     shade_extrap(cfg, ax_extrap)
     ax_extrap.plot(t_plot_full, y_true_full, color=GRAY, lw=1.5, label="True")
     ax_extrap.plot(t_plot_full, y_pinn_full,
-                   color=GREEN, lw=2,
-                   label=f"PINN         (extrap RMSE={rmse_pinn_ext:.4f})")
+                   color=model_color, lw=2,
+                   label=f"{model_label}         (extrap RMSE={rmse_pinn_ext:.4f})")
     ax_extrap.scatter(data["t_obs"], data["y_obs"],
                       color=BLUE, s=30, zorder=5, marker="o", alpha=0.5, label="Observations")
     ax_extrap.set_xlabel("Time $[s]$")
@@ -272,14 +292,14 @@ def plot_summary(
                        xycoords="axes fraction", fontsize=7.5, color=GRAY)
     ax_extrap.annotate("Extrapolation",   xy=(0.72, 0.93),
                        xycoords="axes fraction", fontsize=7.5, color=GRAY)
-    
+
     # -- panel 5: pointwise data residual -----------------------------------
     ax_error.set_title(r"Panel 5 -- Pointwise data residual  $|y(t) - \hat{y}(t)|^2$",
                    fontsize=10, loc="left", pad=6, color="#444441")
     shade_extrap(cfg, ax_error)
     r_pinn = np.abs(y_true_full - y_pinn_full)**2
-    ax_error.plot(t_plot_full, r_pinn, color=GREEN, lw=1.5,
-                   label=f"PINN  data residual  (mean={np.mean(r_pinn):.3f})")
+    ax_error.plot(t_plot_full, r_pinn, color=model_color, lw=1.5,
+                   label=f"{model_label}  data residual  (mean={np.mean(r_pinn):.3f})")
     ax_error.set_xlabel("Time $[s]$")
     ax_error.set_ylabel(r"$|y(t) - \hat{y}(t)|²$")
     ax_error.set_xlim(0, cfg.t_extrap)
@@ -290,8 +310,8 @@ def plot_summary(
                       fontsize=10, loc="left", pad=6, color="#444441")
     shade_extrap(cfg, ax_phys)
     r_pinn = pointwise_residual(y_pinn_full, t_plot_full, cfg) ** 2
-    ax_phys.plot(t_plot_full, r_pinn, color=GREEN, lw=1.5,
-                 label=f"PINN  (mean={phys_res_pinn:.3f})")
+    ax_phys.plot(t_plot_full, r_pinn, color=model_color, lw=1.5,
+                 label=f"{model_label}  (mean={phys_res_pinn:.3f})")
     ax_phys.set_xlabel("Time $[s]$")
     ax_phys.set_ylabel(r"$|my'' + cy' + ky|^2$")
     ax_phys.set_xlim(0, cfg.t_extrap)
@@ -300,7 +320,7 @@ def plot_summary(
     # -- suptitle ----------------------------------------------------------
     if inverse:
         fig.suptitle(
-            rf"PINN  |  device={device}  |  "
+            rf"{model_label}  |  device={device}  |  "
             rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
             rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
             "\n"
@@ -314,7 +334,7 @@ def plot_summary(
         )
     else:
         fig.suptitle(
-            rf"PINN  |  device={device}  |  "
+            rf"{model_label}  |  device={device}  |  "
             rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
             rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
             "\n"
@@ -334,12 +354,17 @@ def plot_epoch_figure(
     cfg:         Config,
     snapshots:   dict,
     t_plot_full: np.ndarray,
-    model_color: str = GREEN,
     model_label: str = "PINN",
     clip_y:      bool = False,
     output_path: Path = None,
     show: bool = True
 ) -> None:
+    # -- detect standard ML algorithm ----------------------------------------------
+    if model_label == "ML":
+        model_color = RED
+    else:
+        model_color = GREEN
+
     # -- detect inverse mode ----------------------------------------------
     inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
 
@@ -558,7 +583,9 @@ def save_model_plots(
     cfg:         Config,
     device:      torch.device,
     inverse:     bool,
-    output_path: Path
+    output_path: Path,
+    model_color: str = GREEN,
+    model_label: str = "PINN",
 ) -> None:
     """
     Generate and save all summary and epoch figures for a trained model.
@@ -592,6 +619,7 @@ def save_model_plots(
         y_pinn_full=y_pinn,
         t_plot_full=t_plot,
         device=device,
+        model_label=model_label,
         output_path=output_path / "summary.png",
         show=False
     )
@@ -602,8 +630,7 @@ def save_model_plots(
         cfg=cfg,
         snapshots=snapshots,
         t_plot_full=t_plot,
-        model_color=GREEN,
-        model_label="PINN",
+        model_label=model_label,
         clip_y=False,
         output_path=output_path / "epoch_snapshots.png",
         show=False

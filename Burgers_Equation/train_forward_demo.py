@@ -10,7 +10,6 @@ Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
 """
 
-import numpy as np
 from pathlib import Path
 from config import Config
 from analytic import predict_shock_time
@@ -20,16 +19,14 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_gauss"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_gauss_lownu"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():
     device = get_device()
     print(f"Device : {device}")
 
-    cfg = Config(
-        ic="Gauss"
-    )
+    cfg = Config()
 
     time_to_shock = predict_shock_time(cfg)
     if time_to_shock <= 5 and time_to_shock >= 0.1:

@@ -75,13 +75,86 @@
 \chapter{Introduction}
 
 \chapter{Damped Harmonic Oscillator}
-
+In this chapter, we will apply PINNs to solve the damped harmonic oscillator, a secondary order ODE which describes oscillatory motion with friction. The code for this chapter can be found in the \verb|Damped_Oscillator| directory.
 \section{Analytic solution}
+The central equation we are trying to solve is given by:
 \begin{equation}\label{eq:damped_harmonic_oscillator}
     my''(t)+cy'(t)+ky(t)=0
 \end{equation}
+This is a second order linear ordinary differential equation. The formal solution of this equation can be found by substituting $y(t)=e^{rt}$ and solving the characteristic equation:
+\begin{equation}\label{eq:damped_harmonic_oscillator_characteristic_equation}
+     mr^2+cr+k=0
+\end{equation}
+The roots of this equation are given by:
+\begin{equation}\label{eq:damped_harmonic_oscillator_roots}
+    r_{1,2}=\frac{-c\pm\sqrt{c^2-4mk}}{2m}
+\end{equation}
+It can be useful to introduce the parameters $\omega_0=\sqrt{k/m}$ and $\zeta=c/(2\sqrt{mk})$, in which case the roots of the equation become:
+\begin{equation}\label{eq:damped_harmonic_oscillator_roots_normalized}
+    r_{1,2}=-\zeta\omega_0\pm\omega_0\sqrt{\zeta^2-1}
+\end{equation}
+We can distinguish three cases based on the value of the discriminant $D=c^2-4mk$ and $\zeta$. Figures \ref{fig:analytic_solution_overdamped} to \ref{fig:analytic_solution_underdamped} illustrate these cases.\\
 
-\section{Understanding an the PINN example}
+\paragraph{Overdamped} If $D>0$ ($\zeta>1$), the roots are real and the solution is given by:
+\begin{equation}\label{eq:damped_harmonic_oscillator_overdamped_solution}
+    y(t)=Ae^{r_1t}+Be^{r_2t}
+\end{equation}
+Where $r_1,\ r_2<0$ are real and $A$ and $B$ are constants determined by the initial conditions $y(0)=y_0$ and $y'(0)=dy_0$:
+\begin{equation}\label{eq:damped_harmonic_oscillator_overdamped_constants}
+    \begin{split}
+        A&=\frac{dy_0-r_2y_0}{r_1-r_2}\\
+        B&=\frac{-dy_0+r_1y_0}{r_1-r_2}
+    \end{split}
+\end{equation}
+
+\paragraph{Critically damped} if $D=0$ ($\zeta=1$), the roots $r_1=r_2=r=-\zeta\omega_0$ are negative, real and equal. A second linearly independent solution is then given by $te^{rt}$, so the generalsolution is given by:
+\begin{equation}\label{eq:damped_harmonic_oscillator_critically_damped_solution}
+    y(t)=(A+Bt)e^{rt}
+\end{equation}
+The constants $A$ and $B$ are again determined by the initial conditions:
+\begin{equation}\label{eq:damped_harmonic_oscillator_critically_damped_constants}
+    \begin{split}
+        A&=y_0\\
+        B&=dy_0-ry_0
+    \end{split}
+\end{equation}
+
+\paragraph{Underdamped} if $D<0$ ($\zeta<1$), the roots $r_1$ and $r_2$ are complex conjugates, whose complex parts are conventionally expressed as $\omega_d=\omega_0\sqrt{1-\zeta^2}$, so that the roots can be expressed as $r_{1,2}=-\zeta\omega_0\pm i\omega_d$. The solution is then given by:
+\begin{equation}\label{eq:damped_harmonic_oscillator_underdamped_solution}
+    y(t)=e^{-\zeta\omega_0t}(A\cos(\omega_dt)+B\sin(\omega_dt))
+\end{equation}
+The constants $A$ and $B$ are again determined by the initial conditions:
+\begin{equation}\label{eq:damped_harmonic_oscillator_underdamped_constants}
+    \begin{split}
+        A&=y_0\\
+        B&=\frac{dy_0+\zeta\omega_0y_0}{\omega_d}
+    \end{split}
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/analytic_solution_overdamped.png}
+    \caption{Analytic solution for the overdamped harmonic oscillator.}
+    \label{fig:analytic_solution_overdamped}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/analytic_solution_criticallydamped.png}
+    \caption{Analytic solution for the critically damped harmonic oscillator.}
+    \label{fig:analytic_solution_critically_damped}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/analytic_solution_underdamped.png}
+    \caption{Analytic solution for the underdamped harmonic oscillator.}
+    \label{fig:analytic_solution_underdamped}
+\end{figure}
+
+
+\section{Understanding the PINN example}
+In this section, we will study the provided code \verb|pinn_spring_damper.py| and attempt to respond to the questions about the method and the code. The provided example trains a standard ML model and a PINN to solve the underdamped case of the damped harmonic oscillator. The models in question are trained on 15 noisy observation points, which are supplemented with the initial conditions and the physics residual al 200 evenly spaced collocation points in the case for the PINN.
 
 \subsection{Questions on the method}
 
@@ -378,22 +451,232 @@ The \verb|torch.autograd.grad| differentiates an output vector $y=(y_1, \ldots, 
 where $v$ is set by \verb|grad_outputs|. In our specific case, every value $y_i$ only depends on the corresponding time value $t_i$, which makes the Jacobian a diagonal matrix. In order to contract the Jacobian to a column vector, $v$ can be set to a row vector of ones with \verb|grad_outputs=torch.ones_like(y_hat)|. The \verb|torch.autograd.grad| acutally returns a tuple $(dy,)$ per input, so to unpack it we can simply select the first and only element using \verb|[0]|.
 
 \section{Improving the example code}
-
+Now that we have a good understanding of the code and have a better idea of how to improve the code, we will restart from scratch and make a new implementatoin of the code based on the provided example. In this section, I will discuss the improvements I have made, demonstrate the code for the three different damping cases, and discuss the results and effects of different factors. Finally, we will adapt the code to solve the inverse problem, where I attempt to extract the physical parameters of the system without passing them as explicit inputs to the model.
 \subsection{Code improvements}
+To begin, I will give a thorough overview of the improvements I have made to the code. These rane from fundamental changes to the training process and code structure, to more minor changes to the plotting methods and helper functions.
+\subsubsection{File structure}
+While the original code was implemented in a single script, I have decided to split the different functionalities and steps into multiple files. The file structure is as follows:
+\begin{tcolorbox}[title=Damped harmonic oscillator file structure, colback=black!10!white, colframe=black!40!white, sharp corners]
+\begin{verbatim}
+Damped_Oscillator/
+|-- config.py           - dataclass holding all physical constants,
+|                        hyperparameters, runtime settings
+|-- data.py             - analytic solution and data generation for
+|                         collocation points, observation points,
+|                         and initial conditions
+|-- model.py            - FCNet architecture and predictor functions
+|-- losses.py           - loss functions for the training of the model
+|-- trainer.py          - training loop
+|-- plot.py             - all plotting functions
+|-- utils.py            - helper file for small functions
+\end{verbatim}
+\end{tcolorbox}
+This file structure allows for a more modular code, which makes it more accessible and easier to maintain or debug. This also allows me to make multiple scripts for different experiments easily, since the necesarry functionalities can simply be imported from the relevant files. The \verb|config.py| file is especially useful, since it provides a dataclass thatallows for the user to specify all parameters at once. This class can then be passed to the different functions and classes which automatically sets the correct parameters. Splitting the trainer script and the model architecture is also a flexible approach, since it allows for modular implementation of new models (ex. a model for the inverse problem, see section \ref{ch:inverse_DHO}) or new training strategies (ex. curriculum training).\\
+
+In order to train a model using these files, a separate script needs to be created. The workflow is as follows:
+\begin{enumerate}
+    \item We check if there is a GPU available and set the device accordingly using the \verb|get_device| helper from the \verb|utils.py| file.
+    \item A \verb|Config| object with user-defined parameters is created.
+    \item Data is generated based on the ground truth solution through the \verb|generate_data| function from the \verb|data.py| file. This includes the collocation points, observation points, and initial conditions.
+    \item A \verb|FCNet| model, from the \verb|model.py| file, is created based on the parameters in the \verb|Config| object.
+    \item The model is trained using the \verb|train| function from the \verb|trainer.py| file, which takes the model, data and \verb|Config| object as inputs.
+\end{enumerate}
+In the rest of this report, we will design multiple of scripts like this to do different experiments. The code for these scripts can be found along with the rest of the aforementioned files in the \verb|Damped_Oscillator| directory.
+\subsubsection{Randomising training data}
+In the provided example, the model is trained on a training set of 15 noisy observation points. The same training points are used at every single epoch, which could lead to the model overfitting or bias towards one region of the time domain as explained previously. To avoid this, I have chosen to randomise the observation points at every epoch. This gives the model more spread-out information about the entire time domain of the equation. I have chosen to keep these observation points noisy for two reasons:
+\begin{enumerate}
+    \item Noisy observation points is more representative of real-world data, which is never perfectly clean. We are essentialy producing 'fake' observation data fot the model to train on, which is a technique that is widely used in the field of machine learning when the amount of real data is limited.
+    \item The noise can also be seen as a way of forcing the model to learn the physics of the system, rather than only memorising the numerical value of the provided observation points. This can avoid overfitting and lead to better results when extrapolating the model beyond the training domain.
+\end{enumerate}
+
+Just like the observation points, the collocation points are also randomised. In the provided example the same dense evenly spaced grid of collocation points is used, in my code the set of collocation points is randomly chosen at every epoch. Since there are way more collocation points than observation points, this is more to avoid the model to fine-tune to the specific spacing of the collocation grid, which is not desirable.
+
+\subsubsection{Early stopping}
+In the provided example, the model is trained for a pre-set number of epochs. This is not optimal, since it could be possible that the model has already converged to an optimal set of parameters before all epochs have passed. to account for this, we need to implement an early stopping strategy which stops the training when the model has converged. For this, we need to choose a performance metric to monitor during the training, so that the training will stop when the metric has minimalised and the improvement has stalled.\\
+
+The most representative way to determine the accuracy of the model is to compare the predicted solution to the exact analytic solution. The metric which we want to use is the mean squared error between the predicted and exact solution over the interval:
+\begin{equation}
+    MSE = \int_0^{t_{end}} (y(t)-\hat{y}(t))^2 dt
+\end{equation}
+In our case, this integral can be approximated by choosing a dense, evenly spaced grid and approximating the integral by the Riemann-sum over the interval:
+\begin{equation}
+    MSE = \sum_{i=0}^{N} (y_i-\hat{y}(t_i))^2 \Delta t
+\end{equation}
+This metric will be called the \textit{validation loss}, annotated by $\mathcal{L}_{val.}$. The training will stop when the validation loss has stopped decreasing. We need to define two more parameters to get an efficient early stopping strategy:
+\begin{enumerate}
+    \item The patience is defined as the number of epochs to wait after the last improvement (decrease of the validation loss) before stopping the training. This is necesarry to avoid stopping too early, since it is possible that the validation fluctuates around (local) minima and further improvements can be made after more training epochs. If the patience is ran out, it means the model has not improved for a while and training can be safely stopped.
+    \item The patience threshold is defined as the minimum improvement in the validation loss to be considered a \textit{notable} improvement. only if the improvement is large enough and notable, the patience counter will be reset. This avoids resetting the patience counter for minimal, unsignificant improvements and makes the early stopping strategy more efficient.
+\end{enumerate}
+Both of these parameters can be set in the \verb|Config| class.
+
+\subsubsection{Model saving}
+Another improvement is the saving of the best model weights after every training run. This allows us to load the trained model later instead of retraining the model every time we want to make or show a predicition. Throughout the training loop, the weights that give the lowest validation loss are saved as a variable \verb|best_state|. After the training has completed, these weights are passed as an output of the function along with the history of the different loss terms as a function of the epochs, and the prediction snapshots after a pre-set number of epochs. I have then created a helper funtion called \verb|save_model| that saves these the relevant outputs to a folder. The model weights and snapshotsare saved as \verb|.pt| files, the history is saved as a \verb|.csv| file, and the \verb|Config| parameters are saved as a \verb|.json| file.\\
+
+A second helper function, \verb|load_model|, is implemented to reload the best model weights from a specific training run and do predictions using those weights. This is done by creating a new \verb|FCNet| using the saved \verb|Config| parameters, afetr which the best weights are loaded into the model using the \verb|load_state_dict| method. The loaded model is then returned along with the training history, snapshots and \verb|Config| parameters. This model is then ready to be used to make predictions and plot results.
+
+\subsubsection{Plotting improvements}
+The plotting methods from the provided example are more or less reused with some small improvements. The following plotting methods are implemented in the \verb|plot.py| file:
+\begin{itemize}
+    \item A plot of the analytic ground truth solution of the differential equation (\verb|plot_analytic|). This function is entirely implemented by me.
+    \item A plot of the predicted solution using the best weights of the model, along with the analytic ground truth solution (\verb|plot_predicted|). This function is entirely implemented by me.
+    \item A plot of the saved snapshots, showing the predicted solution at different stages of the training process (\verb|plot_epoch_figure|). This function is taken from the provided example.
+    \item A plot of the different loss terms as a function of the epochs (\verb|plot_loss_history|). This function is entirely implemented by me.
+    \item A summary plot with six panels (\verb|plot_summary|). This plot shows:
+    \begin{enumerate}
+        \item The analytic solution with noisy observation points and the position of the collocation points\footnote{These points are actually never usen in training, but are generated after training has already finished. They do however give an intuïtive idea of what the training set look like, which is why I have chosen to plot these as well.}.
+        \item The analytic and predicted solutions on the training interval.
+        \item The training loss $\mathcal{L}_{tot}$ (logarithmic scale) as a function of the epochs.
+        \item The analytic and predicted solutions on the training and extrapolated interval. 
+        \item The pointwise data residual, in other words the squared error between the predicted and observed values $(y_i-\hat{y}(t_i))^2$, as a function of time.
+        \item The squared ODE residual $|r(t)|^2$ as a function of time.
+    \end{enumerate}
+    Panels 1, 2, 3, and 4 are copied from the provided example, while panels 5 and 6 are made by me (based on the original fifth panel, which showed the \textit{absolute} error between the predicted and observed values).
+\end{itemize}
+These plotting methods are then wrapped in a single function called \verb|save_model_plots|, which generated all of the above plots and saves them to a specified output folder. This function can be called at the end of a training loop witht he model, training history, epoch snapshots, data, and \verb|Config| parameters as inputs.\\
+
+Alternatively, one can choose to save the outputs of the training loop to a folder and then call the \verb|save_plots_from_file| funtion, which load the saved model weights and saves all relevant plot to the same folder. This is my preferred approach, since the best model weights need to be saved in this way, which can be useful in the futire for ex. comparing model performances.
 
 \subsection{Code demonstration}
+In this section, I will give a quick demonstration of three PINNs, used to predict the solution to each of the three damped cases. In all three examples, we will use the following hyperparameters:
 
-\subsection{Hyperparameter optimisation}
+\begin{table}[h]
+\centering
+\caption{PINN Hyperparameters}
+\begin{tabular}{llr}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
+\midrule
+\texttt{hidden}              & Hidden units per layer        & 64     \\
+\texttt{n\_layers}           & Number of hidden layers       & 5      \\
+\texttt{n\_epochs}           & Maximum training epochs       & 30000  \\
+\texttt{lr}                  & Initial learning rate         & $5\times10^{-3}$ \\
+\texttt{patience}            & Early stopping patience       & 1000   \\
+\texttt{patience\_threshold} & Min improvement to reset patience & $1\times10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\section{Inverse problem}
+For now, these hyperparameters are chosen because they are observed to give good results. Section \ref{ch:hyperparameters_DHO} will give a more quantitative analysis of the effect of the hyperparameters. For brevity, I will only show the summary plots. All generated plots can be found in the \verb|outputs| directory
 
-\subsection{Underdamped case}
+\subsubsection{Overdamped demonstration}
 
-\subsection{Critically damped case}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_forward_model_overdamped/summary.png}
+    \caption{Summary plot for the underdamped case.}
+    \label{fig:demo_forward_model_overdamped/summary}
+\end{figure}
+
+\subsubsection{Critically damped demonstration}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_forward_model_criticallydamped/summary.png}
+    \caption{Summary plot for the underdamped case.}
+    \label{fig:demo_forward_model_criticallydamped/summary}
+\end{figure}
+
+\subsubsection{Underdamped demonstration}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_forward_model_underdamped/summary.png}
+    \caption{Summary plot for the underdamped case.}
+    \label{fig:demo_forward_model_underdamped/summary}
+\end{figure}
+
+\subsection{Comparison between blind and physics informed extrapolation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_forward_model_underdamped_extrapblind/summary.png}
+    \caption{Summary plot for a PINN whithout collocation points in the extrapolated domain. This leads to a fully blind predicition for $t>t_{dom}$.}
+    \label{fig:demo_forward_model_underdamped_extrapblind/summary}
+\end{figure}
+
+\subsection{Comparison with traditional ML model}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_forward_model_underdamped_ML/summary.png}
+    \caption{Summary plot for a non-physics informed neural network.}
+    \label{fig:demo_forward_model_underdamped_ML/summary}
+\end{figure}
+
+\subsection{Hyperparameter optimisation}\label{ch:hyperparameters_DHO}
+
+\section{Inverse problem}\label{ch:inverse_DHO}
 
 \subsection{Overdamped case}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_backward_model_overdamped/predicted_solution.png}
+    \caption{Predicted solution and parameters for an overdamped harmonic oscillator with randomised parameters.}
+    \label{fig:demo_backward_model_overdamped/predicted_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_backward_model_overdamped/parameter_convergence.png}
+    \caption{Parameter convergence to true values for an overdamped harmonic oscillator with randomised parameters.}
+    \label{fig:demo_backward_model_overdamped/parameter_convergence}
+\end{figure}
+
+\subsection{Critically damped case}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_backward_model_criticallydamped/predicted_solution.png}
+    \caption{Predicted solution and parameters for a critically damped harmonic oscillator with randomised parameters.}
+    \label{fig:demo_backward_model_criticallydamped/predicted_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_backward_model_criticallydamped/parameter_convergence.png}
+    \caption{Parameter convergence to true values for a critically damped harmonic oscillator with randomised parameters.}
+    \label{fig:demo_backward_model_criticallydamped/parameter_convergence}
+\end{figure}
+
+\subsection{Underdamped case}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_backward_model_underdamped/predicted_solution.png}
+    \caption{Predicted solution and parameters for an underdamped harmonic oscillator with randomised parameters.}
+    \label{fig:demo_backward_model_underdamped/predicted_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Images/demo_backward_model_underdamped/parameter_convergence.png}
+    \caption{Parameter convergence to true values for an underdamped harmonic oscillator with randomised parameters.}
+    \label{fig:demo_backward_model_underdamped/parameter_convergence}
+\end{figure}
+
 \subsection{Statistical analysis}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/parameter_estimation_2/scatter_zeta_full.png}
+    \caption{Scatter plot of 2402 true and predicted $\zeta$ pairs for the damped harmonic oscillator.}
+    \label{fig:parameter_estimation_2/scatter_zeta_full}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/parameter_estimation_2/scatter_omega_0_full.png}
+    \caption{Scatter plot of 2402 true and predicted $\omega_0$ pairs for the damped harmonic oscillator.}
+    \label{fig:parameter_estimation_2/scatter_omega_0_full}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/parameter_estimation_2/parameter_space_rmse_full.png}
+    \caption{Parameter space of 2402 true $(\zeta, \omega_0)$ pairs and the $RMSE$ compared to the predicted values..}
+    \label{fig:parameter_estimation_2/parameter_space_rmse_full}
+\end{figure}
 
 \subsection{Discussion}
 
@@ -411,6 +694,10 @@ where $v$ is set by \verb|grad_outputs|. In our specific case, every value $y_i$
 
 \subsection{Code demonstration}
 
+\subsection{Comparison between blind and physics informed extrapolation}
+
+\subsection{Comparison with traditional ML model}
+
 \subsection{Hyperparameter optimisation}
 
 \section{Inverse problem}
@@ -427,11 +714,11 @@ where $v$ is set by \verb|grad_outputs|. In our specific case, every value $y_i$
 
 \chapter{Conclusion}
 
-\appendix
+% \appendix
 
-\chapter{Equation derivations}
+% \chapter{Equation derivations}
 
-\chapter{Figures}
+% \chapter{Figures}
 
 \bibliographystyle{abbrv}
 \bibliography{bibliography}   % your .bib filename without .bib extension

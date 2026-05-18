@@ -15,35 +15,65 @@ from config import Config
 from data import generate_data
 from model import FCNet
 from trainer import train
-from utils import get_device, save_model, load_best_cfg
+from utils import get_device, save_model, convert_to_mck
 from plot import save_plots_from_file
 
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/demo_forward_model_bestparams"
-OUTPUT_PATH.mkdir(exist_ok=True)
+SCRIPT_DIR = Path(__file__).resolve().parent
 
 def main():
     device = get_device()
     print(f"Device : {device}")
 
-    cfg = Config()
+    # # -- Underdamped ------------------------------------------------
+    # output_path = SCRIPT_DIR/ "outputs/demo_forward_model_underdamped"
+    # output_path.mkdir(exist_ok=True)
+    # cfg = Config(
+    #     m=1.0,
+    #     c=0.5,
+    #     k=4.0
+    # )
 
-    # -- train model ------------------------------------------------
-    data     = generate_data(cfg)
-    model    = FCNet(cfg)
-    history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+    # # -- Critically damped ------------------------------------------------
+    # output_path = SCRIPT_DIR/ "outputs/demo_forward_model_criticallydamped"
+    # output_path.mkdir(exist_ok=True)
+    # zeta = 1
+    # omega_0 = 2
+    # m, c, k = convert_to_mck(zeta, omega_0)
+    # cfg = Config(
+    #     m=m,
+    #     c=c,
+    #     k=k
+    # )
+
+    # -- Overdamped ------------------------------------------------
+    output_path = SCRIPT_DIR/ "outputs/demo_forward_model_overdamped"
+    output_path.mkdir(exist_ok=True)
+    zeta = 1.5
+    omega_0 = 2
+    m, c, k = convert_to_mck(zeta, omega_0)
+    cfg = Config(
+        m=m,
+        c=c,
+        k=k
     )
 
-    # -- save model ------------------------------------------------
-    save_model(best_state, history, snapshots, cfg, OUTPUT_PATH)
-    print(f"Model saved to {OUTPUT_PATH}")
+    # # -- train model ------------------------------------------------
+    # data     = generate_data(cfg)
+    # model    = FCNet(cfg)
+    # history, snapshots, best_state = train(
+    #     model       = model,
+    #     data        = data,
+    #     cfg         = cfg,
+    #     device      = device,
+    #     label       = "Model",
+    # )
+
+    # # -- save model ------------------------------------------------
+    # save_model(best_state, history, snapshots, cfg, output_path)
+    # print(f"Model saved to {output_path}")
 
     # -- make plots ------------------------------------------------
-    save_plots_from_file(OUTPUT_PATH)
+    save_plots_from_file(output_path)
 
 if __name__ == "__main__":
     main()

@@ -165,14 +165,14 @@ def train(
                 raise optuna.exceptions.TrialPruned()
 
         # -- early stopping -------------------------------------------------
-        if l_val.item() < best_val_loss:
-            best_val_loss         = l_val.item()
-            best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
-
         if l_val.item() < best_val_loss - cfg.patience_thershold:
             epochs_no_improvement = 0
         else:
             epochs_no_improvement += 1
+
+        if l_val.item() < best_val_loss:
+            best_val_loss         = l_val.item()
+            best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
 
         if epochs_no_improvement >= cfg.patience:
             print(f"  [{label}] early stopping at epoch {epoch}, improvement stalled.")

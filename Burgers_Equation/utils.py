@@ -30,9 +30,10 @@ def to_tensor(arr: np.ndarray, requires_grad: bool = False, unsqueeze: bool = Tr
     """
     device = get_device()
     arr = np.atleast_1d(np.array(arr, dtype=np.float32))
-    t = torch.tensor(arr, dtype=torch.float32).unsqueeze(1).to(device)
-    if unsqueeze == False:
-        t = torch.tensor(arr, dtype=torch.float32).to(device)
+    t = torch.tensor(arr, dtype=torch.float32)
+    if unsqueeze:
+        t = t.unsqueeze(1)
+    t = t.to(device)
     if requires_grad:
         t.requires_grad_(True)
     return t

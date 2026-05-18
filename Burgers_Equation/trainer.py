@@ -1,5 +1,5 @@
 """
-Training loop for the damped spring-mass PINN.
+Training loop for the Burger's Equation.
 
 Contains:
     train -- run the Adam optimiser with cosine-annealing scheduler,
@@ -12,6 +12,7 @@ Last modified   : 12/05/2026
 import optuna
 import time
 import os
+import copy
 from config import Config
 import torch
 import torch.nn as nn
@@ -194,14 +195,14 @@ def train(
                 raise optuna.exceptions.TrialPruned()
 
         # -- early stopping -------------------------------------------------
-        if l_val.item() < best_val_loss:
-            best_val_loss         = l_val.item()
-            best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
-
         if l_val.item() < best_val_loss - cfg.patience_thershold:
             epochs_no_improvement = 0
         else:
             epochs_no_improvement += 1
+
+        if l_val.item() < best_val_loss:
+            best_val_loss         = l_val.item()
+            best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
 
         if epochs_no_improvement >= cfg.patience:
             print(f"  [{label}] early stopping at epoch {epoch}, improvement stalled.")
@@ -209,9 +210,7 @@ def train(
 
         # -- snapshots ------------------------------------------------------
         if epoch in cfg.snapshot_epochs:
-            snapshots[epoch] = {
-                k: v.cpu() for k, v in model.state_dict().items()
-            }
+            snapshots[epoch] = copy.deepcopy(model.state_dict())
 
         # -- logging --------------------------------------------------------
         if verbatim:

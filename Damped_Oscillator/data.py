@@ -129,7 +129,7 @@ def make_train_observation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
 
 def make_validation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
     t_val= np.linspace(0.1, cfg.t_dom, cfg.n_val)
-    y_val = analytic(t_val, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_val)
+    y_val = analytic(t_val, cfg)
     return t_val, y_val
 
 def make_collocation(cfg: Config) -> np.ndarray:

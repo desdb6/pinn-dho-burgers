@@ -29,11 +29,11 @@ def main():
 
     # ---------- Underdamped ----------
 
-    # set_seed(13)
-    # zeta = np.random.uniform(0.02, 0.2)
-    # omega_0 = np.random.uniform(1, 5)
-    # output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_underdamped"
-    # output_path.mkdir(exist_ok=True)
+    set_seed(13)
+    zeta = np.random.uniform(0.02, 0.2)
+    omega_0 = np.random.uniform(1, 5)
+    output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_underdamped"
+    output_path.mkdir(exist_ok=True)
 
     # ---------- Critcally damped ----------
 
@@ -45,11 +45,11 @@ def main():
 
     # ---------- Overdamped ----------
 
-    set_seed(16)
-    zeta = np.random.uniform(1.5, 2)
-    omega_0 = np.random.uniform(2, 3)
-    output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_overdamped"
-    output_path.mkdir(exist_ok=True)
+    # set_seed(16)
+    # zeta = np.random.uniform(1.5, 2)
+    # omega_0 = np.random.uniform(2, 3)
+    # output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_overdamped"
+    # output_path.mkdir(exist_ok=True)
 
     print("------------------------------------------------"
           f"\nRandomised zeta    : {zeta:.4f}"

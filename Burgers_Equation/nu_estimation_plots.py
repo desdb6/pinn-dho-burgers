@@ -35,11 +35,14 @@ PANEL  = "#F1EFE8"   # axes background
 def nu_estimation_plot(
         csv_path: Path,
         ic: str,
+        nu_class: str = None,
         output_path: Path = None,
         show: bool = True
 ) -> None:
     nu_data = pd.read_csv(csv_path)
     nu_data = nu_data[nu_data["ic"] == ic]
+    if nu_class is not None:
+        nu_data = nu_data[nu_data["nu_class"] == nu_class]
 
     fig, ax = plt.subplots(figsize=(8, 8))
     style_ax(ax)
@@ -49,14 +52,27 @@ def nu_estimation_plot(
 
     ax.set_xlabel(r"$\nu$", fontsize=20)
     ax.set_ylabel(r"$\hat\nu$", fontsize=20)
-    ax.set_title(rf"$\nu$ prediction for {ic} initial condition", fontsize = 14)
+
+    if nu_class == "low":
+        ax.set_xlim(0, 0.05)
+        ax.set_ylim(0, 0.05)
+
+    if nu_class is not None:
+        ax.set_title(rf"$\nu$ prediction for {ic} initial condition and {nu_class} viscosity", fontsize = 14)
+        max = np.max(nu_data[["nu_true", "nu_pred"]])
+    else:
+        ax.set_title(rf"$\nu$ prediction for {ic} initial condition", fontsize = 14)
+        
     ax.grid()
     save_show(output_path, show)
 
 for ic in ["Gauss", "N_wave", "Step_down", "Step_up"]:
-    nu_estimation_plot(csv_path=OUTPUT_PATH / "nu_pairs.csv",
+    for nu_class in ["low", "high", None]:
+        nu_estimation_plot(csv_path=OUTPUT_PATH / "nu_pairs.csv",
                     ic=ic,
-                    output_path=OUTPUT_PATH / f"scatter_{ic}.png",
+                    nu_class=nu_class,
+                    output_path=OUTPUT_PATH / f"scatter_{ic}_{nu_class}.png",
                     show=False
                     )
-    print(f"Saved {ic} scatter plot")
+    
+    print(f"Saved {ic} scatter plots")
