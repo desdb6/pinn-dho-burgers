@@ -1,77 +1,113 @@
+"""
+Optuna hyperparameter search for the damped oscillator PINN.
+
+Usage:
+    python tune.py
+
+Author          : Des De Borger
+Email           : des.deborger@student.uantwerpen.be
+Last modified   : 12/05/2026
+"""
+
 import random
+import csv
+import json
 import numpy as np
 import torch
 import optuna
-import csv
 from pathlib import Path
+
 from config import Config
 from model import FCNet
 from trainer import train
 from data import generate_data
 from utils import get_device
 
-OUTPUT_PATH = Path.cwd() / "outputs"
-OUTPUT_PATH.mkdir(exist_ok=True)
+# -- settings --------------------------------------------------------------
+SEED        = 42
+N_TRIALS    = 200
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/optuna_tuning"
+OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
-SEED = 42
 CSV_PATH = OUTPUT_PATH / "optuna_results.csv"
 CSV_FIELDS = [
-    "trial", "value",
-    "hidden", "n_layers", "lr", "scheduler_gamma", "scheduler_step",
-    "lambda_phys", "lambda_ic", "lambda_bc",
-    "final_loss_data", "final_loss_phys", "final_loss_ic",
-    "final_loss_bc", "final_loss_val", "final_loss_total",
+    "trial", "state", "rmse",
+    # architecture
+    "hidden", "n_layers",
+    # loss weights
+    "lambda_phys", "lambda_ic",
+    # learning rate
+    "lr", "scheduler_gamma", "scheduler_step",
+    # adam optimiser
+    "adam_beta1", "adam_beta2"
 ]
 
-def set_seed(seed: int):
+ICS = ["Gauss", "N_wave", "Step_up", "Step_down", "Slope"]
+
+# -- fixed seed ------------------------------------------------------------
+def set_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-base_cfg = Config()
-base_data = generate_data(base_cfg)
+# -- generate data once ----------------------------------------------------
+_base_cfg  = Config()
+_base_data = generate_data(_base_cfg)
 
+# -- objective -------------------------------------------------------------
 def objective(trial: optuna.Trial) -> float:
     set_seed(SEED)
 
     cfg = Config(
-        hidden          = trial.suggest_int("hidden", 16, 128, step=16),
-        n_layers        = trial.suggest_int("n_layers", 4, 8),
-        lr              = trial.suggest_float("lr", 1e-4, 1e-2, log=True),
-        scheduler_gamma = trial.suggest_float("scheduler_gamma", 0.3, 0.9),
-        scheduler_step  = trial.suggest_int("scheduler_step", 1000, 5000, step=500),
-        lambda_phys     = trial.suggest_float("lambda_phys", 1e-3, 1e0, log=True),
-        lambda_ic       = trial.suggest_float("lambda_ic", 1e0, 1e2, log=True),
-        lambda_bc       = trial.suggest_float("lambda_bc", 1e0, 1e2, log=True),
-        n_epochs        = 10000,
-        patience        = 2000,
+         # -- regime parameters from _base_cfg -----------------------------
+        ic = _base_cfg.ic,
+        # architecture
+        hidden          = trial.suggest_int(  "hidden",          16,   128, step=16),
+        n_layers        = trial.suggest_int(  "n_layers",         2,     6),
+        # loss weights
+        lambda_phys     = trial.suggest_float("lambda_phys",     1e-3,  1e1, log=True),
+        lambda_ic       = trial.suggest_float("lambda_ic",       1e0,   1e2, log=True),
+        # learning rate and scheduler
+        lr              = trial.suggest_float("lr",              1e-4,  1e-2, log=True),
+        scheduler_gamma = trial.suggest_float("scheduler_gamma", 0.3,   0.9),
+        scheduler_step  = trial.suggest_int(  "scheduler_step",  1000, 5000, step=1000),
+        # adam
+        adam_beta1      = trial.suggest_float("adam_beta1",      0.85,  0.99),
+        adam_beta2      = trial.suggest_float("adam_beta2",      0.99,  0.9999),
     )
 
     device = get_device()
     model  = FCNet(cfg)
-    history, _ = train(model, base_data, cfg, device, verbatim=False)
+
+    try:
+        history, _, _ = train(
+            model        = model,
+            data         = _base_data,
+            cfg          = cfg,
+            device       = device,
+            verbatim     = False,
+            optuna_trial = trial,
+        )
+    except optuna.exceptions.TrialPruned:
+        raise
 
     best_val = min(history["loss_val"])
 
-    # -- write row to CSV ---------------------------------------------------
+    # -- write to CSV ------------------------------------------------------
     row = {
-        "trial":            trial.number,
-        "value":            best_val,
-        "hidden":           cfg.hidden,
-        "n_layers":         cfg.n_layers,
-        "lr":               cfg.lr,
-        "scheduler_gamma":  cfg.scheduler_gamma,
-        "scheduler_step":   cfg.scheduler_step,
-        "lambda_phys":      cfg.lambda_phys,
-        "lambda_ic":        cfg.lambda_ic,
-        "lambda_bc":        cfg.lambda_bc,
-        "final_loss_data":  history["loss_data"][-1],
-        "final_loss_phys":  history["loss_phys"][-1],
-        "final_loss_ic":    history["loss_ic"][-1],
-        "final_loss_bc":    history["loss_bc"][-1],
-        "final_loss_val":   history["loss_val"][-1],
-        "final_loss_total": history["loss_total"][-1],
+        "trial":             trial.number,
+        "state":             "complete",
+        "rmse":              best_val,
+        "hidden":            cfg.hidden,
+        "n_layers":          cfg.n_layers,
+        "lambda_phys":       cfg.lambda_phys,
+        "lambda_ic":         cfg.lambda_ic,
+        "lr":                cfg.lr,
+        "scheduler_gamma":   cfg.scheduler_gamma,
+        "scheduler_step":    cfg.scheduler_step,
+        "adam_beta1":       cfg.adam_beta1,
+        "adam_beta2":       cfg.adam_beta2,
     }
 
     write_header = not CSV_PATH.exists()
@@ -84,19 +120,60 @@ def objective(trial: optuna.Trial) -> float:
     return best_val
 
 
-Path("outputs").mkdir(exist_ok=True)
+# -- callback --------------------------------------------------------------
+def print_callback(study: optuna.Study, trial: optuna.trial.FrozenTrial) -> None:
+    print(
+        f"  Trial {trial.number:>4} | "
+        f"State: {trial.state.name:<10} | "
+        f"RMSE: {f'{trial.value:.6f}' if trial.value is not None else 'pruned':>12} | "
+        f"Best:  {study.best_value:.6f}"
+    )
 
-study = optuna.create_study(
-    direction    = "minimize",
-    pruner       = optuna.pruners.MedianPruner(n_warmup_steps=20),
-    sampler      = optuna.samplers.TPESampler(seed=SEED),   # fixed sampler seed
-    storage      = "sqlite:///optuna.db",
-    study_name   = "burgers_pinn_N_wave",
-    load_if_exists=True,
-)
-study.optimize(objective, n_trials=100, timeout=3600)
+# -- run -------------------------------------------------------------------
+if __name__ == "__main__":
+    for ic in ICS:
+        print(f"\n{'='*60}")
+        print(f"Starting study: {ic}")
+        print(f"{'='*60}")
 
-print(f"\nBest value : {study.best_value:.6f}")
-print("Best params:")
-for k, v in study.best_params.items():
-    print(f"  {k:<25} {v}")
+        # -- generate data for this initial condition ---------------------------------
+        _base_cfg  = Config(ic=ic)
+        _base_data = generate_data(_base_cfg)
+
+        # -- per-regime output paths ---------------------------------------
+        regime_path = OUTPUT_PATH / ic
+        regime_path.mkdir(parents=True, exist_ok=True)
+        CSV_PATH = regime_path / "optuna_results.csv"
+
+        study = optuna.create_study(
+            direction     = "minimize",
+            pruner        = optuna.pruners.MedianPruner(n_warmup_steps=20),
+            sampler       = optuna.samplers.TPESampler(seed=SEED),
+            storage       = f"sqlite:///{regime_path}/optuna.db",
+            study_name    = f"Burgers_Equation_{ic}",
+            load_if_exists= True,
+        )
+
+        study.optimize(
+            objective,
+            n_trials  = N_TRIALS,
+            callbacks = [print_callback],
+        )
+
+        # -- summary -------------------------------------------------------
+        print(f"\n[{ic}] Best value : {study.best_value:.6f}")
+        print(f"[{ic}] Best params:")
+        for k, v in study.best_params.items():
+            print(f"  {k:<25} {v}")
+
+        # -- save best params ----------------------------------------------
+        with open(regime_path / "best_params.json", "w") as f:
+            json.dump({
+                "regime":      ic,
+                "best_val":    study.best_value,
+                "best_params": study.best_params,
+            }, f, indent=4)
+
+        df = study.trials_dataframe()
+        df.to_csv(regime_path / "all_trials.csv", index=False)
+        print(f"[{ic}] Saved to {regime_path}")

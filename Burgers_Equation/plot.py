@@ -11,22 +11,20 @@ Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
 """
 
-import os
 import json
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from pathlib import Path
 import torch
 import torch.nn as nn
 from config import Config
 from data import generate_data
-from model import predict, predict_from_state, FCNet, InverseFCNet
-from utils import save_show, get_device, load_model
-from analytic import interpolate_solution, interpolate_solution_arr
+from model import predict, FCNet, InverseFCNet
+from utils import save_show, load_model
+from analytic import interpolate_solution_arr, u_0
 
 # -- LaTeX font ------------------------------------------------
 plt.rcParams.update({
@@ -106,6 +104,7 @@ def plot_gt_1D(
 def plot_pred_1D(
     model:       nn.Module,
     cfg:         Config,
+    snapshots:   dict,
     u_grid:      np.ndarray,
     t_arr:       np.ndarray,
     n_times:     int        = 8,
@@ -116,6 +115,9 @@ def plot_pred_1D(
     output_path: Path       = None,
     show:        bool       = True
 ) -> None:
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("_nu_raw" in k for v in snapshots.values() for k in v.keys())
+
     # -- time slices -------------------------------------------------------
     if times is not None:
         times  = list(times)
@@ -188,11 +190,16 @@ def plot_pred_1D(
     fig.legend(handles=legend_elements, loc="lower center",
                ncol=2, fontsize=8, framealpha=0.6,
                bbox_to_anchor=(0.5, 0.0))
-
-    fig.suptitle(
-        rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
-        fontsize=16, color="#2C2C2A"
-    )
+    if inverse:
+        fig.suptitle(
+            rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f} \ \hat\nu = {model.nu_hat.item():.4f}$",
+            fontsize=16, color="#2C2C2A"
+        )
+    else:
+        fig.suptitle(
+            rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
+            fontsize=16, color="#2C2C2A"
+        )
     fig.tight_layout(rect=[0, 0.05, 1, 1])
     save_show(output_path=output_path, show=show)
 
@@ -200,6 +207,7 @@ def plot_solution_grid(
     model:       nn.Module,
     data:        dict,
     cfg:         Config,
+    snapshots:   dict,
     u_grid:      np.ndarray,
     t_arr:       np.ndarray,
     n_times:     int        = 8,
@@ -230,6 +238,9 @@ def plot_solution_grid(
     n_times     : number of time slices (ignored if times is provided)
     times       : optional explicit list of times to plot
     """
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("_nu_raw" in k for v in snapshots.values() for k in v.keys())
+
     if times is not None:
         times   = list(times)
         n_times = len(times)
@@ -300,10 +311,16 @@ def plot_solution_grid(
                ncol=3, fontsize=12, framealpha=0.6,
                bbox_to_anchor=(0.5, 0.0))
 
-    fig.suptitle(
-        rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
-        fontsize=16, color="#2C2C2A"
-    )
+    if inverse:
+        fig.suptitle(
+            rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f} \ \hat\nu = {model.nu_hat.item():.4f}$",
+            fontsize=16, color="#2C2C2A"
+        )
+    else:
+        fig.suptitle(
+            rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
+            fontsize=16, color="#2C2C2A"
+        )
     fig.tight_layout(rect=[0, 0.05, 1, 1])
     save_show(output_path=output_path, show=show)
 
@@ -391,6 +408,11 @@ def plot_gt_2D(
         vmax    =  np.max(np.abs(u_matrix)),
     )
 
+    if cfg.t_shock is not None:
+        ax.axhline(cfg.t_shock, color=ORANGE, lw=1.5, ls="--")
+        ax.annotate("Inviscous shock formation time",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                        xycoords="axes fraction", fontsize=12, color=ORANGE)
+
     cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04)
     cbar.set_label("$u(x, t)$", fontsize=16)
 
@@ -409,9 +431,13 @@ def plot_gt_2D(
 def plot_pred_2D(
     model:       nn.Module,
     cfg:         Config,
+    snapshots:   dict,
     output_path: Path = None,
     show:        bool = True
 ) -> None:
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("_nu_raw" in k for v in snapshots.values() for k in v.keys())
+
     x = np.linspace(0, cfg.L, 500)
     t = np.linspace(0, cfg.t_extrap, 500)
     x_matrix, t_matrix = np.meshgrid(x, t)
@@ -436,6 +462,11 @@ def plot_pred_2D(
         vmax    =  np.max(np.abs(u_matrix)),
     )
 
+    if cfg.t_shock is not None:
+        ax.axhline(cfg.t_shock, color=GREEN, lw=1.5, ls="--", label="Inviscous shock formation time")
+        ax.annotate("Inviscous shock formation time",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                        xycoords="axes fraction", fontsize=12, color=GREEN)
+
     cbar = fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04)
     cbar.set_label("$u(x, t)$", fontsize=16)
 
@@ -443,10 +474,16 @@ def plot_pred_2D(
     ax.set_ylabel("$t$",  fontsize=14)
     ax.set_xticks(np.linspace(0, cfg.L,        6))
     ax.set_yticks(np.linspace(0, cfg.t_extrap, 6))
-    ax.set_title(
-        rf"Predicted $u(x, t)$  --  $\nu = {cfg.nu:.4f}$",
-        fontsize=16, loc="left", pad=6, color="#444441"
-    )
+    if inverse:
+        ax.set_title(
+            rf"Predicted $u(x, t)$  --  $\nu = {cfg.nu:.4f} \ \hat\nu = {model.nu_hat.item():.4f}$",
+            fontsize=16, loc="left", pad=6, color="#444441"
+        )
+    else:
+        ax.set_title(
+            rf"Predicted $u(x, t)$  --  $\nu = {cfg.nu:.4f}$",
+            fontsize=16, loc="left", pad=6, color="#444441"
+        )
 
     fig.tight_layout()
     save_show(output_path=output_path, show=show)
@@ -523,6 +560,10 @@ def plot_epoch_figure_2D(
             vmin   = -v,
             vmax   =  v,
         )
+
+        if cfg.t_shock is not None:
+            ax.axhline(cfg.t_shock, color=GREEN, lw=1.5, ls="--")
+
         fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04, label="$u(x,t)$")
 
         # training domain boundary
@@ -543,6 +584,9 @@ def plot_epoch_figure_2D(
                         xycoords="axes fraction", fontsize=7, color=GRAY)
             ax.annotate("extrap",   xy=(0.02, cfg.t_dom / cfg.t_extrap + 0.01),
                         xycoords="axes fraction", fontsize=7, color=GRAY)
+            if cfg.t_shock is not None:
+                ax.annotate("shock",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                            xycoords="axes fraction", fontsize=7, color=GREEN)
 
     for idx in range(n_snap, len(axes_flat)):
         axes_flat[idx].set_visible(False)
@@ -555,6 +599,7 @@ def plot_summary_2D(
     model:       nn.Module,
     history:     dict,
     cfg:         Config,
+    snapshots:   dict,
     data:        dict,
     u_grid:      np.ndarray,
     t_arr:       np.ndarray,
@@ -573,6 +618,9 @@ def plot_summary_2D(
     5. 3D ground truth surface      — with observation scatter
     6. Training loss curves         — log scale
     """
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("_nu_raw" in k for v in snapshots.values() for k in v.keys())
+
     # -- grid for 2D panels ------------------------------------------------
     x      = np.linspace(0, cfg.L,        200)
     t      = np.linspace(0, cfg.t_extrap, 200)
@@ -631,6 +679,10 @@ def plot_summary_2D(
     add_cbar(fig, im1, ax1, "$u$")
     ax1.set_title(r"Panel 1 -- Ground truth $u(x,t)$",
                   fontsize=9, loc="left", color="#444441")
+    if cfg.t_shock is not None:
+        ax1.axhline(cfg.t_shock, color=GREEN, lw=1.5, ls="--")
+        ax1.annotate("Inviscous shock formation time",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                        xycoords="axes fraction", fontsize=7, color=GREEN)
 
     # -- panel 2: prediction -----------------------------------------------
     style_2d(ax2)
@@ -639,6 +691,11 @@ def plot_summary_2D(
     add_cbar(fig, im2, ax2, r"$\hat{u}$")
     ax2.set_title(rf"Panel 2 -- PINN prediction $\hat{{u}}(x,t)$  |  $\nu={cfg.nu:.4f}$",
                   fontsize=9, loc="left", color="#444441")
+    if cfg.t_shock is not None:
+        ax2.axhline(cfg.t_shock, color=GREEN, lw=1.5, ls="--")
+        ax2.annotate("Inviscous shock formation time",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                        xycoords="axes fraction", fontsize=7, color=GREEN)
+
 
     # -- panel 3: physics residual -----------------------------------------
     style_2d(ax3)
@@ -705,22 +762,111 @@ def plot_summary_2D(
                   fontsize=9, loc="left", color="#444441")
 
     # -- suptitle ----------------------------------------------------------
-    fig.suptitle(
-        rf"Burgers PINN summary  |  $\nu={cfg.nu:.4f}$  |  "
-        rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom}$  $t_{{extrap}}={cfg.t_extrap}$",
-        fontsize=11, color="#2C2C2A"
-    )
+    if inverse:
+        fig.suptitle(
+            rf"Burgers PINN summary  |  $\nu={cfg.nu:.3f} \ \hat\nu={model.nu_hat.item():.3f}$  |  "
+            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom:.3f} \ t_{{extrap}}={cfg.t_extrap:.3f}$",
+            fontsize=11, color="#2C2C2A"
+        )
+    else:
+        fig.suptitle(
+            rf"Burgers PINN summary  |  $\nu={cfg.nu:.3f}$  |  "
+            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom:.3f}$  $t_{{extrap}}={cfg.t_extrap:.3f}$",
+            fontsize=11, color="#2C2C2A"
+        )
 
     fig.tight_layout()
     save_show(output_path=output_path, show=show)
     
+def plot_predicted_parameter_convergence(
+        history: dict,
+        cfg: Config,
+        output_path: Path = None,
+        show: bool = True
+) -> None:
+    """
+    Plot the convergence of the predicted parameter (e.g. viscosity) over epochs.
+
+    Parameters
+    ----------
+    history : dict from train(), must contain "nu_hat" key with list of predicted nu values per epoch
+    cfg     : Config, used for true nu value and snapshot epoch markers
+    output_path : Path to save the figure
+    show : Whether to display the figure
+    """
+
+    nu_hat_history = history["nu_hat"]
+    epochs = history["epoch"]
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    style_ax(ax)
+    fig.patch.set_facecolor(BG)
+
+    ax.plot(epochs, nu_hat_history, color=GREEN, lw=2.0, label=r"Predicted $\hat{\nu}$")
+    ax.axhline(cfg.nu, color=GRAY, lw=1.5, ls="--", label=r"True $\nu$")
+
+    # snapshot epoch markers
+    for ep in cfg.snapshot_epochs:
+        if ep <= max(epochs):
+            ax.axvline(ep, color=LGRAY, lw=0.8, ls=":", zorder=0)
+
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel(r"Viscosity $\nu$", fontsize=12)
+    ax.set_title(r"Convergence of $\hat{\nu}$", fontsize=14, loc="left", color="#444441")
+    ax.legend(fontsize=10, framealpha=0.5)
+    ax.set_xlim(min(epochs), max(epochs))
+    ax.grid(True, linestyle="--", alpha=0.6)
+
+    plt.tight_layout()
+    save_show(output_path=output_path, show=show)
+
+def plot_method_of_characteristics(
+        cfg: Config,
+        samples: int = 50,
+        output_path: Path = None,
+        show: bool = True
+        ) -> None:
+    """
+    Plot the method of characteristics for Burgers' equation.
+    Each characteristic is a straight line x(t) = x0 + u0 * t,
+    since u is constant along characteristics (inviscid assumption).
+    """
+    
+    u = u_0(cfg)
+    index_samples = np.round(np.linspace(0, cfg.n_x - 1, samples)).astype(int)
+    u_samples = u[index_samples]
+    x_samples = index_samples * cfg.delta_x
+
+    t_end = cfg.t_dom
+    t_line = np.linspace(0, t_end, 200)
+
+    fig, ax = plt.subplots(figsize=(10,8))
+
+    for i, (x0, u0) in enumerate(zip(x_samples, u_samples)):
+        x_char = x0 + u0 * t_line
+        ax.plot(x_char, t_line, lw=1.2, color='blue',
+                label="Characteristics" if i == 0 else None)
+    if cfg.time_to_shock is None:
+        print("Cannot plot shock time, shock time is too small/large")
+    else:
+        ax.axhline(cfg.time_to_shock, color='red', linestyle='--', label="Shockwave time")
+
+    ax.set_xlabel("x")
+    ax.set_ylabel("t")
+    ax.set_title("Method of Characteristics")
+    ax.set_xlim(0, cfg.L)
+    ax.set_ylim(0, t_end)
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+    save_show(output_path=output_path, show=show)
+
 def save_model_plots(
     model:       nn.Module,
     history:     dict,
     snapshots:   dict,
     data:        dict,
     cfg:         Config,
-    device:      torch.device,
+    inverse:     bool,
     output_path: Path
 ) -> None:
     """
@@ -740,6 +886,7 @@ def save_model_plots(
     plot_pred_1D(
         model=model,
         cfg=cfg,
+        snapshots=snapshots,
         u_grid=data["u_grid"],
         t_arr=data["t_arr"],
         times=[0, 2, 4, 6],
@@ -751,6 +898,7 @@ def save_model_plots(
         model=model,
         data=data,
         cfg=cfg,
+        snapshots=snapshots,
         u_grid=data["u_grid"],
         t_arr=data["t_arr"],
         output_path=output_path / "pred_grid.png",
@@ -775,6 +923,7 @@ def save_model_plots(
     plot_pred_2D(
         model=model,
         cfg=cfg,
+        snapshots=snapshots,
         output_path=output_path / "pred_2D.png",
         show=False
     )
@@ -790,12 +939,27 @@ def save_model_plots(
         model=model,
         history=history,
         cfg=cfg,
+        snapshots=snapshots,
         data=data,
         u_grid=data["u_grid"],
         t_arr=data["t_arr"],
         output_path=output_path / "summary.png",
         show=False
     )
+
+    plot_method_of_characteristics(
+        cfg=cfg,
+        output_path=output_path / "method_of_characteristics.png",
+        show=False
+        )
+
+    if inverse:
+        plot_predicted_parameter_convergence(
+            history=history,
+            cfg=cfg,
+            output_path=output_path / "parameter_convergence.png",
+            show=False
+        )
 
 def save_plots_from_file(
         folder_path: str
@@ -804,7 +968,6 @@ def save_plots_from_file(
     Load a model als export all plots.
     """
     folder_path = Path(folder_path)
-    device      = get_device()
 
     # -- detect model type before loading ----------------------------------
     state_dict  = torch.load(folder_path / "best_model.pt", map_location="cpu")
@@ -817,5 +980,5 @@ def save_plots_from_file(
     model, history, snapshots, cfg = load_model(model, folder_path)
 
     data = generate_data(cfg)
-    save_model_plots(model, history, snapshots, data, cfg, device, folder_path)
+    save_model_plots(model, history, snapshots, data, cfg, inverse, folder_path)
     print(f"Plots saved to {folder_path}")

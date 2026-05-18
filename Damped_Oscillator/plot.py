@@ -14,12 +14,12 @@ Last modified   : 12/05/2026
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from pathlib import Path
 import torch
+import torch.nn as nn
 from config import Config
 from model import predict, predict_from_state
 from utils import pointwise_residual, rmse, convert_to_mck, get_device, load_model, save_show
@@ -52,10 +52,11 @@ def style_ax(ax: Axes) -> None:
     for spine in ax.spines.values():
         spine.set_edgecolor(LGRAY)
 
-def plot_analytic(cfg: Config,
-                 output_path: Path = None,
-                 show: bool = True
-                 ) -> None:
+def plot_analytic(
+        cfg: Config,
+        output_path: Path = None,
+        show: bool = True
+        ) -> None:
     """
     Plot the analytic solution to the differential equation.
     """
@@ -74,7 +75,7 @@ def plot_analytic(cfg: Config,
         "\n"
         rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
         "\n"
-        rf"$\zeta={cfg.zeta:.3f}\  \omega_d={cfg.omega_d:.3f} rad/s$",
+        rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$",
         fontsize=12
         )
     ax.grid(True, linestyle="--", alpha=0.6)
@@ -82,15 +83,22 @@ def plot_analytic(cfg: Config,
     plt.tight_layout()
     save_show(output_path=output_path, show=show)
 
-def plot_predicted(cfg: Config,
-                 y_pinn_full: np.ndarray,
-                 t_plot_full: np.ndarray,
-                 output_path: Path = None,
-                 show: bool = True
-                 ) -> None:
+def plot_predicted(
+        model: nn.Module,
+        snapshots: dict,
+        cfg: Config,
+        y_pinn_full: np.ndarray,
+        t_plot_full: np.ndarray,
+        output_path: Path = None,
+        show: bool = True
+        ) -> None:
     """
     Plot the analytic solution to the differential equation.
     """
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
+
+
     t = np.linspace(0, cfg.t_extrap, 500)
     y = analytic(t, cfg)
 
@@ -98,27 +106,41 @@ def plot_predicted(cfg: Config,
     ax.set_facecolor(PANEL)
     shade_extrap(cfg, ax) 
 
-    ax.plot(t_plot_full, y_pinn_full, linewidth=2, label="Predicted solution", color=GREEN)
+    ax.plot(t_plot_full, y_pinn_full, linewidth=2, label="Predicted solution", color=GREEN, zorder=5)
     ax.plot(t, y, linewidth=2, label="Analytic solution", color=GRAY)
     ax.set_xlabel("Time $t$", fontsize=12)
     ax.set_ylabel("Solution $y(t)$", fontsize=12)
-    ax.set_title(
-        "Predicted Solution of the Differential Equation"
-        "\n"
-        rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
-        "\n"
-        rf"$\zeta={cfg.zeta:.3f}\  \omega_d={cfg.omega_d:.3f} rad/s$",
-        fontsize=12
-        )
+    if inverse:
+        ax.set_title(
+            "Predicted Solution of the Differential Equation"
+            "\n"
+            rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
+            "\n"
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
+            "\n"
+            rf"$\hat\zeta={model.zeta_hat.item():.3f}\  \hat\omega_0={model.omega_0_hat.item():.3f} rad/s$",
+            fontsize=12
+            )
+    else:
+        ax.set_title(
+            "Predicted Solution of the Differential Equation"
+            "\n"
+            rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
+            "\n"
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$",
+            fontsize=12
+            )
     ax.grid(True, linestyle="--", alpha=0.6)
     ax.legend()
     plt.tight_layout()
     save_show(output_path=output_path, show=show)
 
 def plot_summary(
+    model: nn.Module,
     hist: dict,
     data: dict,
     cfg: Config,
+    snapshots: dict,
     y_pinn_full: np.ndarray,
     t_plot_full: np.ndarray,
     device: torch.device,
@@ -158,6 +180,9 @@ def plot_summary(
     show : bool
         Whether to display the figure.
     """
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
+
     # -- derived quantities -------------------------------------------------
     y_true_full  = analytic(t_plot_full, cfg)
     mask_train   = t_plot_full <= cfg.t_dom
@@ -273,33 +298,51 @@ def plot_summary(
     ax_phys.legend(fontsize=7.5, framealpha=0.5)
 
     # -- suptitle ----------------------------------------------------------
-    fig.suptitle(
-        rf"PINN  |  device={device}  |  "
-        rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
-        rf"$\zeta={cfg.zeta:.3f}\  \omega_d={cfg.omega_d:.3f} rad/s$"
-        "\n"
-        rf"{cfg.n_obs} observations ($t>0$)  $\sigma={cfg.sigma}$  |  "
-        rf"{cfg.n_col_dom} collocation pts  |  "
-        rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "
-        rf"IC: $y(0)={cfg.y0}\  y'(0)={cfg.dy0}$",
-        fontsize=12, y=0.975, color="#131313"
-    )
+    if inverse:
+        fig.suptitle(
+            rf"PINN  |  device={device}  |  "
+            rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
+            "\n"
+            rf"$\hat{{\zeta}}={model.zeta_hat.item():.3f}\  \hat{{\omega_0}}={model.omega_0_hat.item():.3f} rad/s$"
+            "\n"
+            rf"{cfg.n_obs} observations ($t>0$)  $\sigma={cfg.sigma}$  |  "
+            rf"{cfg.n_col_dom} collocation pts  |  "
+            rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "
+            rf"IC: $y(0)={cfg.y0}\  y'(0)={cfg.dy0}$",
+            fontsize=12, y=0.975, color="#131313"
+        )
+    else:
+        fig.suptitle(
+            rf"PINN  |  device={device}  |  "
+            rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
+            "\n"
+            rf"{cfg.n_obs} observations ($t>0$)  $\sigma={cfg.sigma}$  |  "
+            rf"{cfg.n_col_dom} collocation pts  |  "
+            rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "
+            rf"IC: $y(0)={cfg.y0}\  y'(0)={cfg.dy0}$",
+            fontsize=12, y=0.975, color="#131313"
+        )
 
     plt.tight_layout()
     save_show(output_path=output_path, show=show)
 
 def plot_epoch_figure(
+    model: nn.Module,
     data:        dict,
     cfg:         Config,
     snapshots:   dict,
     t_plot_full: np.ndarray,
     model_color: str = GREEN,
     model_label: str = "PINN",
-    fig_title:   str = r"PINN -- predicted solution after training epochs",
     clip_y:      bool = False,
     output_path: Path = None,
     show: bool = True
 ) -> None:
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
+
     epochs  = sorted(snapshots.keys())
     n_snap  = len(epochs)
     n_cols  = 2
@@ -389,7 +432,26 @@ def plot_epoch_figure(
                ncol=3, fontsize=8, framealpha=0.6,
                bbox_to_anchor=(0.5, 0.0))
 
-    fig.suptitle(fig_title, fontsize=12, color="#2C2C2A")
+    if inverse:
+        fig.suptitle(
+            "Predicted Solution of the Differential Equation"
+            "\n"
+            rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
+            "\n"
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$"
+            "\n"
+            rf"$\hat\zeta={model.zeta_hat.item():.3f}\  \hat\omega_0={model.omega_0_hat.item():.3f} rad/s$",
+            fontsize=12
+            )
+    else:
+        fig.suptitle(
+            "Predicted Solution of the Differential Equation"
+            "\n"
+            rf"$m={cfg.m:.3f}\  c={cfg.c:.3f}\  k={cfg.k:.3f}   |$"
+            "\n"
+            rf"$\zeta={cfg.zeta:.3f}\  \omega_0={cfg.omega_0:.3f} rad/s$",
+            fontsize=12
+            )
     plt.tight_layout()
     save_show(output_path=output_path, show=show)
 
@@ -441,6 +503,53 @@ def plot_losses(
     plt.tight_layout()
     save_show(output_path=output_path, show=show)
 
+def plot_predicted_parameter_convergence(
+        history: dict,
+        cfg: Config,
+        output_path: Path = None,
+        show: bool = True
+) -> None:
+    """
+    Plot the convergence of the predicted parameter (e.g. viscosity) over epochs.
+
+    Parameters
+    ----------
+    history : dict from train(), must contain "nu_hat" key with list of predicted nu values per epoch
+    cfg     : Config, used for true nu value and snapshot epoch markers
+    output_path : Path to save the figure
+    show : Whether to display the figure
+    """
+
+    zeta_hat_history = history["zeta_hat"]
+    omega_0_hat_history = history["omega_0_hat"]
+
+    epochs = history["epoch"]
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    style_ax(ax)
+    fig.patch.set_facecolor(BG)
+
+    ax.plot(epochs, zeta_hat_history, color=GREEN, lw=2.0, label=r"Predicted $\hat{\zeta}$")
+    ax.axhline(cfg.zeta, color=GRAY, lw=1.5, ls="--", label=r"True $\zeta$")
+
+    ax.plot(epochs, omega_0_hat_history, color=ORANGE, lw=2.0, label=r"Predicted $\hat{\omega}_0$")
+    ax.axhline(cfg.omega_0, color=GRAY, lw=1.5, ls=":", label=r"True $\omega_0$")
+
+    # snapshot epoch markers
+    for ep in cfg.snapshot_epochs:
+        if ep <= max(epochs):
+            ax.axvline(ep, color=LGRAY, lw=0.8, ls=":", zorder=0)
+
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel(r"Parameters", fontsize=12)
+    ax.set_title(r"Convergence of $\hat{\zeta}$ and $\hat{\omega}_0$", fontsize=14, loc="left", color="#444441")
+    ax.legend(fontsize=10, framealpha=0.5)
+    ax.set_xlim(min(epochs), max(epochs))
+    ax.grid(True, linestyle="--", alpha=0.6)
+
+    plt.tight_layout()
+    save_show(output_path=output_path, show=show)
+
 def save_model_plots(
     model:       torch.nn.Module,
     history:     dict,
@@ -448,6 +557,7 @@ def save_model_plots(
     data:        dict,
     cfg:         Config,
     device:      torch.device,
+    inverse:     bool,
     output_path: Path
 ) -> None:
     """
@@ -464,7 +574,9 @@ def save_model_plots(
     )
 
     plot_predicted(
+        model=model,
         cfg=cfg,
+        snapshots=snapshots,
         y_pinn_full=y_pinn,
         t_plot_full=t_plot,
         output_path=output_path / "predicted_solution.png",
@@ -472,9 +584,11 @@ def save_model_plots(
     )
 
     plot_summary(
+        model=model,
         hist=history,
         data=data,
         cfg=cfg,
+        snapshots=snapshots,
         y_pinn_full=y_pinn,
         t_plot_full=t_plot,
         device=device,
@@ -483,13 +597,13 @@ def save_model_plots(
     )
 
     plot_epoch_figure(
+        model=model,
         data=data,
         cfg=cfg,
         snapshots=snapshots,
         t_plot_full=t_plot,
         model_color=GREEN,
         model_label="PINN",
-        fig_title=r"PINN -- predicted solution after training epochs",
         clip_y=False,
         output_path=output_path / "epoch_snapshots.png",
         show=False
@@ -501,6 +615,14 @@ def save_model_plots(
         output_path=output_path / "losses.png",
         show=False
     )
+
+    if inverse:
+        plot_predicted_parameter_convergence(
+            history=history,
+            cfg=cfg,
+            output_path=output_path / "parameter_convergence.png",
+            show=False
+        )
 
 def save_plots_from_file(folder_path: str) -> None:
     """
@@ -521,7 +643,7 @@ def save_plots_from_file(folder_path: str) -> None:
     model, history, snapshots, cfg = load_model(model, folder_path)
 
     data = generate_data(cfg)
-    save_model_plots(model, history, snapshots, data, cfg, device, folder_path)
+    save_model_plots(model, history, snapshots, data, cfg, device, inverse, folder_path)
     print(f"Plots saved to {folder_path}")
 
 if __name__ == "__main__":

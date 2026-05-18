@@ -74,9 +74,9 @@
 
 \chapter{Introduction}
 
-\chapter{Theoretical background}
-
 \chapter{Damped Harmonic Oscillator}
+
+\section{Analytic solution}
 \begin{equation}\label{eq:damped_harmonic_oscillator}
     my''(t)+cy'(t)+ky(t)=0
 \end{equation}
@@ -377,8 +377,53 @@ The \verb|torch.autograd.grad| differentiates an output vector $y=(y_1, \ldots, 
 \end{equation}
 where $v$ is set by \verb|grad_outputs|. In our specific case, every value $y_i$ only depends on the corresponding time value $t_i$, which makes the Jacobian a diagonal matrix. In order to contract the Jacobian to a column vector, $v$ can be set to a row vector of ones with \verb|grad_outputs=torch.ones_like(y_hat)|. The \verb|torch.autograd.grad| acutally returns a tuple $(dy,)$ per input, so to unpack it we can simply select the first and only element using \verb|[0]|.
 
+\section{Improving the example code}
+
+\subsection{Code improvements}
+
+\subsection{Code demonstration}
+
+\subsection{Hyperparameter optimisation}
+
+\section{Inverse problem}
+
+\subsection{Underdamped case}
+
+\subsection{Critically damped case}
+
+\subsection{Overdamped case}
+
+\subsection{Statistical analysis}
+
+\subsection{Discussion}
 
 \chapter{Burger's Equation}
+
+\section{Ground truth solving strategies}
+
+\subsection{Numerical PDE solvers}
+
+\subsection{Cole-Hopf Transformation}
+
+\section{PINNs for the Burger's equation}
+
+\subsection{Code implementation}
+
+\subsection{Code demonstration}
+
+\subsection{Hyperparameter optimisation}
+
+\section{Inverse problem}
+
+\subsection{Underdamped case}
+
+\subsection{Critically damped case}
+
+\subsection{Overdamped case}
+
+\subsection{Statistical analysis}
+
+\subsection{Discussion}
 
 \chapter{Conclusion}
 

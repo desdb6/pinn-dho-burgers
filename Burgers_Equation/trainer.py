@@ -54,6 +54,7 @@ def train(
         Loss values logged every cfg.log_every epochs. Keys:
         epoch, loss_data, loss_phys,
         loss_ic, loss_val, loss_total.
+        Also saves predicted parameters in case of inverse mode.
     snapshots : dict
         Maps epoch number to CPU state_dict at cfg.snapshot_epochs.
 
@@ -112,6 +113,9 @@ def train(
         "loss_val":         [],
         "loss_total":       [],
     }
+    if inverse_mode:
+        history["nu_hat"] = []
+
     snapshots             = {}
     best_val_loss         = float("inf")
     epochs_no_improvement = 0
@@ -190,10 +194,12 @@ def train(
                 raise optuna.exceptions.TrialPruned()
 
         # -- early stopping -------------------------------------------------
-        if l_val.item() < best_val_loss - cfg.patience_thershold:
+        if l_val.item() < best_val_loss:
             best_val_loss         = l_val.item()
-            epochs_no_improvement = 0
             best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
+
+        if l_val.item() < best_val_loss - cfg.patience_thershold:
+            epochs_no_improvement = 0
         else:
             epochs_no_improvement += 1
 
@@ -211,6 +217,7 @@ def train(
         if verbatim:
             if epoch % cfg.log_every == 0 or epoch == 1:
                 elapsed = time.perf_counter() - t0
+                nu_str = f"nu_hat={model.nu_hat.item():.5f}  " if inverse_mode else ""
                 print(f"  [{label}] epoch {epoch:5d} | "
                     f"L_data={l_data.item():.5f}  "
                     f"L_phys={l_phys.item():.5f}  "
@@ -218,6 +225,7 @@ def train(
                     f"L_bc={l_bc.item():.5f}  "
                     f"L_val={l_val.item():.5f}  "
                     f"L_total={loss_total.item():.5f}  "
+                    f"{nu_str}"
                     f"({elapsed:.1f}s)")
 
         if epoch % cfg.log_every == 0:
@@ -228,7 +236,10 @@ def train(
             history["loss_bc"].append(l_bc.item())
             history["loss_val"].append(l_val.item())
             history["loss_total"].append(loss_total.item())
+            if inverse_mode:
+                history["nu_hat"].append(model.nu_hat.item())
 
+    model.load_state_dict(best_state)
     total_time = time.perf_counter() - t0
     if verbatim:
         print(f"  [{label}] finished in {total_time:.1f}s "

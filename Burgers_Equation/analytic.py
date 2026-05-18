@@ -5,6 +5,7 @@ Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
 """
+from matplotlib.axes import Axes
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import convolve
@@ -85,6 +86,25 @@ def negative_slope(cfg: Config) -> np.ndarray:
     u[int(center-width_rel):int(center+width_rel)] = np.linspace(cfg.height, 0, int(2 * width_rel))
     return u
 
+def u_0(cfg: Config) -> np.ndarray:
+    """
+    Generate the initial condition u(x, 0) based on the config.
+    """
+    if cfg.ic == "Gauss":
+        return gauss(cfg)
+    elif cfg.ic == "Step_up":
+        return step_up(cfg)
+    elif cfg.ic == "N_wave":
+        return n_wave(cfg)
+    elif cfg.ic == "N_wave_chop":
+        return n_wave_chop(cfg)
+    elif cfg.ic == "Slope":
+        return negative_slope(cfg)
+    elif cfg.ic == "Step_down":
+        return step_down(cfg)
+    else:
+        raise ValueError(f"Unknown initial condition type: {cfg.ic}")
+
 # -- Cole-Hopf transformation ------------------------------------------------
 def cole_hopf_trans(u_0: np.ndarray, cfg: Config) -> np.ndarray:
     """
@@ -139,13 +159,23 @@ def cole_hopf_grid(cfg: Config, pad: int = 200) -> tuple:
         u_0 = step_down(cfg)
     else:
         raise ValueError(f"Unknown initial condition type: {cfg.ic}")
+
     u_grid = np.zeros(shape=(cfg.n_t, cfg.n_x))
     u_grid[0] = u_0
 
-    for i, t in tqdm(enumerate(np.linspace(cfg.delta_t, cfg.t_extrap, cfg.n_t - 1)), 
-                     total = cfg.n_t - 1,
+    for i, t in tqdm(enumerate(np.linspace(cfg.delta_t, cfg.t_extrap, cfg.n_t - 1)),
+                     total=cfg.n_t - 1,
                      desc="Computing ground truth solution with Cole-Hopf"):
         u_grid[i + 1] = solve_burgers_padded(u_0, t, cfg, pad)
+
+    # -- rescale rows for ICs with a known maximum -------------------------
+    if cfg.ic in ("Step_up", "Step_down", "Slope"):
+        u_max = np.max(np.abs(u_0))
+        if u_max > 1e-12:
+            for i in range(1, cfg.n_t):
+                row_max = np.max(np.abs(u_grid[i]))
+                if row_max > 1e-12:
+                    u_grid[i] *= u_max / row_max
 
     t_arr = np.linspace(0, cfg.t_extrap, cfg.n_t)
     return u_grid, t_arr
@@ -385,50 +415,16 @@ def rmse(sol: np.ndarray, t_arr: np.ndarray, cfg: Config) -> np.ndarray:
     return np.mean(residual(sol, t_arr, cfg) ** 2)
 
 # -- Characteristics ------------------------
-def predict_shock_time(u: np.ndarray, cfg: Config) -> float:
+def predict_shock_time(cfg: Config) -> float:
     """
     Predict when shockwave will occur using method of characteristics.
     """
+    u = u_0(cfg)
     du = np.gradient(u, cfg.delta_x)
     if np.all(du > 0):
         return float('Inf')
     else:
         return -1 / np.min(du)
-
-def plot_method_of_characteristics(u: np.ndarray, cfg: Config, samples: int = 50) -> None:
-    """
-    Plot the method of characteristics for Burgers' equation.
-    Each characteristic is a straight line x(t) = x0 + u0 * t,
-    since u is constant along characteristics (inviscid assumption).
-    """
-    index_samples = np.round(np.linspace(0, cfg.n_x - 1, samples)).astype(int)
-    u_samples = u[index_samples]
-    x_samples = index_samples * cfg.delta_x
-
-    t_end = cfg.t_dom
-    t_line = np.linspace(0, t_end, 200)
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-
-    for i, (x0, u0) in enumerate(zip(x_samples, u_samples)):
-        x_char = x0 + u0 * t_line
-        ax.plot(x_char, t_line, lw=1.2, color='blue',
-                label="Characteristics" if i == 0 else None)
-
-    shockwave_time = predict_shock_time(u, cfg)
-    if shockwave_time is not float("Inf"):
-        ax.axhline(shockwave_time, color='red', linestyle='--', label="Shockwave time")
-
-    ax.set_xlabel("x")
-    ax.set_ylabel("t")
-    ax.set_title("Method of Characteristics")
-    ax.set_xlim(0, cfg.L)
-    ax.set_ylim(0, t_end)
-    ax.grid(True, alpha=0.3)
-    ax.legend()
-
-    plt.tight_layout()
-    plt.show()
 
 # -- Plotting ------------------------
 def plot_anim(sol: np.ndarray, plot_pause: float = 1) -> None:
@@ -466,14 +462,6 @@ def plot_anim(sol: np.ndarray, plot_pause: float = 1) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    cfg = Config()
-    # u_init = gauss(cfg=cfg)
-    # u_init = n_wave(cfg=cfg)
-    u_init = step_up(cfg=cfg)
-    # u_init = negative_slope(cfg)
-    # sol, dt_arr = lax_wendroff(u_init, t_end=5, cfg=cfg)
-    # plot_anim(sol, 1)
-    for ic in ["Step_up", "Gauss", "N_wave", "N_wave_chop", "Slope", "Step_down"]:
-        cfg=Config(ic=ic)
-        sol, t_arr = cole_hopf_grid(cfg=cfg, pad = 1000 if ic in ["Step_up", "Step_down"] else 200)
-        print(f"{ic}: {rmse(sol, t_arr, cfg)}")
+    cfg = Config(ic="Step_down")
+    sol, t_arr = cole_hopf_grid(cfg)
+    plot_anim(sol, 1)

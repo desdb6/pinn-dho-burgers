@@ -68,8 +68,8 @@ class Config:
     n_epochs: int = 30000               # Number of epochs
     lr: float = 1e-3                    # Starting learning rate
     lr_inverse: float = 1e-2            # Learning rate for inverse problem; parameter estimation  
-    patience: int = 500             # Patience for model stop
-    patience_thershold: float = 1e-4    # Patience threshold for new best model
+    patience: int = 3000             # Patience for model stop
+    patience_thershold: float = 1e-6    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter
     adam_beta2: float = 0.999           # Adam optimiser: RMSprop hyperparameter

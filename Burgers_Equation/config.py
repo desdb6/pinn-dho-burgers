@@ -17,7 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     # Physical parameters
-    nu: float = 0.1                   # viscosity
+    nu: float = 0.05                   # viscosity
 
     # Initial conditions
     ic: str = "Gauss"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
@@ -30,6 +30,7 @@ class Config:
     # Time domain
     t_dom: float = 5.0              # End time of known domain
     t_extrap: float = 7.0           # End time of extrapolated domain
+    t_shock: float = None           # Time of shockwave formation, if known. If not calculated, set to None.
 
     # Space domain
     n_x: int = 1000                     # Spatial resolution for numerical solution
@@ -70,9 +71,9 @@ class Config:
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
     lr: float = 1e-3                    # Starting learning rate
-    lr_inverse: float = 1e-2            # Learning rate for inverse problem; parameter estimation  
+    lr_inverse: float = 5e-3            # Learning rate for inverse problem; parameter estimation  
     patience: int = 2000                # Patience for model stop
-    patience_thershold: float = 1e-4    # Patience threshold for new best model
+    patience_thershold: float = 2e-6    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter
     adam_beta2: float = 0.999           # Adam optimiser: RMSprop hyperparameter
@@ -86,7 +87,7 @@ class Config:
     # IC specific parameters
     def __post_init__(self):
         if self.ic == "Gauss":
-            self.height     = self.height     or 1.0
+            self.height     = self.height     or 0.4
             self.sigma_ic   = self.sigma_ic   or 1.0
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.bc_right   or 0.0
@@ -115,7 +116,7 @@ class Config:
 
         elif self.ic == "Slope":
             self.height     = self.height     or 0.5
-            self.width      = self.width      or 3.0
+            self.width      = self.width      or 7.0
             self.bc_left    = self.height     or 0.5
             self.bc_right   = self.bc_right   or 0.0
 

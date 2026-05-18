@@ -62,7 +62,9 @@ class InverseFCNet(nn.Module):
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
-        self._nu_raw = nn.Parameter(torch.tensor([0.0]))  # unconstrained
+        nu_init  = np.random.uniform(0.5, 2.0)   # random start
+        nu_init = float(np.log(np.exp(nu_init) - 1.0))   # softplus inverse
+        self._nu_raw = nn.Parameter(torch.tensor([nu_init], requires_grad = True ))
 
     @property
     def nu_hat(self):

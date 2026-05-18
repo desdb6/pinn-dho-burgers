@@ -77,7 +77,17 @@ def load_best_cfg(json_path: str) -> Config:
     """
     with open(json_path) as f:
         data = json.load(f)
-    return Config(**data["best_params"])
+
+    params = data["best_params"]
+
+    if "m" in data:
+        params["m"] = data["m"]
+    if "c" in data:
+        params["c"] = data["c"]
+    if "k" in data:
+        params["k"] = data["k"]
+
+    return Config(**params)
 
 def save_model(
     best_state:  dict,

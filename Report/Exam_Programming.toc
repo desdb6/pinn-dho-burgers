@@ -1,14 +1,37 @@
 \babel@toc {english}{}\relax 
 \contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
-\contentsline {chapter}{\numberline {2}Theoretical background}{3}{chapter.2}%
-\contentsline {chapter}{\numberline {3}Damped Harmonic Oscillator}{5}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Understanding an the PINN example}{5}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}Questions on the method}{5}{subsection.3.1.1}%
-\contentsline {paragraph}{\nonumberline Mean Absolute Error}{7}{paragraph*.4}%
-\contentsline {paragraph}{\nonumberline Huber Loss}{7}{paragraph*.6}%
-\contentsline {subsection}{\numberline {3.1.2}Questions on the code}{10}{subsection.3.1.2}%
-\contentsline {chapter}{\numberline {4}Burger's Equation}{15}{chapter.4}%
-\contentsline {chapter}{\numberline {5}Conclusion}{17}{chapter.5}%
-\contentsline {chapter}{\numberline {A}Equation derivations}{19}{appendix.A}%
-\contentsline {chapter}{\numberline {B}Figures}{21}{appendix.B}%
+\contentsline {chapter}{\numberline {2}Damped Harmonic Oscillator}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Analytic solution}{3}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Understanding an the PINN example}{3}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Questions on the method}{3}{subsection.2.2.1}%
+\contentsline {paragraph}{\nonumberline Mean Absolute Error}{5}{paragraph*.4}%
+\contentsline {paragraph}{\nonumberline Huber Loss}{5}{paragraph*.6}%
+\contentsline {subsection}{\numberline {2.2.2}Questions on the code}{8}{subsection.2.2.2}%
+\contentsline {section}{\numberline {2.3}Improving the example code}{12}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Code improvements}{12}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Code demonstration}{12}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Hyperparameter optimisation}{12}{subsection.2.3.3}%
+\contentsline {section}{\numberline {2.4}Inverse problem}{12}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Underdamped case}{12}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Critically damped case}{12}{subsection.2.4.2}%
+\contentsline {subsection}{\numberline {2.4.3}Overdamped case}{12}{subsection.2.4.3}%
+\contentsline {subsection}{\numberline {2.4.4}Statistical analysis}{12}{subsection.2.4.4}%
+\contentsline {subsection}{\numberline {2.4.5}Discussion}{12}{subsection.2.4.5}%
+\contentsline {chapter}{\numberline {3}Burger's Equation}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Ground truth solving strategies}{13}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Numerical PDE solvers}{13}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Cole-Hopf Transformation}{13}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}PINNs for the Burger's equation}{13}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Code implementation}{13}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Code demonstration}{13}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Hyperparameter optimisation}{13}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Inverse problem}{13}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Underdamped case}{13}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Critically damped case}{13}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Overdamped case}{13}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Statistical analysis}{13}{subsection.3.3.4}%
+\contentsline {subsection}{\numberline {3.3.5}Discussion}{13}{subsection.3.3.5}%
+\contentsline {chapter}{\numberline {4}Conclusion}{15}{chapter.4}%
+\contentsline {chapter}{\numberline {A}Equation derivations}{17}{appendix.A}%
+\contentsline {chapter}{\numberline {B}Figures}{19}{appendix.B}%
 \providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

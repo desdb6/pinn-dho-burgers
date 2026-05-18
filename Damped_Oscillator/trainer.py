@@ -99,6 +99,10 @@ def train(
         "loss_val":         [],
         "loss_total":       [],
     }
+    if inverse_mode:
+        history["zeta_hat"] = []
+        history["omega_0_hat"] = []
+
     snapshots             = {}
     best_val_loss         = float("inf")
     epochs_no_improvement = 0
@@ -161,16 +165,19 @@ def train(
                 raise optuna.exceptions.TrialPruned()
 
         # -- early stopping -------------------------------------------------
-        if l_val.item() < best_val_loss - cfg.patience_thershold:
+        if l_val.item() < best_val_loss:
             best_val_loss         = l_val.item()
-            epochs_no_improvement = 0
             best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
+
+        if l_val.item() < best_val_loss - cfg.patience_thershold:
+            epochs_no_improvement = 0
         else:
             epochs_no_improvement += 1
 
         if epochs_no_improvement >= cfg.patience:
             print(f"  [{label}] early stopping at epoch {epoch}, improvement stalled.")
             break
+
 
         # -- snapshots ------------------------------------------------------
         if epoch in cfg.snapshot_epochs:
@@ -182,12 +189,16 @@ def train(
         if verbatim:
             if epoch % cfg.log_every == 0 or epoch == 1:
                 elapsed = time.perf_counter() - t0
+                zeta_str = f"zeta_hat={model.zeta_hat.item():.5f}  " if inverse_mode else ""
+                omega_0_str = f"omega_0_hat={model.omega_0_hat.item():.5f}  " if inverse_mode else ""
                 print(f"  [{label}] epoch {epoch:5d} | "
                     f"L_data={l_data.item():.5f}  "
                     f"L_phys={l_phys.item():.5f}  "
                     f"L_ic={l_ic.item():.5f}  "
                     f"L_val={l_val.item():.5f}  "
                     f"L_total={loss_total.item():.5f}  "
+                    f"{zeta_str}"
+                    f"{omega_0_str}"
                     f"({elapsed:.1f}s)")
 
         if epoch % cfg.log_every == 0:
@@ -197,6 +208,9 @@ def train(
             history["loss_ic"].append(l_ic.item())
             history["loss_val"].append(l_val.item())
             history["loss_total"].append(loss_total.item())
+            if inverse_mode:
+                history["zeta_hat"].append(model.zeta_hat.item())
+                history["omega_0_hat"].append(model.omega_0_hat.item())
 
     total_time = time.perf_counter() - t0
     if verbatim:

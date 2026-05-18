@@ -50,13 +50,20 @@ def save_show(output_path: str = None, show: bool = True) -> None:
         plt.show()
     else:
         plt.close()
+
 def load_best_cfg(json_path: str) -> Config:
     """
     Load best Optuna parameters from a JSON file as a Config object.
     """
     with open(json_path) as f:
         data = json.load(f)
-    return Config(**data["best_params"])
+
+    params = data["best_params"]
+
+    if "regime" in data:
+        params["ic"] = data["regime"]
+
+    return Config(**params)
 
 def save_model(
     best_state:  dict,

@@ -63,8 +63,10 @@ class InverseFCNet(nn.Module):
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
-        self.zeta_hat = nn.Parameter (torch.tensor([0.01], requires_grad = True ))
-        self.omega_0_hat = nn.Parameter (torch.tensor([1.0], requires_grad = True ))
+        zeta_init = np.random.uniform(0, 2)   # random start
+        omega_0_init = np.random.uniform(0, 5) 
+        self.zeta_hat = nn.Parameter (torch.tensor([zeta_init], requires_grad = True ))
+        self.omega_0_hat = nn.Parameter (torch.tensor([omega_0_init], requires_grad = True ))
 
     def forward(self, t: torch.Tensor) -> torch.Tensor:
         return self.net(t)

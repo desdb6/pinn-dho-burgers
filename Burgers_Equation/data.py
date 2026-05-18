@@ -60,7 +60,7 @@ def generate_data(cfg: Config) -> dict:
     """
     print("Generating data...")
 
-    u_grid, t_arr = cole_hopf_grid(cfg, pad = 600 if cfg.ic in ["Step_up", "Step_down", "Slope"] else 200)
+    u_grid, t_arr = cole_hopf_grid(cfg, pad = 800 if cfg.ic in ["Step_up", "Step_down", "Slope"] else 400)
 
     t_obs, x_obs, u_obs = make_observation(cfg, u_grid, t_arr)
     t_col_dom, x_col_dom, t_col_extrap, x_col_extrap = make_collocation(cfg)

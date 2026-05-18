@@ -1,0 +1,5 @@
+- Proper hyperparameter tuning
+- Better backwards data generation by randomising initial guess
+- Get good N-wave results
+- Make report plots
+- Write report
