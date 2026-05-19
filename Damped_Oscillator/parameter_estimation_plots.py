@@ -16,7 +16,7 @@ from pathlib import Path
 from plot import style_ax
 from utils import save_show
 
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/parameter_estimation_3"
+OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/parameter_estimation_4"
 
 # -- LaTeX font ------------------------------------------------
 plt.rcParams.update({
@@ -114,7 +114,50 @@ def parameter_space_rmse_plot(
 
     save_show(output_path, show)
 
+def rmse(csv_path: str) -> tuple:
+    """Return the RMSE of every case"""
+    df = pd.read_csv(csv_path)
+    df_under = df[df["damped_case"]=="underdamped"]
+    df_crit = df[df["damped_case"]=="critically_damped"]
+    df_over = df[df["damped_case"]=="overdamped"]
+
+    rmse_zeta_full = np.sqrt(np.mean((df["zeta_true"]-df["zeta_pred"]) ** 2))
+    rmse_zeta_under = np.sqrt(np.mean((df_under["zeta_true"]-df_under["zeta_pred"]) ** 2))
+    rmse_zeta_crit = np.sqrt(np.mean((df_crit["zeta_true"]-df_crit["zeta_pred"]) ** 2))
+    rmse_zeta_over = np.sqrt(np.mean((df_over["zeta_true"]-df_over["zeta_pred"]) ** 2))
+
+    rmse_omega_0_full = np.sqrt(np.mean((df["omega_0_true"]-df["omega_0_pred"]) ** 2))
+    rmse_omega_0_under = np.sqrt(np.mean((df_under["omega_0_true"]-df_under["omega_0_pred"]) ** 2))
+    rmse_omega_0_crit = np.sqrt(np.mean((df_crit["omega_0_true"]-df_crit["omega_0_pred"]) ** 2))
+    rmse_omega_0_over = np.sqrt(np.mean((df_over["omega_0_true"]-df_over["omega_0_pred"]) ** 2))
+
+    return rmse_zeta_full, rmse_zeta_under, rmse_zeta_crit, rmse_zeta_over, rmse_omega_0_full, rmse_omega_0_under, rmse_omega_0_crit, rmse_omega_0_over
+
 def main():
+    (
+        rmse_zeta_full,
+        rmse_zeta_under,
+        rmse_zeta_crit,
+        rmse_zeta_over,
+        rmse_omega_0_full,
+        rmse_omega_0_under,
+        rmse_omega_0_crit,
+        rmse_omega_0_over,
+    ) = rmse(csv_path=OUTPUT_PATH / "parameter_pairs.csv")
+
+    print(
+        "----------------------------------\n"
+        "RMSE for different damping cases\n"
+        f"zeta full : {rmse_zeta_full:.4f}\n"
+        f"zeta underdamped: {rmse_zeta_under:.4f}\n"
+        f"zeta critically damped : {rmse_zeta_crit:.4f}\n"
+        f"zeta overdamped : {rmse_zeta_over:.4f}\n"
+        f"omega_0 full : {rmse_omega_0_full:.4f}\n"
+        f"omega_0 underdamped: {rmse_omega_0_under:.4f}\n"
+        f"omega_0 critically damped : {rmse_omega_0_crit:.4f}\n"
+        f"omega_0 overdamped : {rmse_omega_0_over:.4f}\n"
+        "----------------------------------"
+    )
     for damped_case in ["overdamped", "underdamped", "critically_damped"]:
         for parameter in ["zeta", "omega_0"]:
             parameter_estimation_plot(
