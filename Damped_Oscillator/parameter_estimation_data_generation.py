@@ -20,15 +20,10 @@ from config import Config
 from data import generate_data
 from model import InverseFCNet
 from trainer import train
-from utils import convert_to_mck, get_device, load_best_cfg
+from utils import convert_to_mck, get_device
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-JSON_PATHS = {
-    "overdamped": SCRIPT_DIR / "outputs/optuna_tuning_2/overdamped/best_params.json",
-    "critically_damped": SCRIPT_DIR / "outputs/optuna_tuning_2/critically/best_params.json",
-    "underdamped": SCRIPT_DIR / "outputs/optuna_tuning_2/underdamped/best_params.json"
-              }
-OUTPUT_PATH = SCRIPT_DIR / "outputs/parameter_estimation_3"
+OUTPUT_PATH = SCRIPT_DIR / "outputs/parameter_estimation_4"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 CSV_PATH   = OUTPUT_PATH / "parameter_pairs.csv"
@@ -65,7 +60,17 @@ def run_single(run_idx: int, device) -> dict | None:
     print(f"-----Randomised zeta:   {zeta:.4f}-----")
     print(f"-----Randomised omega_0:{omega_0:.4f}-----")
 
-    cfg = load_best_cfg(JSON_PATHS[damped_case])
+    cfg = Config(
+        n_layers=5,
+        hidden=96,
+        lambda_phys=0.5,
+        lambda_ic=10,
+        lr=0.002,
+        lr_inverse=0.015,
+        scheduler_gamma=0.8,
+        scheduler_step=3000,
+        patience=3000
+    )
 
     cfg.m = m
     cfg.c = c
@@ -93,7 +98,7 @@ def run_single(run_idx: int, device) -> dict | None:
 
     best_val   = min(history["loss_val"])
 
-    print(f"  [run {run_idx}] zeta_true={zeta:.4f}  zeta_pred={zeta_pred:.4f}  "
+    print(f"  [run {run_idx}] zeta_pred={zeta_pred:.4f}  omega_0_pred={omega_0_pred:.4f}  "
           f"zeta err={abs_error_zeta:.4f} ({rel_error_zeta:.1f}%)  "
           f"omega_0 err={abs_error_omega_0:.4f} ({rel_error_omega_0:.1f}%)  "
           f"val={best_val:.5f}")

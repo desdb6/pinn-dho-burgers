@@ -20,10 +20,8 @@ from sklearn.model_selection import train_test_split
 from config import Config
 
 def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
-    """
-    Closed-form solution for the damped spring-mass system ODE.
-    """
-    zeta  = cfg.zeta
+    """Closed-form solution for the damped spring-mass system ODE."""
+    zeta = cfg.zeta
     omega_0 = cfg.omega_0
     omega_d = cfg.omega_d
     y0 = cfg.y0
@@ -68,10 +66,7 @@ def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
 
 def make_observations_strata(cfg: Config) -> tuple[np.ndarray, np.ndarray,
                                             np.ndarray, np.ndarray]:
-    """
-    Generate noisy observation points and stratified train/validation sets.
-    """
-
+    """Generate noisy observation points and stratified train/validation sets."""
     if cfg.strata_splitting < 2:
         t = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
         y = analytic(t, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
@@ -123,28 +118,26 @@ def make_observations_strata(cfg: Config) -> tuple[np.ndarray, np.ndarray,
     return t_train, y_train, t_val, y_val
 
 def make_train_observation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
+    """Make noisy observation points."""
     t_obs= np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
     y_obs = analytic(t_obs, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
     return t_obs, y_obs
 
 def make_validation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
+    """Make randomised validation points."""
     t_val= np.linspace(0.1, cfg.t_dom, cfg.n_val)
     y_val = analytic(t_val, cfg)
     return t_val, y_val
 
 def make_collocation(cfg: Config) -> np.ndarray:
-    """
-    Generate collocation points.
-    """
+    """Generate collocation points."""
     t_col_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
     t_col_extrap = np.linspace(cfg.t_dom, cfg.t_extrap,
                             int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
     return t_col_dom, t_col_extrap
 
 def generate_data(cfg: Config) -> dict:
-    """
-    Generate all data and return as a dict.
-    """
+    """Generate all data and return as a dict."""
     t_obs, y_obs = make_train_observation(cfg)
     t_val, y_val = make_validation(cfg)
     t_col_dom, t_col_extrap = make_collocation(cfg)
