@@ -17,7 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     # Physical parameters
-    nu: float = 0.1                   # viscosity
+    nu: float = 0.05                   # viscosity
 
     # Initial conditions
     ic: str = "Gauss"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
@@ -47,12 +47,13 @@ class Config:
 
     # Loss weights
     use_physics: bool = True
-    lambda_phys: float = 3e0
+    lambda_phys: float = 5e0
     use_ic: bool = True
     lambda_ic: float = 1e1
     use_bc: bool = True
     lambda_bc: float = 1e1
     train_extrap: bool = True
+    use_data: bool = True
 
     # Data generation parameters
     n_obs: float = 30                     # Noisy observation points
@@ -62,17 +63,17 @@ class Config:
     randomise_collocation: bool = True    # Randomise collocation points every epoch
     n_bc: float = 50                      # Boundary condition points
     randomise_bc_points: bool = True      # Randomise boundary condition loss points every epoch
-    n_grid_val: float = 100               # Validation grid size
+    n_grid_val: float = 300               # Validation grid size
 
     # Network architecture
-    hidden: int = 128
-    n_layers: int = 10
+    hidden: int = 96
+    n_layers: int = 8
 
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
-    lr: float = 1e-3                    # Starting learning rate
+    lr: float = 2e-3                    # Starting learning rate
     lr_inverse: float = 5e-3            # Learning rate for inverse problem; parameter estimation  
-    patience: int = 2000                # Patience for model stop
+    patience: int = 5000                # Patience for model stop
     patience_thershold: float = 2e-6    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter
@@ -87,7 +88,7 @@ class Config:
     # IC specific parameters
     def __post_init__(self):
         if self.ic == "Gauss":
-            self.height     = self.height     or 0.4
+            self.height     = self.height     or 0.7
             self.sigma_ic   = self.sigma_ic   or 1.0
             self.bc_left    = self.bc_left    or 0.0
             self.bc_right   = self.bc_right   or 0.0

@@ -1,0 +1,84 @@
+"""
+Demo script for training a PINN to solve 
+the damped harmonic oscillator system.
+
+Usage:
+    python train_forward.py
+
+Author          : Des De Borger
+Email           : des.deborger@student.uantwerpen.be
+Last modified   : 12/05/2026
+"""
+
+from pathlib import Path
+from config import Config
+from analytic import predict_shock_time
+from data import generate_data
+from model import FCNet
+from trainer import train
+from plot import save_plots_from_file
+from utils import get_device, save_model
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs"
+
+def train_model(cfg: Config, output_path: str) -> None:
+    device = get_device()
+    print(f"Device : {device}")
+
+    print(cfg)
+
+    time_to_shock = predict_shock_time(cfg)
+    if time_to_shock <= 5 and time_to_shock >= 0.1:
+        print("--------------------------------------------------"
+              "\n"
+              f"Shockwave predicted to occur at {time_to_shock:.3f}s."
+              "\n"
+              "Setting training domain to end at shock time."
+              "\n"
+              "--------------------------------------------------")
+        cfg.t_shock = time_to_shock
+        cfg.t_dom = time_to_shock + 2.0
+        cfg.t_extrap = time_to_shock + 4.0
+    else:
+        print("--------------------------------------------------"
+              "\n"
+              f"Shockwave predicted to occur at {time_to_shock:.3f}s."
+              "\n"
+              "This time is not suitable for training. Returning None"
+              "\n"
+              f"(ic={cfg.ic}, nu={cfg.nu})"
+              "--------------------------------------------------")
+        return None
+
+    # -- train model ------------------------------------------------
+    data     = generate_data(cfg)
+    model    = FCNet(cfg)
+    history, snapshots, best_state = train(
+        model       = model,
+        data        = data,
+        cfg         = cfg,
+        device      = device,
+        label       = "Model",
+    )
+
+    # -- save model ------------------------------------------------
+    save_model(best_state, history, snapshots, cfg, output_path)
+    print(f"Model saved to {output_path}")
+
+    # -- make plots ------------------------------------------------
+    save_plots_from_file(output_path)
+
+
+if __name__ == "__main__":
+    ics = ["Gauss", "Step_up", "N_wave"]
+    nu_values = [0.1, 0.05, 0.01]
+    for ic in ics:
+        for nu in nu_values:
+            cfg = Config(
+                ic=ic,
+                nu=nu
+            )
+            output_path = OUTPUT_PATH / f"{ic}_nu_{nu}"
+
+            train_model(cfg, output_path)

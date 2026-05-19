@@ -860,6 +860,113 @@ def plot_method_of_characteristics(
     ax.legend()
     save_show(output_path=output_path, show=show)
 
+def plot_three_times(
+    model:       nn.Module,
+    cfg:         Config,
+    snapshots:   dict,
+    u_grid:      np.ndarray,
+    t_arr:       np.ndarray,
+    times:       list[float] = None,
+    model_color: str        = GREEN,
+    model_label: str        = "PINN",
+    clip_y:      bool       = False,
+    output_path: Path       = None,
+    show:        bool       = True
+) -> None:
+    """
+    Makt three plots at three times;
+        -One at t=0
+        -One at a time before the shock time
+        -One at the shock time
+
+    Each panel shows:
+        - numerical solution u(x, t)     (gray line)
+        - model prediction u_hat(x, t)   (coloured line)
+        - RMSE annotated in panel title
+
+    Parameters
+    ----------
+    model       : trained PINN on CPU
+    data        : output of generate_data()
+    cfg         : Config
+    u_grid      : numerical solution, shape (n_t, n_x)
+    t_arr       : time array from lax_wendroff
+    n_times     : number of time slices (ignored if times is provided)
+    times       : optional explicit list of times to plot
+    """
+    # -- detect inverse mode ----------------------------------------------
+    inverse = any("_nu_raw" in k for v in snapshots.values() for k in v.keys())
+
+    if cfg.t_shock == None:
+        print("Shock time not defined! Not making plot.")
+    else:
+        times = [0, cfg.t_shock / 2, cfg.t_shock]
+
+    x_plot = np.linspace(0, cfg.L, 300)
+    n_cols = 2
+
+    fig, axes = plt.subplots(3, 1,
+                             figsize=(6, 10),
+                             sharex=True)
+    fig.patch.set_facecolor(BG)
+    axes_flat = axes.flatten()
+
+
+    plot_titles = [
+        "Initial condition",
+        "Before shock time",
+        "At shock time"
+    ]
+    for idx, t_val in enumerate(times):
+        ax = axes_flat[idx]
+        style_ax(ax)
+        ax.grid(True, linestyle="--", alpha=0.6)
+
+        # -- numerical solution --------------------------------------------
+        u_true = interpolate_solution_arr(
+            u_grid, t_arr,
+            x_plot, np.full_like(x_plot, t_val),
+            cfg
+        )
+
+        # -- model prediction ----------------------------------------------
+        u_pred = predict(model, np.full_like(x_plot, t_val), x_plot)
+        if clip_y:
+            u_pred = np.clip(u_pred, -3, 3)
+
+        err = np.sqrt(np.mean((u_pred - u_true) ** 2))
+
+        ax.plot(x_plot, u_true, color=GRAY,        lw=1.4, alpha=0.9)
+        ax.plot(x_plot, u_pred, color=model_color,  lw=2.0)
+        ax.set_xlabel("$x$", fontsize=8)
+
+        # -- annotate time and RMSE ----------------------------------------
+        ax.set_title(rf"{plot_titles[idx]}  -  $t = {t_val:.3f}$ s  -  RMSE $= {err:.4f}$",
+                    fontsize=10, color="#2C2C2A")
+    # -- shared legend -----------------------------------------------------
+    legend_elements = [
+        Line2D([0], [0], color=GRAY,        lw=1.4,
+               label="Numerical solution $u(x, t)$"),
+        Line2D([0], [0], color=model_color, lw=2.0,
+               label=rf"{model_label} prediction $\hat{{u}}(x, t)$"),
+    ]
+    fig.legend(handles=legend_elements, loc="lower center",
+               ncol=3, fontsize=12, framealpha=0.6,
+               bbox_to_anchor=(0.5, 0.0))
+
+    if inverse:
+        fig.suptitle(
+            rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f} \ \hat\nu = {model.nu_hat.item():.4f}$",
+            fontsize=16, color="#2C2C2A"
+        )
+    else:
+        fig.suptitle(
+            rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f}$",
+            fontsize=16, color="#2C2C2A"
+        )
+    fig.tight_layout(rect=[0, 0.05, 1, 1])
+    save_show(output_path=output_path, show=show)
+
 def save_model_plots(
     model:       nn.Module,
     history:     dict,
@@ -902,6 +1009,16 @@ def save_model_plots(
         u_grid=data["u_grid"],
         t_arr=data["t_arr"],
         output_path=output_path / "pred_grid.png",
+        show=False
+    )
+
+    plot_three_times(
+        model=model,
+        cfg=cfg,
+        snapshots=snapshots,
+        u_grid=data["u_grid"],
+        t_arr=data["t_arr"],
+        output_path=output_path / "3_times.png",
         show=False
     )
 

@@ -6,21 +6,10 @@
 set -e  # stop on first error
 
 PYTHON="/home/des/miniconda3/envs/mypythonenv/bin/python"
-PROJECT="Damped_Oscillator"
+PROJECT="Burgers_Equation"
 
-echo ""
-echo "============================================================"
-echo "  Zeta and omega estimation"
-echo "============================================================"
-$PYTHON $PROJECT/tune.py
-echo "Tuning complete."
-$PYTHON $PROJECT/tune_plots.py
-echo "Retraining complete."
-
-
-echo ""
-echo "============================================================"
-echo "  Zeta and omega estimation"
-echo "============================================================"
-$PYTHON $PROJECT/parameter_estimation_data_generation.py
-echo "Data generation complete."
+$PYTHON $PROJECT/train_forward_demonstration_cases.py
+$PYTHON $PROJECT/train_forward_extrapblind.py
+$PYTHON $PROJECT/train_forward_PINNvsML.py
+$PYTHON $PROJECT/train_forward_hyperparameters.py
+$PYTHON $PROJECT/optuna_tuning.py
