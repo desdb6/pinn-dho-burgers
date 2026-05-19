@@ -16,7 +16,7 @@ from pathlib import Path
 from plot import style_ax
 from utils import save_show
 
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/parameter_estimation_2"
+OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/parameter_estimation_3"
 
 # -- LaTeX font ------------------------------------------------
 plt.rcParams.update({

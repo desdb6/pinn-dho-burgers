@@ -581,6 +581,12 @@ The training was stopped early after $\sim1600$ epochs and the final prediction 
     \label{fig:demo_forward_model_overdamped/summary}
 \end{figure}
 
+We can see that the model can predict the solution of the ODE very accurately after a relatively small number of epochs. As a reminder, the provided code ran the training for a set number of $8000$ epochs. However, the overdamped case is a relative simple solution, so it is not surprising that the model is able to predict the solution.\\
+
+When looking at the MSE and physics residual plots, we can see that the model struggles the most with the inital part of the solution. One possible explanation is that the $\lambda_{i.c.}$ is so large that it essentialy fixes the starting point and derivative in place, at the cost of the other terms in the total loss function. Furthermore, the observation points are actually generated from $t=0.1$ to $t=t_{dom}$ to avoid accounting for the initial condition twice, so it is not all that strange that the model has the highest $MSE$ for $t<t_{dom}$\\
+
+We can see that the model perfroms exceptionally well for the extrapolated domain. However, since the solution to the ODE is virtually zero, this is not an indicator for the model performance. The extrapolating capabilities will be interpreted when the solution is not stationary in the extrapolated domain, such as for the underdamped case.
+
 \subsubsection{Critically damped demonstration}
 For the critically damped case, I chose the following parameters:
 \begin{table}[H]
@@ -603,6 +609,8 @@ The training was stopped early after $\sim1400$ epochs and the final prediction 
     \caption{Summary plot for the critically damped case.}
     \label{fig:demo_forward_model_criticallydamped/summary}
 \end{figure}
+
+The critically damped case is very similar to the overdamped case, as it can be seen as a limit case of the overdamped solution. The $RMSE$ and number of epochs to reach a solution are very similar indeed. The validation MSE and the physics residual plots also look very simular to those shown on Figure \ref{fig:demo_forward_model_overdamped/summary}. Again, the extrapolation is very good, but trivial.
 
 \subsubsection{Underdamped demonstration}
 For the overdamped case, I chose the following parameters:
@@ -627,23 +635,31 @@ The training was stopped early after $\sim4700$ epochs and the final prediction 
     \label{fig:demo_forward_model_underdamped/summary}
 \end{figure}
 
-\subsection{Comparison between blind and physics informed extrapolation}\label{ch:extrap_DHO}
+The underdamped case is the most interesting case of the three, and also the case in the provided code. First of all, the number of epochs until the optimisation stalls is a factor $\sim3$ greater than the other two cases. This makes sense as the oscillatory behavior of this solution is more complex than the converging behavior of the other cases, which takes more time for the model to understand.\\
 
+Here, the extrapolating capabilities become clearer. The model is not capable of extrapolating the exponentially suppressed oscillaion, but flattens out to a straight line at $y(t)=0$. This is the most trivial solution of the ODE, and the actual analytic solution for $t\rightarrow \infty$, so it is not surprising that the predicted solution converges to zero in the extrapolated domain. It seems that the model has not yet learned to continue the oscillation in the extrapolated domain. These results are however very promising, and can be improved with proper hyperparameter tuning (see section \ref{ch:hyperparameters_DHO}).
+
+\subsection{Comparison between blind and physics informed extrapolation}\label{ch:extrap_DHO}
+Before tuning the hyperparameters or attempting to solve the inverse problem, I want to study the effect of some of the loss terms. Firstly, in all previous simulations, the collocation points were allowed to be chosen in the extrapolated domain. This makes the extrapolation not fully blind, but physics-informed. In this experiment, the collocation points will only be chosen in the training domain, and no other hyperparameters will be changed.. This results in an actually blind test, as shown in Fugure \ref{fig:demo_forward_model_underdamped_extrapblind/summary}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_forward_model_underdamped_extrapblind/summary.png}
     \caption{Summary plot for a PINN whithout collocation points in the extrapolated domain. This leads to a fully blind predicition for $t>t_{dom}$.}
     \label{fig:demo_forward_model_underdamped_extrapblind/summary}
 \end{figure}
+In the training domain, the predicted solution is virtually the same as in the previous example (Figure \ref{fig:demo_forward_model_underdamped/summary}). In the extrapolated domain however, the results are different. the solution also plateaus, but now stays constant at around $y=0.4$ instead of $y=0$. This is unphysical, but since the physics loss is not calculated in the extrapolated domain, the model is not punished for this. The model has not generalised, and since there are no loss terms dependent on the predicted solution in the extrapolated area, the predicted solution simply remains constant.
 
 \subsection{Comparison with traditional ML model}
-
+Another interesting experiment is to compare the results to a non-physics informed neural network, as was done in the provided code. For this, the physics terms $\mathcal{L}_{phys}$ and $\mathcal{L}_{i.c.}$ are dropped from the loss function, and the model is retrained with the same hyperparameters. This gives the following results:
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_forward_model_underdamped_ML/summary.png}
     \caption{Summary plot for a non-physics informed neural network.}
     \label{fig:demo_forward_model_underdamped_ML/summary}
 \end{figure}
+Visually, the solution does not look all to different from the PINN prediction. However, when looking at the physics residual plot, we can see that $r(t)$ is very large when compared to the PINN. This is precisely the strength of PINNs; while standard neural networks can fit to the data and interpolate between observation points, they can overfit and/or lead to unphysical predictions, while a PINN both fits the data and complies to the ODE.\\
+
+In the extrapolated domain, the results are very similar to the blind test PINN extrapolation. This makes sense, both the standard neural network and the blind test PINN do not have any information about the extrapolated domain, and we have already established that the PINN cannot generalise if it does not informed about the physics in the extrapolated domain.
 
 \subsection{Hyperparameter optimisation}\label{ch:hyperparameters_DHO}
 

@@ -1,0 +1,16 @@
+{
+    "regime": "overdamped",
+    "m": 1.0,
+    "c": 12.0,
+    "k": 9.0,
+    "best_val": 3.2344773899239954e-06,
+    "best_params": {
+        "hidden": 32,
+        "n_layers": 5,
+        "lambda_phys": 0.3228331106808352,
+        "lambda_ic": 2.341046423028018,
+        "lr": 0.003323009725144113,
+        "scheduler_gamma": 0.6552047866853444,
+        "scheduler_step": 1000
+    }
+}

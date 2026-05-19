@@ -25,8 +25,8 @@ from utils import get_device, convert_to_mck
 
 # -- settings --------------------------------------------------------------
 SEED        = 42
-N_TRIALS    = 200
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/optuna_tuning"
+N_TRIALS    = 1000
+OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/optuna_tuning_3"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 CSV_PATH = OUTPUT_PATH / "optuna_results.csv"
@@ -37,15 +37,13 @@ CSV_FIELDS = [
     # loss weights
     "lambda_phys", "lambda_ic",
     # learning rate
-    "lr", "scheduler_gamma", "scheduler_step",
-    # adam optimiser
-    "adam_beta1", "adam_beta2"
+    "lr", "scheduler_gamma", "scheduler_step"
 ]
 
 DAMPED_CASE_CFGS = {
-    "underdamped":  {"zeta": 0.2,  "omega_0": 3.0},
-    "critically":   {"zeta": 1.0,  "omega_0": 3.0},
-    "overdamped":   {"zeta": 2.0,  "omega_0": 3.0},
+    "underdamped":  {"zeta": 0.125,  "omega_0": 2.0},
+    "critically":   {"zeta": 1.0,  "omega_0": 2.0},
+    "overdamped":   {"zeta": 1.5,  "omega_0": 2.0},
 }
 
 # -- fixed seed ------------------------------------------------------------
@@ -78,9 +76,6 @@ def objective(trial: optuna.Trial) -> float:
         lr              = trial.suggest_float("lr",              1e-4,  1e-2, log=True),
         scheduler_gamma = trial.suggest_float("scheduler_gamma", 0.3,   0.9),
         scheduler_step  = trial.suggest_int(  "scheduler_step",  1000, 5000, step=1000),
-        # adam
-        adam_beta1      = trial.suggest_float("adam_beta1",      0.85,  0.99),
-        adam_beta2      = trial.suggest_float("adam_beta2",      0.99,  0.9999),
     )
 
     device = get_device()
@@ -112,8 +107,6 @@ def objective(trial: optuna.Trial) -> float:
         "lr":                cfg.lr,
         "scheduler_gamma":   cfg.scheduler_gamma,
         "scheduler_step":    cfg.scheduler_step,
-        "adam_beta1":       cfg.adam_beta1,
-        "adam_beta2":       cfg.adam_beta2,
     }
 
     write_header = not CSV_PATH.exists()

@@ -1,0 +1,16 @@
+{
+    "regime": "underdamped",
+    "m": 1.0,
+    "c": 1.2000000000000002,
+    "k": 9.0,
+    "best_val": 1.5389507098007016e-05,
+    "best_params": {
+        "hidden": 64,
+        "n_layers": 6,
+        "lambda_phys": 0.23075547694115664,
+        "lambda_ic": 1.2322348585912897,
+        "lr": 0.007838181229075033,
+        "scheduler_gamma": 0.45681946953522234,
+        "scheduler_step": 4000
+    }
+}

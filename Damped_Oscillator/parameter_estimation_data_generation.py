@@ -20,9 +20,15 @@ from config import Config
 from data import generate_data
 from model import InverseFCNet
 from trainer import train
-from utils import convert_to_mck, get_device
+from utils import convert_to_mck, get_device, load_best_cfg
 
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/parameter_estimation_2"
+SCRIPT_DIR = Path(__file__).resolve().parent
+JSON_PATHS = {
+    "overdamped": SCRIPT_DIR / "outputs/optuna_tuning_2/overdamped/best_params.json",
+    "critically_damped": SCRIPT_DIR / "outputs/optuna_tuning_2/critically/best_params.json",
+    "underdamped": SCRIPT_DIR / "outputs/optuna_tuning_2/underdamped/best_params.json"
+              }
+OUTPUT_PATH = SCRIPT_DIR / "outputs/parameter_estimation_3"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 CSV_PATH   = OUTPUT_PATH / "parameter_pairs.csv"
@@ -59,11 +65,11 @@ def run_single(run_idx: int, device) -> dict | None:
     print(f"-----Randomised zeta:   {zeta:.4f}-----")
     print(f"-----Randomised omega_0:{omega_0:.4f}-----")
 
-    cfg = Config(
-        m=m,
-        c=c,
-        k=k
-    )
+    cfg = load_best_cfg(JSON_PATHS[damped_case])
+
+    cfg.m = m
+    cfg.c = c
+    cfg.k = k
 
     data  = generate_data(cfg)
     model = InverseFCNet(cfg)

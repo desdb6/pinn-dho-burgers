@@ -14,7 +14,7 @@ from trainer import train
 from utils import get_device, save_model, load_best_cfg
 from plot import save_plots_from_file
 
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/optuna_tuning"
+OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/optuna_tuning_2"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 DAMPED_CASES = ["underdamped", "critically", "overdamped"]
