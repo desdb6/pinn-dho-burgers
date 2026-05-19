@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex Exam_Programming"] 1779206265.3898 "Exam_Programming.aux" "Exam_Programming.bbl" "Exam_Programming" 1779206324.53908 0
+["bibtex Exam_Programming"] 1779219390.23641 "Exam_Programming.aux" "Exam_Programming.bbl" "Exam_Programming" 1779219408.19877 0
   "./bibliography.bib" 1779205842 5133 e87ccda1f0225389579419d0d6a5bd25 ""
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/abbrv.bst" 1291864736 20329 b5fed53e10044d0f8112183785c759b1 ""
-  "Exam_Programming.aux" 1779206323 38829 b7e7b707e2d31b6da7032ff8e6e4121e "pdflatex"
+  "Exam_Programming.aux" 1779219407 40372 680af7f09f982ad9708a2eaf13b735f4 "pdflatex"
   (generated)
   "Exam_Programming.bbl"
   "Exam_Programming.blg"
   (rewritten before read)
-["pdflatex"] 1779206308.0463 "c:/Users/desde/Documents/GitHub/ExProgrammeren/Report/Exam_Programming.tex" "Exam_Programming.pdf" "Exam_Programming" 1779206324.53979 0
+["pdflatex"] 1779219390.54312 "c:/Users/desde/Documents/GitHub/ExProgrammeren/Report/Exam_Programming.tex" "Exam_Programming.pdf" "Exam_Programming" 1779219408.19948 0
   "C:/Users/desde/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1778600683 279792 b1841da5a4425d49af54f8f4bfefbf9f ""
   "C:/Users/desde/AppData/Local/MiKTeX/fonts/tfm/public/rsfs/rsfs10.tfm" 1776010630 688 37338d6ab346c2f1466b29e195316aa4 ""
   "C:/Users/desde/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1776011511 24141949 1a3afdfe45fc79c3b8008dfebd83dea9 ""
@@ -235,12 +235,12 @@
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/tex/latex/xkeyval/xkeyval.sty" 1656236919 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/tex/latex/xpatch/xpatch.sty" 1585221260 8510 7803f78066c4f9d008405191a4b43073 ""
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/tex/latex/xstring/xstring.sty" 1693735632 123 a302f2c651a95033260db60e51527ae8 ""
-  "Exam_Programming.aux" 1779206323 38829 b7e7b707e2d31b6da7032ff8e6e4121e "pdflatex"
-  "Exam_Programming.bbl" 1779206265 2330 9e49f560e99590b28df4ba46c52d9c11 "bibtex Exam_Programming"
-  "Exam_Programming.brf" 1779206323 915 69400652e0fe9d53df84ff176e6626b7 "pdflatex"
-  "Exam_Programming.out" 1779206310 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "Exam_Programming.tex" 1779206307 94974 4918664a18a55920d455d58ecd70aab6 ""
-  "Exam_Programming.toc" 1779206323 4951 c3dcd215967a511564ee739ad450f28f "pdflatex"
+  "Exam_Programming.aux" 1779219407 40372 680af7f09f982ad9708a2eaf13b735f4 "pdflatex"
+  "Exam_Programming.bbl" 1779219390 2330 9e49f560e99590b28df4ba46c52d9c11 "bibtex Exam_Programming"
+  "Exam_Programming.brf" 1779219407 915 a86e7b265b1c1cf26b2808ec08427d3c "pdflatex"
+  "Exam_Programming.out" 1779219393 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "Exam_Programming.tex" 1779219354 101831 f65eea096301b22b3548f5bbfca1c47d ""
+  "Exam_Programming.toc" 1779219407 5247 878dcfe50151fd178b7962d684bf0fee "pdflatex"
   "Images/analytic_solution_criticallydamped.png" 1779122491 104413 cc445e521340545ddc42970e56178227 ""
   "Images/analytic_solution_overdamped.png" 1779122491 116824 ed9155c56dc8840710df6165d1be27d8 ""
   "Images/analytic_solution_underdamped.png" 1779122491 147905 d975fa1363d493e4250cdbb05e92fb6f ""
@@ -262,6 +262,9 @@
   "Images/demo_forward_model_hyperparameters/low_complexity/predicted_solution.png" 1779177219 168300 2acf69c9224e47b6a79797c6738ebd4f ""
   "Images/demo_forward_model_hyperparameters/low_lr/predicted_solution.png" 1779177449 170379 145e6e9ad5f2da3b2e43fe51d201cb5c ""
   "Images/demo_forward_model_overdamped/summary.png" 1779122492 513837 d1e7077ac6d4f4bb5b20d9b1d7481191 ""
+  "Images/demo_forward_model_underdamped/analytic_solution.png" 1779122492 151517 5f6bc6160a955b29d06efdb73122e640 ""
+  "Images/demo_forward_model_underdamped/epoch_snapshots.png" 1779122492 463732 b085eaa12073fdb0cb66e16842aec63f ""
+  "Images/demo_forward_model_underdamped/losses.png" 1779122492 430332 e3ae70f53db5a9e0f4f148cf69b61d6f ""
   "Images/demo_forward_model_underdamped/predicted_solution.png" 1779122492 181735 9a493346444eab52ccd1e8ed93fc5336 ""
   "Images/demo_forward_model_underdamped/summary.png" 1779122492 672897 c5dae188510a235968a0733d0cbe120f ""
   "Images/demo_forward_model_underdamped_ML/summary.png" 1779122492 648118 0508d850f5382e1d139ce4c46ccf9ee1 ""
@@ -275,7 +278,7 @@
   "Images/parameter_estimation_4/scatter_zeta_full.png" 1779192718 127231 fba2d4eb532b547e73e3b831a561eed7 ""
   "Images/unsqueeze.png" 1778601686 38095 50084aa806fcfb951bd0ff0e8483c9fb ""
   "Logos/logo-uantwerpen-we-en-rgb-pos.pdf" 1778576499 8462 da1ad7b8d9445e1bc658d46022dd4afa ""
-  "c:/Users/desde/Documents/GitHub/ExProgrammeren/Report/Exam_Programming.tex" 1779206307 94974 4918664a18a55920d455d58ecd70aab6 ""
+  "c:/Users/desde/Documents/GitHub/ExProgrammeren/Report/Exam_Programming.tex" 1779219354 101831 f65eea096301b22b3548f5bbfca1c47d ""
   "uantwerpenbamathesis.cls" 1778576499 17754 c96842663ea8e58cb6bccdb8c7953cd1 ""
   "uantwerpencolorlogoscheme.sty" 1778576499 4109 60fa40da65f1cc76f44a56ad0903d87d ""
   "uantwerpencommonoptions.clo" 1778576499 4479 d337bd93e0dd3d7f4efe9370b7db1688 ""
