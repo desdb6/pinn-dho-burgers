@@ -1,8 +1,8 @@
 """
 Configuration for the damped spring-mass PINN.
 
-All physical constants, hyperparameters, and runtime settings 
-for the PINN are defined as a single config class. 
+All physical constants, hyperparameters, and runtime settings
+for the PINN are defined as a single config class.
 Import and instantiate Config in every script that needs these values.
 
 Author          : Des De Borger
@@ -10,12 +10,13 @@ Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
 """
 
-import numpy as np
-from pathlib import Path
 from dataclasses import dataclass
+import numpy as np
+
 
 @dataclass
 class Config:
+    """Config class containing all parameters for model training."""
     # Physical parameters
     m: float = 1.0       # mass  [kg]
     c: float = 0.5       # damping coefficient
@@ -23,14 +24,17 @@ class Config:
 
     @property
     def omega_0(self) -> float:
+        """Return omega_0."""
         return float(np.sqrt(self.k / self.m))
 
     @property
     def zeta(self) -> float:
+        """Return zeta."""
         return float(self.c / (2 * np.sqrt(self.m * self.k)))
 
     @property
     def omega_d(self) -> float:
+        """Return omega_d."""
         return float(self.omega_0 * np.sqrt(max(0.0, 1.0 - self.zeta**2)))
 
     # Initial conditions
@@ -55,7 +59,6 @@ class Config:
     randomise_observation: bool = True  # Randomise observation points every epoch
     # strata_splitting: int = 8           # Strata for stratified splitting
     # test_train_split: float = 0.4       # Fraction of train set(t)
-    
 
     n_col_dom: float = 500              # ODE residual collocation points
     sigma: float = 0.05                 # Standard deviation for n_obs
@@ -68,7 +71,7 @@ class Config:
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
     lr: float = 5e-3                    # Starting learning rate
-    lr_inverse: float = 2e-2            # Learning rate for inverse problem; parameter estimation  
+    lr_inverse: float = 2e-2            # Learning rate for inverse problem; parameter estimation
     patience: int = 1000                # Patience for model stop
     patience_thershold: float = 1e-5    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
