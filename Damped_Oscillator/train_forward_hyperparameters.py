@@ -47,42 +47,42 @@ def main():
     print(f"Device : {device}")
 
     cfg_list = [
-        # Config(
-        #     n_layers=2,
-        #     hidden=4
-        # ),
-        # Config(
-        #     lambda_phys=1e2,
-        # ),
-        # Config(
-        #     lambda_phys=1e2,
-        #     train_extrap=False
-        # ),
+        Config(
+            n_layers=2,
+            hidden=4
+        ),
+        Config(
+            lambda_phys=1e2,
+        ),
+        Config(
+            lambda_phys=1e2,
+            train_extrap=False
+        ),
         Config(
             lambda_phys=1e0,
             use_data=False
         ),
-        # Config(
-        #     lambda_ic=0,
-        # ),
-        # Config(
-        #     lr=0.05
-        # ),
-        # Config(
-        #     lr=1e-3,
-        #     scheduler_gamma=0.3,
-        #     scheduler_step=1000
-        # )
+        Config(
+            lambda_ic=0,
+        ),
+        Config(
+            lr=0.05
+        ),
+        Config(
+            lr=1e-3,
+            scheduler_gamma=0.3,
+            scheduler_step=1000
+        )
     ]
 
     label_list = [
-        # "low_complexity",
-        # "large_phys",
-        # "large_phys_no_extrap",
+        "low_complexity",
+        "large_phys",
+        "large_phys_no_extrap",
         "large_phys_no_data",
-        # "no_ic",
-        # "high_lr",
-        # "low_lr"
+        "no_ic",
+        "high_lr",
+        "low_lr"
     ]
 
     for cfg, label in zip(cfg_list, label_list):

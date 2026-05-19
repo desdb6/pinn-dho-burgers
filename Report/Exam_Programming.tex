@@ -505,7 +505,7 @@ In our case, this integral can be approximated by choosing a dense, evenly space
 This metric will be called the \textit{validation loss}, annotated by $\mathcal{L}_{val.}$. The training will stop when the validation loss has stopped decreasing. We need to define two more parameters to get an efficient early stopping strategy:
 \begin{enumerate}
     \item The patience is defined as the number of epochs to wait after the last improvement (decrease of the validation loss) before stopping the training. This is necesarry to avoid stopping too early, since it is possible that the validation fluctuates around (local) minima and further improvements can be made after more training epochs. If the patience is ran out, it means the model has not improved for a while and training can be safely stopped.
-    \item The patience threshold is defined as the minimum improvement in the validation loss to be considered a \textit{notable} improvement. only if the improvement is large enough and notable, the patience counter will be reset. This avoids resetting the patience counter for minimal, unsignificant improvements and makes the early stopping strategy more efficient.
+    \item The patience threshold is defined as the minimum improvement in the validation loss to be considered a \textit{significant} improvement. only if the improvement is large enough and significant, the patience counter will be reset. This avoids resetting the patience counter for minimal, unsignificant improvements and makes the early stopping strategy more efficient.
 \end{enumerate}
 Both of these parameters can be set in the \verb|Config| class.
 
@@ -542,7 +542,7 @@ In this section, I will give a quick demonstration of three PINNs, used to predi
 \begin{table}[H]
 \centering
 \caption{PINN Hyperparameters}\label{tab:standard_parameters_DHO}
-\begin{tabular}{llr}
+\begin{tabular}{llc}
 \toprule
 \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
 \midrule
@@ -565,7 +565,7 @@ For the overdamped case, I chose the following parameters:
 \begin{table}[H]
 \centering
 \caption{Overdamped parameters}
-\begin{tabular}{llr}
+\begin{tabular}{lc}
 \toprule
 \textbf{Parameter} & \textbf{Value} \\
 \midrule
@@ -594,7 +594,7 @@ For the critically damped case, I chose the following parameters:
 \begin{table}[H]
 \centering
 \caption{Overdamped parameters}
-\begin{tabular}{llr}
+\begin{tabular}{lc}
 \toprule
 \textbf{Parameter} & \textbf{Value} \\
 \midrule
@@ -619,7 +619,7 @@ For the overdamped case, I chose the following parameters:
 \begin{table}[H]
 \centering
 \caption{Overdamped parameters}
-\begin{tabular}{llr}
+\begin{tabular}{lc}
 \toprule
 \textbf{Parameter} & \textbf{Value} \\
 \midrule
@@ -676,7 +676,7 @@ I have chosen to focus on the underdamped case, as it has the most interesting d
 \end{figure}
 
 \subsubsection{Model complexity}
-The first two parameters we will investigate determine the \textit{model complexity}, in other words the number of parameters to be optimised. To investiugate this, we will train a model with a very low complexity, more specifically $\verb|n_layers|=2$ and $\verb|hidden|=4$. This model thus only has 8 nodes, divided between two layers. This ersults in the folowwing fit:
+The first two parameters we will investigate determine the \textit{model complexity}, in other words the number of parameters to be optimised. To investiugate this, we will train a model with a very low complexity, more specifically $\verb|n_layers|=2$ and $\verb|hidden|=4$. This model thus only has 8 nodes, divided between two layers. This ersults in the following fit:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/low_complexity/predicted_solution.png}
@@ -686,9 +686,27 @@ The first two parameters we will investigate determine the \textit{model complex
 This model is not able to fit the analytic solution over the entire training domain. The complexity is too low for the model to fit to multiple oscillations, so the improvements stall after the prediction has fitted to the first oscillation of the analytic solution. As explained before, it is important to tune the model complexity s that the model is complex enough for the given task, but not overly complex to avoid overfitting or conputationally model heavy training.
 
 \subsubsection{Learning rate}
+Another cricual parameter is the learning rate of the model. I will study two cases; one where the learning rate is chosen too high and one where the learning rate is chosen too low. When the learning rate is set very high, say $\verb|lr|=0.05$, we get the following results:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/high_lr/predicted_solution.png}
+    \caption{Predicted solution with $lr=0.05$.}
+    \label{fig:demo_forward_model_hyperparameters/high_lr/predicted_solution}
+\end{figure}
+
+The learning rate is chosen so high that the model does not converge to an optimal solution at all. Rather, $\hat y(t)$ remains constant over the entire interval. When running this training, the early stopping mechanism triggered after $1014$ epochs, which is a little over the patience limit. This indicated that the model was never really optimising.\\
+
+When the learning rate is set very high, say $\verb|lr|=0.001$, we get the following results:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/low_lr/predicted_solution.png}
+    \caption{Predicted solution with $lr=0.05$.}
+    \label{fig:demo_forward_model_hyperparameters/low_lr/predicted_solution}
+\end{figure}
+The model has not fully fitted to the analytic solution. This is the case because the early stopping mechanism has triggered too early; the small learning rate leads to very gradual improvements, which leads to the patience limit being reached since no significant improvement has been made. From these results, it can be conlcuded that the learning rate has to be tuned very precisely to get an efficient training loop. 
 
 \subsubsection{Loss function weights}
-Another have already investigated what happend when $\lambda_{phys}$ is set to zero. Let us now choose a very high value, say $\lambda_{phys}=100$. This results in the following solution:
+We have already investigated what happend when $\lambda_{phys}$ is set to zero. Let us now choose a very high value, say $\lambda_{phys}=100$. This results in the following solution:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys/predicted_solution.png}
@@ -717,11 +735,95 @@ Finally, I want to see if the model can fit to the solution \ref{without} any ob
 The model is in fact able to reconstruct the analytic solution without any data points being provided. This does however negat the point of using a neural network, since it is also possible to reconstruct the solution with finite-difference methods (ex. Euler method or Runge-Kutta). PINNs are more applicable to backwards problems, where we need to extract the (unknown) physical parameters from observational data. This means that we need to balance the loss terms so that both the observation points and the physics of the system are taken into account in the training loop. 
 
 \subsubsection{Optuna}
+In order to find an optimal model complexity and learning rate, as well as tune the balance of the loss function, I have chosen to use the implement a use the \verb|optuna| library to employ a \textit{Tree-Structured Parzen Estimator} with the \verb|optuna.samplers.TPESampler| class. This has a few advantages \cite{watanabe2025treestructuredparzenestimatorunderstanding}:
+\begin{itemize}
+    \item The optuna library can \textit{prune} runs that do not look promising enough to provide an optimisation of the hyperparameters. This makes the optimisation more efficient since not every run needs to be fully completed.
+    \item Bayesian optimisation is an efficient technique of finding the minimum of black box functions. In this case the black box function is the $MSE$ of the best trained model.
+    \item Tree-Structured Parzen Estimators are a subclass of Bayesian Optimisation algorithms which are efficient for high-dimensional spaces, which is applicable here since we have to tune many hyperparameters in order to get an optimal configuration.
+\end{itemize}
+We have chosen to separate the three cases, since the dynamics are very different for over- and underdamped cases which means the optimal hyperparameters will likely also be different. We have chosen to tune the following parameters in the following intervals:
 
+\begin{table}[H]
+\centering
+\caption{Optuna Hyperparameter Search Ranges}\label{tab:optuna_hyperparams}
+\begin{tabular}{llc}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Search Range} \\
+\midrule
+\texttt{hidden}           & Hidden units per layer         & $[16,\ 128]$,\ step 16 \\
+\texttt{n\_layers}        & Number of hidden layers        & $[2,\ 6]$,\ step 1 \\
+\texttt{lambda\_phys}     & Physics loss weight            & $[10^{-3},\ 10^{1}]$\ (log) \\
+\texttt{lambda\_ic}       & Initial condition loss weight  & $[10^{0},\ 10^{2}]$\ (log) \\
+\texttt{lr}               & Initial learning rate          & $[10^{-4},\ 10^{-2}]$\ (log) \\
+\texttt{scheduler\_gamma} & LR scheduler decay factor      & $[0.3,\ 0.9]$ \\
+\texttt{scheduler\_step}  & LR scheduler step size         & $[1000,\ 5000]$,\ step 1000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For each case, we will run $1000$ trials and finally save the configuration that leads to the lowest MSE to a \verb|.json| file. This yielded the following results:
+
+\begin{table}[H]
+\centering
+\caption{Optimal Hyperparameters Found by Optuna}\label{tab:optuna_best_params}
+\begin{tabular}{llrrr}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Overdamped} & \textbf{Critically Damped} & \textbf{Underdamped} \\
+\midrule
+\texttt{hidden}           & Hidden units per layer        & 96     & 128    & 64     \\
+\texttt{n\_layers}        & Number of hidden layers       & 5      & 4      & 4      \\
+\texttt{lambda\_phys}     & Physics loss weight           & $0.78$ & $3.78$ & $0.27$ \\
+\texttt{lambda\_ic}       & Initial condition loss weight & $1.45$ & $5.51$ & $2.07$ \\
+\texttt{lr}               & Initial learning rate         & $9.90\times10^{-4}$ & $7.64\times10^{-3}$ & $3.65\times10^{-3}$ \\
+\texttt{scheduler\_gamma} & Scheduler decay factor        & $0.553$ & $0.545$ & $0.548$ \\
+\texttt{scheduler\_step}  & Scheduler step size           & 4000   & 2000   & 4000   \\
+\bottomrule
+\end{tabular}
+\end{table}
+The optimal configurations are relatively similar. The optimal model complexity has $\sim10^4$ parameters, the physics loss weight is $\sim10^0$, the learning rate is $\sim10^-3$, the scheduler decay factor is $\sim0.5$ and the scheduler step size is $\sim3000$. We can see that the optimiser has not maximalised the physics loss weight, which indicated that the inclusion of noisy observation data in the training loop is still a good choice. Based on these results, we can make well-reasoned choices for the hyperparameters in the inverse problem.
 \section{Inverse problem}\label{ch:inverse_DHO}
+We will now try to extract the parameters $\zeta$ and $\omega_0$ from the equation by training the model on noisy observation data generated from an analytical solution with unknown, randomised parameters. This can be implemented easily by creating a new model achitecture class, \verb|InverseFCNet| with $\hat\zeta$ and $\hat\omega_0$ as model parameters and a new loss function \verb|loss_physics_inverse| which uses these parameters. $\hat\zeta$ and $\hat\omega_0$ are then treated like every other weight or bias parameter, and will be tweaked every epoch until the model training is complete.\\
+
+Based on the previous optimised hyperparameters, I have chosen for the following hyperparameters for the inverse problem:
+\begin{table}[H]
+\centering
+\caption{Hyperparameters used for inverse problem}\label{tab:inverse_hyperparameters}
+\begin{tabular}{llrrr}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Value}\\
+\midrule
+\texttt{hidden}           & Hidden units per layer        & 96 \\
+\texttt{n\_layers}        & Number of hidden layers       & 5  \\
+\texttt{lambda\_phys}     & Physics loss weight           & $0.5$ \\
+\texttt{lambda\_ic}       & Initial condition loss weight & $10$ \\
+\texttt{lr}               & Initial learning rate         & $2.0\times10^{-3}$ \\
+\texttt{lr}               & Initial learning rate for  $\hat\zeta$ and $\hat\omega_0$       & $1.5\times10^{-2}$ \\
+\texttt{scheduler\_gamma} & Scheduler decay factor        & $0.8$ \\
+\texttt{scheduler\_step}  & Scheduler step size           & 3000  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+I have chosen to slightly increase the $\lambda_{phys}$ than the optimal configurations found by optuna. By increasing the physics loss contribution, I am forcing the model to prioritize minimising the ODE residual, for which good estimates for the parameter are necesarry. Hovewer, I want $\lambda_{ic}$ to remain the largest loss term to fix the initial condition in place\footnote{This is actually not absolutely necesarry, since the observation points are randomised every epoch and provide enough information for the model to guess the initial conditions. However since we explicitly know the initial conditions, adding them to the loss function is never a bad idea.}, so this term as increased as well.\\
+
+In this section, I will discuss three demonstration examples where the paramaters for an overdamped, critically damped, and underdamped case are extracted. Then, I will provide a statistical analysis where the parameters are estimated for a great number of randomised ground truth solutions.
 
 \subsection{Overdamped case}
+For the overdamped demonstration example, the randomised and predicted parameters are:
+\begin{table}[H]
+\centering
+\caption{Overdamped parameters}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Parameter} & \textbf{True value} & \textbf{Predicted value} \\
+\midrule
+\texttt{$\zeta$}             & $1.162$ & $1.556$ \\
+\texttt{$\omega_0$}          & $2.523 rad/s$ & $2.592 rad/s$   \\
+\bottomrule
+\end{tabular}
+\end{table}
 
+Figures \ref{fig:demo_backward_model_overdamped/predicted_solution} and \ref{fig:demo_backward_model_overdamped/parameter_convergence} show the predicted solution and parameter convergence to the true values.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_backward_model_overdamped/predicted_solution.png}
@@ -735,9 +837,24 @@ The model is in fact able to reconstruct the analytic solution without any data 
     \caption{Parameter convergence to true values for an overdamped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_overdamped/parameter_convergence}
 \end{figure}
+We can see that the model is able to recover the equation parameters with great acuraccy for the overdamped case. This is quite impressive given that the analytic solutions are not very different for varying values of $\zeta$ and $\omega_0$ for the overdamped case. Tis will be discussed in more detail in section \ref{ch:stat_DHO}.
 
 \subsection{Critically damped case}
+For the critically damped demonstration example, $\zeta$ can obviously not be randomised since it has to be equal to $1$ by definition. The true and predicted parameters are:
+\begin{table}[H]
+\centering
+\caption{Overdamped parameters}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Parameter} & \textbf{True value} & \textbf{Predicted value} \\
+\midrule
+\texttt{$\zeta$}             & $1.000$ & $1.014$ \\
+\texttt{$\omega_0$}          & $4.000 rad/s$ & $4.350 rad/s$   \\
+\bottomrule
+\end{tabular}
+\end{table}
 
+Figures \ref{fig:demo_backward_model_criticallydamped/predicted_solution} and \ref{fig:demo_backward_model_criticallydamped/parameter_convergence} show the predicted solution and parameter convergence to the true values.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_backward_model_criticallydamped/predicted_solution.png}
@@ -751,9 +868,23 @@ The model is in fact able to reconstruct the analytic solution without any data 
     \caption{Parameter convergence to true values for a critically damped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_criticallydamped/parameter_convergence}
 \end{figure}
+We can see that the model is able to recover the equation parameters with relatively good acuraccy for the critically damped case. Again, this case is very similar to the overdamped case so comparable results are expected.
 
 \subsection{Underdamped case}
-
+For the overdamped demonstration example, the randomised and predicted parameters are:
+\begin{table}[H]
+\centering
+\caption{Overdamped parameters}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Parameter} & \textbf{True value} & \textbf{Predicted value} \\
+\midrule
+\texttt{$\zeta$}             & $0.160$ & $1.950$ \\
+\texttt{$\omega_0$}          & $0.171 rad/s$ & $1.961 rad/s$   \\
+\bottomrule
+Figures \ref{fig:demo_backward_model_underdamped/predicted_solution} and \ref{fig:demo_backward_model_underdamped/parameter_convergence} show the predicted solution and parameter convergence to the true values.
+\end{tabular}
+\end{table}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Images/demo_backward_model_underdamped/predicted_solution.png}
@@ -767,8 +898,14 @@ The model is in fact able to reconstruct the analytic solution without any data 
     \caption{Parameter convergence to true values for an underdamped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_underdamped/parameter_convergence}
 \end{figure}
+We can see that the model is able to recover the equation parameters with great acuraccy for the underdamped case. The analytic solutions for this case are more dependent on the equation parameters than the previous two cases, so it is to be expected that the model can extract the parameters with the same or better acuraccy.
 
-\subsection{Statistical analysis}
+\subsection{Statistical analysis}\label{ch:stat_DHO}
+The previous three demonstration examples are a good illustration of the capabilities of the inverse model, but are not enough to make well-reasoned and statistically backed conlcusions about the model acuraccy. For this, we need a more quantifiable way to gauge the accuracy of the model.\\
+
+One of the sources of uncertainty when estimating the parameters is the noise applied to the training observation points. The training points are randomised every epoch and should, in principle, not have much influence on the exact prediction, but it makes the process non-deterministic nonetheless. Furthermore, up until now we have only tested the parameter extraction on 3 $(\zeta,\ \omega_0)$ pairs. This is not yet representative for the model performance over a wide range of valeus for these parameters.\\
+
+In order to account for both of these effects, we can run a large amount of parameter estimations with randomised equation parameters for every different model. This will both give an idea of the variance of the estimations due to the noisy training data, and generalise the three demonstration examples to a larger domain of $(\zeta,\ \omega_0)$ values. I have chosen to first randomize the damped case, with a $45\%$ chance of under- or overdamped and a $10\%$ chance of critically damped. Then, $(\zeta,\ \omega_0)$ is randomised and the inverse model is trained to estimate the parameters. In the end, $1000$ total estimations were performed. Figures \ref{fig:parameter_estimation_2/scatter_zeta_full} and \ref{fig:parameter_estimation_2/scatter_omega_0_full} show the true-predicted parameter values and figure \ref{fig:parameter_estimation_2/scatter_omega_0_full} shows the $(\zeta,\ \omega_0)$ in the parameter space, color coded by the $RMSE$ of the predicted values.
 
 \begin{figure}[H]
     \centering
