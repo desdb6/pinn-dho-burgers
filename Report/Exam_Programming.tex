@@ -534,7 +534,9 @@ The plotting methods from the provided example are more or less reused with some
 \end{itemize}
 These plotting methods are then wrapped in a single function called \verb|save_model_plots|, which generated all of the above plots and saves them to a specified output folder. This function can be called at the end of a training loop witht he model, training history, epoch snapshots, data, and \verb|Config| parameters as inputs.\\
 
-Alternatively, one can choose to save the outputs of the training loop to a folder and then call the \verb|save_plots_from_file| funtion, which load the saved model weights and saves all relevant plot to the same folder. This is my preferred approach, since the best model weights need to be saved in this way, which can be useful in the futire for ex. comparing model performances.
+Alternatively, one can choose to save the outputs of the training loop to a folder and then call the \verb|save_plots_from_file| funtion, which load the saved model weights and saves all relevant plot to the same folder. This is my preferred approach, since the best model weights need to be saved in this way, which can be useful in the futire for ex. comparing model performances.\\
+
+Examples of all plotting methods are shown in section \ref{ch:underdamped}
 
 \subsection{Code demonstration}
 In this section, I will give a quick demonstration of three PINNs, used to predict the solution to each of the three damped cases. In all three examples, we will use the following hyperparameters:
@@ -612,9 +614,9 @@ The training was stopped early after $\sim1400$ epochs and the final prediction 
     \label{fig:demo_forward_model_criticallydamped/summary}
 \end{figure}
 
-The critically damped case is very similar to the overdamped case, as it can be seen as a limit case of the overdamped solution. The $RMSE$ and number of epochs to reach a solution are very similar indeed. The validation MSE and the physics residual plots also look very simular to those shown on Figure \ref{fig:demo_forward_model_overdamped/summary}. Again, the extrapolation is very good, but trivial.
+The critically damped case is very similar to the overdamped case, as it can be seen as a limit case of the overdamped solution. The $RMSE$ and number of epochs to reach a solution are very similar indeed. The validation MSE and the physics residual plots also look very simular to those shown on Figure \ref{fig:demo_forward_model_overdamped/summary}. Again, the extrapolation is very good, but trivial at $y=0$.
 
-\subsubsection{Underdamped demonstration}
+\subsubsection{Underdamped demonstration}\label{ch:underdamped}
 For the overdamped case, I chose the following parameters:
 \begin{table}[H]
 \centering
@@ -639,7 +641,39 @@ The training was stopped early after $\sim4700$ epochs and the final prediction 
 
 The underdamped case is the most interesting case of the three, and also the case in the provided code. First of all, the number of epochs until the optimisation stalls is a factor $\sim3$ greater than the other two cases. This makes sense as the oscillatory behavior of this solution is more complex than the converging behavior of the other cases, which takes more time for the model to understand.\\
 
-Here, the extrapolating capabilities become clearer. The model is not capable of extrapolating the exponentially suppressed oscillaion, but flattens out to a straight line at $y(t)=0$. This is the most trivial solution of the ODE, and the actual analytic solution for $t\rightarrow \infty$, so it is not surprising that the predicted solution converges to zero in the extrapolated domain. It seems that the model has not yet learned to continue the oscillation in the extrapolated domain. These results are however very promising, and can be improved with proper hyperparameter tuning (see section \ref{ch:hyperparameters_DHO}).
+Here, the extrapolating capabilities become clearer. The model is not capable of extrapolating the exponentially suppressed oscillaion, but flattens out to a straight line at $y(t)=0$. This is the most trivial solution of the ODE, and the actual analytic solution for $t\rightarrow \infty$, so it is not surprising that the predicted solution converges to zero in the extrapolated domain. It seems that the model has not yet learned to continue the oscillation in the extrapolated domain. These results are however very promising, and can be improved with proper hyperparameter tuning (see section \ref{ch:hyperparameters_DHO}).\\
+
+Since the underdamped regime is the most interesting, I will show the rest of the generated plots for this case as well as a demonstration of all plotting methods. The plotting methods are shown on Figures \ref{fig:demo_forward_model_underdamped/analytic_solution} to \ref{fig:demo_forward_model_underdamped/losses}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/demo_forward_model_underdamped/analytic_solution.png}
+    \caption{Predicted solution for the underdamped case.}
+    \label{fig:demo_forward_model_underdamped/analytic_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/demo_forward_model_underdamped/predicted_solution.png}
+    \caption{Predicted solution for the underdamped case.}
+    \label{fig:demo_forward_model_underdamped/predicted_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images/demo_forward_model_underdamped/epoch_snapshots.png}
+    \caption{Epoch snapshots for the underdamped case.}
+    \label{fig:demo_forward_model_underdamped/epoch_snapshots}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_underdamped/losses.png}
+    \caption{Loss convergence plot for the underdamped case.}
+    \label{fig:demo_forward_model_underdamped/losses}
+\end{figure}
+
+These plots give us some useful insights. The epoch plot (Figure \ref{fig:demo_forward_model_underdamped/epoch_snapshots}) shows how the model learns the equation behavior, starting at low $t$ and working its way through the entire domain. The loss plot (Figure \ref{fig:demo_forward_model_underdamped/losses}) is also very interesting. We can see that the $\mathcal{L}_{i.c.}$ is minimised the fastest, as it is the largest contribution to the total loss function. At that point, the largest contribution to the total is form the data, and the $\mathcal{L}_{data}$ and $\mathcal{L}_{total}$ curves match each other quite well.  In this case $\mathcal{L}_{val}$ stays lower than $\mathcal{L}_{data}$, since the observation points have data applied to them but the validation points do not. Over time, the other loss terms also converge, and at some point the validation loss $\mathcal{L}_{val}$ stops decreasing; this is the point where the model starts overfitting. Since no more significant optimisations are made, the training is stopped.
 
 \subsection{Comparison between blind and physics informed extrapolation}\label{ch:extrap_DHO}
 Before tuning the hyperparameters or attempting to solve the inverse problem, I want to study the effect of some of the loss terms. Firstly, in all previous simulations, the collocation points were allowed to be chosen in the extrapolated domain. This makes the extrapolation not fully blind, but physics-informed. In this experiment, the collocation points will only be chosen in the training domain, and no other hyperparameters will be changed.. This results in an actually blind test, as shown in Fugure \ref{fig:demo_forward_model_underdamped_extrapblind/summary}
@@ -672,7 +706,6 @@ I have chosen to focus on the underdamped case, as it has the most interesting d
     \centering
     \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_underdamped/predicted_solution.png}
     \caption{Predicted solution with standard hyperparameters shown in Table \ref{tab:standard_parameters_DHO}}
-    \label{fig:demo_forward_model_underdamped/predicted_solution}
 \end{figure}
 
 \subsubsection{Model complexity}
@@ -992,7 +1025,9 @@ Again, we can see that large parameter values generally lead to a larger $RMSE$.
     \label{fig:grid_zeta_omega}
 \end{figure}
 
-We can observe a lot more dispersion for the underdamped case, which means that the uncertainty of the estimates of the parameters will be smaller in this regime. For the overdamped case, the solutions are similar, and it is more difficult to extract the correct parameter value.
+We can observe a lot more dispersion for the underdamped case, which means that the uncertainty of the estimates of the parameters will be smaller in this regime. For the overdamped case, the solutions are similar, and it is more difficult to extract the correct parameter value.\\
+
+We can conclude that the most important source of uncertainty when estimating the equation parameters is the noise applied to the training data. We can investigate the uncertainty through a statistical approach where we estimate the parameters for a large amount of randomised equations, which also clarifies the model acuraccy in the different damped regimes. We conclude that the higher the damping, the more difficult the parameter extraction becomes since the solutions look very similar for variations in the parameters.
 
 \chapter{Burger's Equation}
 In this chapter, we will apply PINNs to solve the 1D Burger's equation, a PDE which describes convection and diffusion. The code for this chapter can be found in the \verb|Burgers_Equation| directory. The general form of the inviscid Burger's equation is given by:
@@ -1117,7 +1152,11 @@ This equation has a closed-form solution once the initial condition $\phi(x,t=0)
         -\frac{(x-x')^2}{4\nu t}
     \right)\,dx'.
 \end{equation}
-With this solution, we can recover $u(x,\ t)$ for ant value of $t$. For some initial conditions, analytic solutions to the Burger's equation can be found using this method. For more flexibility, I have chosen to solve the convolution integral numerically, so that any initial condition can be used as a ground truth. For validation, it is wise to calculate the $RMSE$. For a gaussian initial condition with $\nu=0.01$ and $t_end=10$, this yields:
+With this solution, we can recover $u(x,\ t)$ for ant value of $t$. For some initial conditions, analytic solutions to the Burger's equation can be found using this method. For more flexibility, I have chosen to solve the convolution integral numerically, so that any initial condition can be used as a ground truth.\\
+
+It is obviously impossible to evaluate the convolution integral from $-\infty$ to $+\infty$ numerically. However, if we constrain the domain of the integral to $[0,\, L]$ where $L$ is the length of our system, boundary effects will occur since the heat kernel will be cut off at the edges. To fix this, we pad the sides of the initial condition with a constant function matching the Dirichlet boundary condition so the domain is extrapolated. We then compute the ground truth solution using the Carl-Hopf method, and remove the paddings. In this way, we can also apply Dirichlet boundary conditions at a finite interval.\\
+
+For validation, it is wise to calculate the $RMSE$ of the physics residual. For a gaussian initial condition with $\nu=0.01$ and $t_end=10$, this yields:
 \begin{equation*}
     RMSE=5.19\cdot 10^{-6}
 \end{equation*}
@@ -1125,9 +1164,42 @@ This is a very small residual, which confirms the transformation can give us acc
 
 Using this method, I calculate the values for $u(x,\ t)$ on a dense grid of points. In order to randomise the data generation even more and avoid fine tuning to the specific spacings of this grid, I will make noisy data points by making a bilinear interpolation of the ground truth solution grid.
 \section{PINNs for the Burger's equation}
-
+With the ground truth data simulation method chosen, we can now train PINNs to solve the viscid Burger's equation. Just like for the damped harmonic oscillator, I will discuss the code implementation and show some examples, study the different loss terms and hyperparameters, and finally attempt to solve the inverse problem.
 \subsection{Code implementation}
-
+The implementation of the neural network is strongly based on the implementation of the damped harmonic oscillator PINN. The same improvements I have previously discussed apply; randomised training data and collocation points, early stopping, and model saving have all been implemented. The most important change is obviously the model itself, which now takes two inputs $(x, t)$ instead of one input $(t)$. This means that the loss functions and plotting methods also need to be adapted to handle two dimensional data. Some more adaptations that require an bit more in-depth explanation are included below.
+\subsubsection{File structure}
+The structure of the code is roughly the same as for the damped harmonic oscillator:
+\begin{tcolorbox}[title=Burger's equation file structure, colback=black!10!white, colframe=black!40!white, sharp corners]
+\begin{verbatim}
+Burgers_Equation/
+|-- config.py           - dataclass holding all physical constants,
+|                        hyperparameters, runtime settings
+|-- analytic.py          - ground truth solution schemes, including
+|                        upwind euler, lax-wendroff and Cole-Hopf method
+|-- data.py             - data generation based on ground truth solutions
+|                        for collocation points, observation points,
+|                        and initial conditions
+|-- model.py            - FCNet architecture and predictor functions
+|-- losses.py           - loss functions for the training of the model
+|-- trainer.py          - training loop
+|-- plot.py             - all plotting functions
+|-- utils.py            - helper file for small functions
+\end{verbatim}
+\end{tcolorbox}
+The only notable difference compared to the damped harmonic oscillator is the inclusion of the \verb|analytic.py| file. The ground truth is now much more complex to calculate than for the damped harmonic oscillator, so I have chosen to do all the ground truth solution generation in a separate file. 
+\subsubsection{Boundary condition loss}
+We introduce a new loss term: $\mathcal{L}_{b.c.}$ to force the PINN to respect the boundary conditions of the system. Every epoch, 50 boundary condition points are chosen randomly along both boundaries of the system (at $x=0$ and $x=L$) and the predicted value $\hat y$ and derivative $d\hat y$ are evaluated (using \verb|autograd|). The loss term $\mathcal{L}_{b.c.}$ and total loss are then calculated as:
+\begin{equation}
+    \begin{split}
+        \mathcal{L}_{b.c.} &= \frac{1}{N}\sum^N_{i=1}\left[(y_{i,\ left}-\hat y_{i,\ left})^2 + (y_{i,\ right}-\hat y_{i,\ right})^2\right]\\
+        \mathcal{L}_{tot} &= \mathcal{L}_{data} + \lambda_{i.c.}\mathcal{L}_{i.c.} + \lambda_{b.c.}\mathcal{L}_{b.c.} + \lambda_{phys}\mathcal{L}_{phys}
+    \end{split}
+\end{equation}
+\subsubsection{Plotting methods}
+I ahve implemented a wide range of plotting methods, which are described below:
+\begin{itemize}
+    \item 
+\end{itemize}
 \subsection{Code demonstration}
 
 \subsection{Comparison between blind and physics informed extrapolation}
@@ -1145,6 +1217,7 @@ Using this method, I calculate the values for $u(x,\ t)$ on a dense grid of poin
 \subsection{Overdamped case}
 
 \subsection{Statistical analysis}
+
 \chapter{Conclusion}
 
 % \appendix
