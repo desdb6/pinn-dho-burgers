@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{geeksforgeeks2024lossfunctions}
 {GeeksforGeeks}.
@@ -27,7 +27,8 @@
 
 \bibitem{guo2025ctlpinn}
 Y.~Guo, Z.~Fu, J.~Min, S.~Lin, X.~Liu, Y.~F. Rashed, and X.~Zhuang.
-\newblock Long-term simulation of physical and mechanical behaviors using curriculum-transfer-learning based physics-informed neural networks.
+\newblock Long-term simulation of physical and mechanical behaviors using
+  curriculum-transfer-learning based physics-informed neural networks.
 \newblock 2025.
 \newblock Accessed: 2026-05-07.
 
@@ -47,5 +48,10 @@ G.~van Rossum, J.~Lehtosalo, and {\L}.~Langa.
 \newblock {PEP} 484 -- type hints.
 \newblock Python Enhancement Proposal 484, Python Software Foundation, 2015.
 \newblock Status: Final. Python version: 3.5.
+
+\bibitem{watanabe2025treestructuredparzenestimatorunderstanding}
+S.~Watanabe.
+\newblock Tree-structured parzen estimator: Understanding its algorithm
+  components and their roles for better empirical performance, 2025.
 
 \end{thebibliography}

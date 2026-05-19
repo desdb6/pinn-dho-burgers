@@ -47,6 +47,7 @@ class Config:
     use_ic: bool = True
     lambda_ic: float = 1e1
     train_extrap: bool = True
+    use_data: bool = True
 
     # Data generation parameters
     n_obs: float = 15                   # Noisy observation points

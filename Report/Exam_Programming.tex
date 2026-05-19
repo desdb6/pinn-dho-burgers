@@ -541,7 +541,7 @@ In this section, I will give a quick demonstration of three PINNs, used to predi
 
 \begin{table}[H]
 \centering
-\caption{PINN Hyperparameters}
+\caption{PINN Hyperparameters}\label{tab:standard_parameters_DHO}
 \begin{tabular}{llr}
 \toprule
 \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
@@ -552,6 +552,8 @@ In this section, I will give a quick demonstration of three PINNs, used to predi
 \texttt{lr}                  & Initial learning rate         & $5\times10^{-3}$ \\
 \texttt{patience}            & Early stopping patience       & 1000   \\
 \texttt{patience\_threshold} & Min improvement to reset patience & $1\times10^{-5}$ \\
+\texttt{lambda\_phys}        & Physics loss weight & $1\times10^{-2}$ \\
+\texttt{lambda\_ic}          & Initial condition loss weight & $1\times10^{1}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -659,9 +661,62 @@ Another interesting experiment is to compare the results to a non-physics inform
 \end{figure}
 Visually, the solution does not look all to different from the PINN prediction. However, when looking at the physics residual plot, we can see that $r(t)$ is very large when compared to the PINN. This is precisely the strength of PINNs; while standard neural networks can fit to the data and interpolate between observation points, they can overfit and/or lead to unphysical predictions, while a PINN both fits the data and complies to the ODE.\\
 
-In the extrapolated domain, the results are very similar to the blind test PINN extrapolation. This makes sense, both the standard neural network and the blind test PINN do not have any information about the extrapolated domain, and we have already established that the PINN cannot generalise if it does not informed about the physics in the extrapolated domain.
+In the extrapolated domain, the results are very similar to the blind test PINN extrapolation. This makes sense, both the standard neural network and the blind test PINN do not have any information about the extrapolated domain, and we have already established that the PINN cannot generalise if it does not informed about the physics in the extrapolated domain. This makes it so thet predict more or less the same behavior in the extrapolated domain.
 
 \subsection{Hyperparameter optimisation}\label{ch:hyperparameters_DHO}
+Instead of choosing the hyperparameters through trail-and-error, it is good practise to do a structured hyperparameter optimisation to understand the effect of the most important parameters and find the optimal configuration for eficcient model training. In this section, we will investigate the effect of some of the hyperparameters, and then use the \verb|optuna| library to employ a \textit{Tree-Structured Parzen Estimator}, which can tune the hyperparameters in an automised way. Bayesian optimisation is a widely used technique to efficiently find an optimised set of hyperparameters \cite{watanabe2025treestructuredparzenestimatorunderstanding}.\\
+
+I have chosen to focus on the underdamped case, as it has the most interesting dynamics of the three cases. The bayesian optimisation will howveer be performed on all three cases. As a reminder, Figure \ref{fig:demo_forward_model_underdamped/predicted_solution} shows the predicted solution using the hyperparameters shown in Table \ref{tab:standard_parameters_DHO}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_underdamped/predicted_solution.png}
+    \caption{Predicted solution with standard hyperparameters shown in Table \ref{tab:standard_parameters_DHO}}
+    \label{fig:demo_forward_model_underdamped/predicted_solution}
+\end{figure}
+
+\subsubsection{Model complexity}
+The first two parameters we will investigate determine the \textit{model complexity}, in other words the number of parameters to be optimised. To investiugate this, we will train a model with a very low complexity, more specifically $\verb|n_layers|=2$ and $\verb|hidden|=4$. This model thus only has 8 nodes, divided between two layers. This ersults in the folowwing fit:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/low_complexity/predicted_solution.png}
+    \caption{Predicted solution from a model with a very low complexity.}
+    \label{fig:demo_forward_model_underdamped_ML/summary}
+\end{figure}
+This model is not able to fit the analytic solution over the entire training domain. The complexity is too low for the model to fit to multiple oscillations, so the improvements stall after the prediction has fitted to the first oscillation of the analytic solution. As explained before, it is important to tune the model complexity s that the model is complex enough for the given task, but not overly complex to avoid overfitting or conputationally model heavy training.
+
+\subsubsection{Learning rate}
+
+\subsubsection{Loss function weights}
+Another have already investigated what happend when $\lambda_{phys}$ is set to zero. Let us now choose a very high value, say $\lambda_{phys}=100$. This results in the following solution:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys/predicted_solution.png}
+    \caption{Predicted solution with $\lambda_{phys}=100$.}
+    \label{fig:demo_forward_model_hyperparameters/large_phys/predicted_solution}
+\end{figure}
+
+Surprisingly, the model can suddenly pake an almost perfect prediction about the extrapolated domain. The large contribution of the physics term in the loss function seems to have forced the model to learn the solution of the ODE even without observation points. This reposes the question if a fully blind generalisation is possible. If we do not privide collocation points in the extrapolated domain, but keep $\lambda_{phys}=100$, we get:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys_no_extrap/predicted_solution.png}
+    \caption{Predicted solution with $\lambda_{phys}=100$ and no collocation points in the extrapolated domain.}
+    \label{fig:demo_forward_model_hyperparameters/large_phys_no_extrap/predicted_solution}
+\end{figure}
+
+The model does not seem to dit to the oscillatory behavior, but it does decrease exponentially, which means it at least has some notions of what the solution would look like. This was not the case in the previous blind test, where the solution evened out at a constant value (see Figure \ref{fig:demo_forward_model_underdamped_extrapblind/summary}).\\
+
+Finally, I want to see if the model can fit to the solution \ref{without} any observation points. This results in the following prediction:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution.png}
+    \caption{Predicted solution with $\lambda_{phys}=100$ and no noisy observation points for training.}
+    \label{fig:demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution}
+\end{figure}
+The model is in fact able to reconstruct the analytic solution without any data points being provided. This does however negat the point of using a neural network, since it is also possible to reconstruct the solution with finite-difference methods (ex. Euler method or Runge-Kutta). PINNs are more applicable to backwards problems, where we need to extract the (unknown) physical parameters from observational data. This means that we need to balance the loss terms so that both the observation points and the physics of the system are taken into account in the training loop. 
+
+\subsubsection{Optuna}
 
 \section{Inverse problem}\label{ch:inverse_DHO}
 
@@ -736,8 +791,6 @@ In the extrapolated domain, the results are very similar to the blind test PINN 
     \label{fig:parameter_estimation_2/parameter_space_rmse_full}
 \end{figure}
 
-\subsection{Discussion}
-
 \chapter{Burger's Equation}
 
 \section{Ground truth solving strategies}
@@ -767,9 +820,6 @@ In the extrapolated domain, the results are very similar to the blind test PINN 
 \subsection{Overdamped case}
 
 \subsection{Statistical analysis}
-
-\subsection{Discussion}
-
 \chapter{Conclusion}
 
 % \appendix

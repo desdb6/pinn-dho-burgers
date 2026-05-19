@@ -115,13 +115,16 @@ def train(
         optimiser.zero_grad()
 
         # -- data loss ------------------------------------
-        if cfg.randomise_observation:
-            t_obs, y_obs = make_train_observation(cfg)
-            t_obs_t    = to_tensor(t_obs) # Randomise every epoch
-            y_obs_t = to_tensor(y_obs)
+        if cfg.use_data:
+            if cfg.randomise_observation:
+                t_obs, y_obs = make_train_observation(cfg)
+                t_obs_t    = to_tensor(t_obs) # Randomise every epoch
+                y_obs_t = to_tensor(y_obs)
 
-        y_pred = model(t_obs_t)
-        l_data = loss_data(y_pred, y_obs_t)
+            y_pred = model(t_obs_t)
+            l_data = loss_data(y_pred, y_obs_t)
+        else:
+            l_data = torch.zeros(1, device=device)
 
         # -- physics loss ------------------------------------
         if cfg.randomise_collocation:
