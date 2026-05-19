@@ -17,7 +17,7 @@ from dataclasses import dataclass
 @dataclass
 class Config:
     # Physical parameters
-    nu: float = 0.05                   # viscosity
+    nu: float = 0.1                   # viscosity
 
     # Initial conditions
     ic: str = "Gauss"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"

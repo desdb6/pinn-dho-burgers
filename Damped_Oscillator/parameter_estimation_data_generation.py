@@ -43,8 +43,7 @@ CSV_FIELDS = [
 
 def run_single(run_idx: int, device) -> dict | None:
     """
-    Randomise nu, train an InverseFCNet, return result row.
-    Returns None if training is skipped (e.g. shock too early).
+    Randomise parameters, train an InverseFCNet, return result row.
     """
     damped_case = np.random.choice(["underdamped", "overdamped", "critically_damped"], p=[0.45, 0.45, 0.1])
     if damped_case == "underdamped":
