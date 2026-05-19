@@ -5,10 +5,8 @@ Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
 """
-from matplotlib.axes import Axes
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import convolve
 import matplotlib.animation as animation
 from tqdm import tqdm
 from config import Config
@@ -118,6 +116,7 @@ def cole_hopf_trans(u_0: np.ndarray, cfg: Config) -> np.ndarray:
     return phi_0
 
 def heat_convolution(phi_0: np.ndarray, t: float, cfg: Config, x_grid: np.ndarray) -> np.ndarray:
+    """Convolute with the heat kernel."""
     if t == 0.0:
         return phi_0.copy()
 
@@ -138,7 +137,7 @@ def solve_burgers_padded(u_0: np.ndarray, t: float, cfg: Config, pad: int) -> np
     u_0_padded    = np.pad(u_0, pad_width=pad, mode='edge')
     x_grid_padded = np.arange(len(u_0_padded)) * cfg.delta_x - pad * cfg.delta_x
 
-    phi_0  = cole_hopf_trans(u_0_padded, cfg)            # no x_grid needed
+    phi_0  = cole_hopf_trans(u_0_padded, cfg)
     phi_t  = heat_convolution(phi_0, t, cfg, x_grid_padded)
     u_full = reverse_cole_hopf_trans(phi_t, cfg)
 
@@ -462,6 +461,22 @@ def plot_anim(sol: np.ndarray, plot_pause: float = 1) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    cfg = Config(ic="Step_down")
-    sol, t_arr = cole_hopf_grid(cfg)
-    plot_anim(sol, 1)
+    cfg = Config(ic="Gauss")
+    cfg.height = 2
+    u_init = u_0(cfg)
+
+    # Upwind Euler
+    sol_upwind, t_arr_upwind = euler_method(u_init, cfg.t_extrap, cfg)
+    rmse_upwind = rmse(sol_upwind, t_arr_upwind, cfg)
+
+    # Lax-Wendroff
+    sol_lw, t_arr_lw = lax_wendroff(u_init, cfg.t_extrap, cfg)
+    rmse_lw = rmse(sol_lw, t_arr_lw, cfg)
+
+    # Cole-Hopf integral
+    sol_ch, t_arr_ch = cole_hopf_grid(cfg, pad=600)
+    rmse_ch = rmse(sol_ch, t_arr_ch, cfg)
+
+    print(f"RMSE Upwind Euler : {rmse_upwind:.6e}")
+    print(f"RMSE Lax-Wendroff : {rmse_lw:.6e}")
+    print(f"RMSE Cole-Hopf : {rmse_ch:.6e}")

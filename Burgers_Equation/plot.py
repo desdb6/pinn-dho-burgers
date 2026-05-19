@@ -846,14 +846,14 @@ def plot_method_of_characteristics(
         x_char = x0 + u0 * t_line
         ax.plot(x_char, t_line, lw=1.2, color='blue',
                 label="Characteristics" if i == 0 else None)
-    if cfg.time_to_shock is None:
+    if cfg.t_shock is None:
         print("Cannot plot shock time, shock time is too small/large")
     else:
-        ax.axhline(cfg.time_to_shock, color='red', linestyle='--', label="Shockwave time")
+        ax.axhline(cfg.t_shock, color='red', linestyle='--', label="Shockwave time")
 
-    ax.set_xlabel("x")
-    ax.set_ylabel("t")
-    ax.set_title("Method of Characteristics")
+    ax.set_xlabel("$x$", fontsize=14)
+    ax.set_ylabel("$t$", fontsize=14)
+    ax.set_title("Method of Characteristics", fontsize=16)
     ax.set_xlim(0, cfg.L)
     ax.set_ylim(0, t_end)
     ax.grid(True, alpha=0.3)
