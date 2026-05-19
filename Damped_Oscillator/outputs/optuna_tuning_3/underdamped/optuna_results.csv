@@ -1,0 +1,2 @@
+trial,state,rmse,hidden,n_layers,lambda_phys,lambda_ic,lr,scheduler_gamma,scheduler_step
+0,complete,0.042154401540756226,48,6,0.8471801418819978,15.75132049977973,0.0002051338263087451,0.3935967122017216,1000
