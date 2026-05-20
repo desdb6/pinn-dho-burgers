@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve 
+Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 
 Usage:
@@ -10,45 +10,42 @@ Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
 """
 
-import argparse
+import numpy as np
 from pathlib import Path
-from config import Config
 from analytic import predict_shock_time
+from config import Config
 from data import generate_data
-from model import FCNet
+from model import InverseFCNet
 from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--ic",
-        type=str,
-        default=None,
-        metavar="VAL",
-        help="Initial conditions (e.g. --ic 'Gauss')",
-    )
-    parser.add_argument(
-        "--nu",
-        type=float,
-        default=None,
-        metavar="VAL",
-        help="Damping coefficient (e.g. --nu 0.5)",
-    )
-    return parser.parse_args()
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/Gauss_backward_demo_highnu"
+OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():
     device = get_device()
     print(f"Device : {device}")
 
-    # -- read parsed arguments ------------------------------------------------
-    args = parse_args()
-    cfg = Config(**vars(args))
-    output_path = Path.cwd() / f"Burgers_Equation/outputs/forward_{args.ic}_{args.nu}"
-    output_path.mkdir(exist_ok=True)
+    # -- randomise viscosity ------------------------------------------------
+    # nu = np.random.uniform(0.005, 0.015) # Low viscosity
+    nu = np.random.uniform(0.1, 0.5)   # High viscosity
+    print("------------------------------------------------"
+          f"\nRandomised viscosity : {nu:.4f}"
+          "\n------------------------------------------------")
+
+    cfg = Config(
+        nu=nu,
+        hidden=64,
+        n_layers=6,
+        lambda_phys=1e1,
+        lambda_ic=1e2,
+        lr=0.003,
+        scheduler_gamma=0.6,
+        scheduler_step=3000,
+        patience_thershold=1e-5,
+        use_data=True
+    )
 
     time_to_shock = predict_shock_time(cfg)
     if time_to_shock <= 5 and time_to_shock >= 0.1:
@@ -63,9 +60,10 @@ def main():
         cfg.t_dom = time_to_shock + 2.0
         cfg.t_extrap = time_to_shock + 4.0
 
-    # -- train model ------------------------------------------------
+    print(f"Config : {cfg}")
+
     data     = generate_data(cfg)
-    model    = FCNet(cfg)
+    model    = InverseFCNet(cfg)
     history, snapshots, best_state = train(
         model       = model,
         data        = data,
@@ -75,11 +73,11 @@ def main():
     )
 
     # -- save model ------------------------------------------------
-    save_model(best_state, history, snapshots, cfg, output_path)
-    print(f"Model saved to {output_path}")
+    save_model(best_state, history, snapshots, cfg, OUTPUT_PATH)
+    print(f"Model saved to {OUTPUT_PATH}")
 
     # -- make plots ------------------------------------------------
-    save_plots_from_file(output_path)
+    save_plots_from_file(OUTPUT_PATH)
 
 
 if __name__ == "__main__":
