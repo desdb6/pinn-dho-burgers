@@ -69,7 +69,7 @@ def plot_gt_1D(
     show        : whether to display the figure
     """
     if times is None:
-        times = np.linspace(0, cfg.t_dom, 4, endpoint=False).tolist()
+        times = np.linspace(0, cfg.t_extrap, 4, endpoint=False).tolist()
     if len(times) != 4:
         raise ValueError(f"Expected 4 times, got {len(times)}")
 
@@ -159,16 +159,17 @@ def plot_pred_1D(
                 color=model_color, lw=2.0)
 
         # -- extrapolation shading -----------------------------------------
-        if t_val > cfg.t_dom:
-            ax.set_title(
-                rf"$t = {t_val:.3f}$ [extrap]   |   RMSE = {err:.4f}",
-                fontsize=9, loc="left", pad=4, color="#444441"
-            )
-        else:
-            ax.set_title(
-                rf"$t = {t_val:.3f}$   |   RMSE = {err:.4f}",
-                fontsize=9, loc="left", pad=4, color="#444441"
-            )
+        if cfg.train_extrap == False:
+            if t_val > cfg.t_dom:
+                ax.set_title(
+                    rf"$t = {t_val:.3f}$ [extrap]   |   RMSE = {err:.4f}",
+                    fontsize=9, loc="left", pad=4, color="#444441"
+                )
+            else:
+                ax.set_title(
+                    rf"$t = {t_val:.3f}$   |   RMSE = {err:.4f}",
+                    fontsize=9, loc="left", pad=4, color="#444441"
+                )
 
         ax.set_xlim(0, cfg.L)
         ax.set_ylabel(f"$u(x, t={t_val:.3f})$", fontsize=8)
@@ -278,14 +279,14 @@ def plot_solution_grid(
         ax.plot(x_plot, u_true,  color=GRAY,        lw=1.4, alpha=0.9)
         ax.plot(x_plot, u_pred,  color=model_color,  lw=2.0)
 
-        # -- observations near this time slice -----------------------------
-        dt_window = cfg.t_extrap / (2 * n_times)
-        mask = np.abs(data["t_obs"] - t_val) < dt_window
-        if mask.any():
-            ax.scatter(data["x_obs"][mask], data["u_obs"][mask],
-                       color=BLUE, s=28, marker="o", zorder=5, alpha=0.85)
-
-        extrap_tag = "  [extrap]" if t_val > cfg.t_dom else ""
+        # # -- observations near this time slice -----------------------------
+        # dt_window = cfg.t_extrap / (2 * n_times)
+        # mask = np.abs(data["t_obs"] - t_val) < dt_window
+        # if mask.any():
+        #     ax.scatter(data["x_obs"][mask], data["u_obs"][mask],
+        #                color=BLUE, s=28, marker="o", zorder=5, alpha=0.85)
+    
+        extrap_tag = "  [extrap]" if t_val > cfg.t_dom and cfg.train_extrap==False else ""
         ax.set_title(rf"$t = {t_val:.3f}${extrap_tag}   |   RMSE = {err:.4f}",
                      fontsize=9, loc="left", pad=4, color="#444441")
         ax.set_xlim(0, cfg.L)
@@ -567,7 +568,8 @@ def plot_epoch_figure_2D(
         fig.colorbar(im, ax=ax, fraction=0.03, pad=0.04, label="$u(x,t)$")
 
         # training domain boundary
-        ax.axhline(cfg.t_dom, color=GRAY, lw=1.0, ls="--", alpha=0.7)
+        if cfg.train_extrap == False:
+            ax.axhline(cfg.t_dom, color=GRAY, lw=1.0, ls="--", alpha=0.7)
 
         ax.set_title(rf"Epoch = {epoch}",
                      fontsize=9, loc="left", pad=4, color="#444441")
@@ -580,10 +582,11 @@ def plot_epoch_figure_2D(
             ax.set_xlabel("$x$", fontsize=10)
 
         if idx == 0:
-            ax.annotate("training", xy=(0.02, cfg.t_dom / cfg.t_extrap - 0.04),
-                        xycoords="axes fraction", fontsize=7, color=GRAY)
-            ax.annotate("extrap",   xy=(0.02, cfg.t_dom / cfg.t_extrap + 0.01),
-                        xycoords="axes fraction", fontsize=7, color=GRAY)
+            if cfg.train_extrap == False:
+                ax.annotate("training", xy=(0.02, cfg.t_dom / cfg.t_extrap - 0.04),
+                            xycoords="axes fraction", fontsize=7, color=GRAY)
+                ax.annotate("extrap",   xy=(0.02, cfg.t_dom / cfg.t_extrap + 0.01),
+                            xycoords="axes fraction", fontsize=7, color=GRAY)
             if cfg.t_shock is not None:
                 ax.annotate("shock",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
                             xycoords="axes fraction", fontsize=7, color=GREEN)
@@ -606,18 +609,6 @@ def plot_summary_2D(
     output_path: Path = None,
     show:        bool = True
 ) -> None:
-    """
-    Six-panel summary figure for the Burgers PINN.
-
-    Panels
-    ------
-    1. Ground truth u(x,t)          — 2D heatmap
-    2. PINN prediction û(x,t)       — 2D heatmap
-    3. Physics residual |r(x,t)|    — 2D heatmap
-    4. Data residual |û - u|²       — 2D heatmap
-    5. 3D ground truth surface      — with observation scatter
-    6. Training loss curves         — log scale
-    """
     # -- detect inverse mode ----------------------------------------------
     inverse = any("_nu_raw" in k for v in snapshots.values() for k in v.keys())
 
@@ -639,7 +630,7 @@ def plot_summary_2D(
     u_t  = np.gradient(u_pred, dt, axis=0)
     u_x  = np.gradient(u_pred, dx, axis=1)
     u_xx = np.gradient(u_x,    dx, axis=1)
-    phys_res = np.abs(u_t + u_pred * u_x - cfg.nu * u_xx)
+    phys_res = np.abs(u_t + u_pred * u_x - cfg.nu * u_xx)**2
 
     # -- data residual -----------------------------------------------------
     data_res = (u_pred - u_true) ** 2
@@ -651,8 +642,8 @@ def plot_summary_2D(
     ax1 = fig.add_subplot(2, 3, 1)
     ax2 = fig.add_subplot(2, 3, 2)
     ax3 = fig.add_subplot(2, 3, 3)
-    ax4 = fig.add_subplot(2, 3, 4)
-    ax5 = fig.add_subplot(2, 3, 5, projection="3d")
+    ax4 = fig.add_subplot(2, 3, 4, projection="3d")
+    ax5 = fig.add_subplot(2, 3, 5)
     ax6 = fig.add_subplot(2, 3, 6)
 
     extent = [0, cfg.L, 0, cfg.t_extrap]
@@ -664,7 +655,8 @@ def plot_summary_2D(
             spine.set_edgecolor(LGRAY)
         ax.set_xlabel("$x$",  fontsize=10)
         ax.set_ylabel("$t$",  fontsize=10)
-        ax.axhline(cfg.t_dom, color=GRAY, lw=0.8, ls="--", alpha=0.6)
+        if cfg.train_extrap == False:
+            ax.axhline(cfg.t_dom, color=GRAY, lw=0.8, ls="--", alpha=0.6)
         ax.set_xticks(np.linspace(0, cfg.L,        5))
         ax.set_yticks(np.linspace(0, cfg.t_extrap, 5))
 
@@ -681,8 +673,9 @@ def plot_summary_2D(
                   fontsize=9, loc="left", color="#444441")
     if cfg.t_shock is not None:
         ax1.axhline(cfg.t_shock, color=GREEN, lw=1.5, ls="--")
-        ax1.annotate("Inviscous shock formation time",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
-                        xycoords="axes fraction", fontsize=7, color=GREEN)
+        ax1.annotate("Inviscous shock formation time",
+                     xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                     xycoords="axes fraction", fontsize=7, color=GREEN)
 
     # -- panel 2: prediction -----------------------------------------------
     style_2d(ax2)
@@ -693,50 +686,38 @@ def plot_summary_2D(
                   fontsize=9, loc="left", color="#444441")
     if cfg.t_shock is not None:
         ax2.axhline(cfg.t_shock, color=GREEN, lw=1.5, ls="--")
-        ax2.annotate("Inviscous shock formation time",    xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
-                        xycoords="axes fraction", fontsize=7, color=GREEN)
-
+        ax2.annotate("Inviscous shock formation time",
+                     xy=(0.02, cfg.t_shock / cfg.t_extrap - 0.04),
+                     xycoords="axes fraction", fontsize=7, color=GREEN)
 
     # -- panel 3: physics residual -----------------------------------------
     style_2d(ax3)
     im3 = ax3.imshow(phys_res, origin="lower", extent=extent,
                      aspect="auto", cmap="Reds", vmin=0)
     add_cbar(fig, im3, ax3, "$|r|$")
-    ax3.set_title(r"Panel 3 -- Physics residual $|u_t + u\,u_x - \nu u_{xx}|$",
+    mean_phys = np.sqrt(np.mean(phys_res))
+    ax3.set_title(rf"Panel 3 -- Physics residual $|u_t + u\,u_x - \nu u_{{xx}}|^2 = {mean_phys:.4f}$",
                   fontsize=9, loc="left", color="#444441")
 
-    # -- panel 4: data residual --------------------------------------------
-    style_2d(ax4)
-    im4 = ax4.imshow(data_res, origin="lower", extent=extent,
-                     aspect="auto", cmap="Reds", vmin=0)
-    add_cbar(fig, im4, ax4, r"$|\hat{u}-u|^2$")
-    ax4.set_title(r"Panel 4 -- Data residual $|\hat{u}(x,t) - u(x,t)|^2$",
-                  fontsize=9, loc="left", color="#444441")
-
-    # -- panel 5: 3D surface + observation scatter -------------------------
-    x_3d = np.linspace(0, cfg.L,        200)
-    t_3d = np.linspace(0, cfg.t_extrap, 200)
-    x_3d_mat, t_3d_mat = np.meshgrid(x_3d, t_3d)
-    u_3d = interpolate_solution_arr(
-        u_grid, t_arr, x_3d_mat.ravel(), t_3d_mat.ravel(), cfg
-    ).reshape(x_3d_mat.shape)
-
-    ax5.plot_surface(x_3d_mat, t_3d_mat, u_3d,
+    # -- panel 4: 3D surface (prediction) + observation scatter -----------
+    ax4.plot_surface(x_mat, t_mat, u_pred,
                      cmap="RdBu_r", alpha=0.7, linewidth=0, antialiased=True,
                      vmin=-v, vmax=v)
-    ax5.scatter(data["x_obs"], data["t_obs"], data["u_obs"],
-                color=BLUE, s=8, zorder=5, alpha=0.6, label="Observations")
-    ax5.set_xlabel("$x$",    fontsize=9, labelpad=4)
-    ax5.set_ylabel("$t$",    fontsize=9, labelpad=4)
-    ax5.set_zlabel("$u$",    fontsize=9, labelpad=4)
-    ax5.set_title("Panel 5 -- Ground truth + observations",
-                  fontsize=9, loc="left", color="#444441")
-    ax5.tick_params(labelsize=7)
-    ax5.legend()
+    if cfg.use_data == True:
+        ax4.scatter(data["x_obs"], data["t_obs"], data["u_obs"],
+                    color=BLUE, s=8, zorder=5, alpha=0.6, label="Observations")
+        ax4.legend()
 
-    # -- panel 6: loss curves ----------------------------------------------
-    ax6.set_facecolor(PANEL)
-    for spine in ax6.spines.values():
+    ax4.set_xlabel("$x$",    fontsize=9, labelpad=4)
+    ax4.set_ylabel("$t$",    fontsize=9, labelpad=4)
+    ax4.set_zlabel("$u$",    fontsize=9, labelpad=4)
+    ax4.set_title("Panel 4 -- PINN prediction in 3D",
+                  fontsize=9, loc="left", color="#444441")
+    ax4.tick_params(labelsize=7)
+    
+    # -- panel 5: loss curves ----------------------------------------------
+    ax5.set_facecolor(PANEL)
+    for spine in ax5.spines.values():
         spine.set_edgecolor(LGRAY)
 
     LOSS_STYLE = {
@@ -750,28 +731,57 @@ def plot_summary_2D(
     epochs = history["epoch"]
     for key, (color, ls, label) in LOSS_STYLE.items():
         if key in history and any(v > 0 for v in history[key]):
-            ax6.semilogy(epochs, history[key], color=color, ls=ls, lw=1.6, label=label)
+            ax5.semilogy(epochs, history[key], color=color, ls=ls, lw=1.6, label=label)
+
     for ep in cfg.snapshot_epochs:
         if ep <= max(epochs):
-            ax6.axvline(ep, color=LGRAY, lw=0.6, ls=":", zorder=0)
-    ax6.set_xlabel("Epoch",          fontsize=10)
-    ax6.set_ylabel("Loss (log)",     fontsize=10)
-    ax6.set_xlim(min(epochs), max(epochs))
-    ax6.legend(fontsize=8, framealpha=0.5, ncol=2)
-    ax6.set_title("Panel 6 -- Training loss curves",
+            ax5.axvline(ep, color=LGRAY, lw=0.6, ls=":", zorder=0)
+
+    # -- panel 6: data residual --------------------------------------------
+    style_2d(ax6)
+    im6 = ax6.imshow(data_res, origin="lower", extent=extent,
+                    aspect="auto", cmap="Reds", vmin=0)
+    add_cbar(fig, im6, ax6, r"$|\hat{u}-u|^2$")
+    mean_data = np.sqrt(np.mean(data_res))
+    ax6.set_title(rf"Panel 6 -- Data residual $|\hat{{u}}(x,t) - u(x,t)|^2 = {mean_data:.4f}$",
+                fontsize=9, loc="left", color="#444441")
+
+    # -- early stopping marker on loss plot (ax5) -------------------------
+    final_epoch = max(epochs)
+    if final_epoch < cfg.n_epochs:
+        ax5.axvline(final_epoch, color=RED, lw=1.2, ls="--", zorder=1)
+        ax5.annotate(f"Stopped\n@ {int(final_epoch)}",
+                     xy=(final_epoch, 1),
+                     xycoords=("data", "axes fraction"),
+                     xytext=(-28, -20), textcoords="offset points",
+                     fontsize=7, color=RED, va="top")
+
+    ax5.set_xlabel("Epoch",      fontsize=10)
+    ax5.set_ylabel("Loss (log)", fontsize=10)
+    ax5.set_xlim(min(epochs), max(epochs))
+    ax5.legend(fontsize=8, framealpha=0.5, ncol=2)
+
+    stopped_str = f"stopped @ {final_epoch}" if final_epoch < cfg.n_epochs else f"ran full {cfg.n_epochs} epochs"
+    ax5.set_title(f"Panel 5 -- Training loss curves  |  {stopped_str}",     # FIX ②
                   fontsize=9, loc="left", color="#444441")
 
     # -- suptitle ----------------------------------------------------------
     if inverse:
         fig.suptitle(
             rf"Burgers PINN summary  |  $\nu={cfg.nu:.3f} \ \hat\nu={model.nu_hat.item():.3f}$  |  "
-            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom:.3f} \ t_{{extrap}}={cfg.t_extrap:.3f}$",
+            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_extrap:.3f}$",
+            fontsize=11, color="#2C2C2A"
+        )
+    elif cfg.train_extrap == False:
+        fig.suptitle(
+            rf"Burgers PINN summary  |  $\nu={cfg.nu:.3f}$  |  "
+            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom:.3f}$  $t_{{extrap}}={cfg.t_extrap:.3f}$",
             fontsize=11, color="#2C2C2A"
         )
     else:
         fig.suptitle(
             rf"Burgers PINN summary  |  $\nu={cfg.nu:.3f}$  |  "
-            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_dom:.3f}$  $t_{{extrap}}={cfg.t_extrap:.3f}$",
+            rf"IC: {cfg.ic}  |  $t_{{dom}}={cfg.t_extrap:.3f}$",
             fontsize=11, color="#2C2C2A"
         )
 
@@ -837,7 +847,7 @@ def plot_method_of_characteristics(
     u_samples = u[index_samples]
     x_samples = index_samples * cfg.delta_x
 
-    t_end = cfg.t_dom
+    t_end = cfg.t_extrap
     t_line = np.linspace(0, t_end, 200)
 
     fig, ax = plt.subplots(figsize=(10,8))
@@ -1012,15 +1022,16 @@ def save_model_plots(
         show=False
     )
 
-    plot_three_times(
-        model=model,
-        cfg=cfg,
-        snapshots=snapshots,
-        u_grid=data["u_grid"],
-        t_arr=data["t_arr"],
-        output_path=output_path / "3_times.png",
-        show=False
-    )
+    if cfg.t_shock is not None:
+        plot_three_times(
+            model=model,
+            cfg=cfg,
+            snapshots=snapshots,
+            u_grid=data["u_grid"],
+            t_arr=data["t_arr"],
+            output_path=output_path / "3_times.png",
+            show=False
+        )
 
     plot_losses(
         history=history,

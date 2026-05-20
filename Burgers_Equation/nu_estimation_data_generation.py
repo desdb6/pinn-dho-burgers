@@ -23,7 +23,7 @@ from model import InverseFCNet
 from trainer import train
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/nu_estimation"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/nu_estimation_2"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 CSV_PATH   = OUTPUT_PATH / "nu_pairs.csv"
@@ -39,22 +39,22 @@ def run_single(run_idx: int, device) -> dict | None:
         nu = float(np.random.uniform(0.005, 0.05))
     else:
         nu = float(np.random.uniform(0.05, 0.5))
-    ic = np.random.choice(["Gauss", "N_wave", "Step_down", "Step_up"], p=[0.4, 0.2, 0.2, 0.2])
+    ic = np.random.choice(["Gauss", "N_wave", "Step_up"], p=[1, 0, 0])
 
     print(f"-----Randomised viscosity : {nu:.4f}-----")
     print(f"-----Randomised initial condition : {ic}-----")
     cfg = Config(
         ic=ic,
         nu=nu,
-        hidden=48,
-        n_layers=5,
-        lambda_phys=7.69867563915968,
-        lambda_ic=8.30475530796565,
-        lr=0.002440602931477322,
-        scheduler_gamma=0.8296654493228313,
+        hidden=64,
+        n_layers=6,
+        lambda_phys=1e1,
+        lambda_ic=1e2,
+        lr=0.003,
+        scheduler_gamma=0.6,
         scheduler_step=3000,
-        adam_beta1=0.9130634551221432,
-        adam_beta2=0.990340166854029
+        patience_thershold=1e-5,
+        use_data=True
         )
 
     time_to_shock = predict_shock_time(cfg)
@@ -132,7 +132,7 @@ def main():
             if write_header:
                 writer.writeheader()
 
-            while run_idx<=1000:
+            while True:
                 run_idx += 1
                 print(f"--- Run {run_idx} ---")
 

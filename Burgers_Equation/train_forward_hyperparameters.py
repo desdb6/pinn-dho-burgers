@@ -20,7 +20,7 @@ from plot import save_plots_from_file
 from utils import get_device, save_model
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-OUTPUT_PATH = Path.cwd() / "outputs"
+OUTPUT_PATH = SCRIPT_DIR / "outputs"
 
 def train_model(cfg: Config, output_path: str) -> None:
     device = get_device()
@@ -81,15 +81,7 @@ def main():
             lambda_phys=1e2,
         ),
         Config(
-            lambda_phys=1e2,
-            train_extrap=False
-        ),
-        Config(
-            lambda_phys=1e2,
-            use_data=False
-        ),
-        Config(
-            lambda_ic=0,
+            use_bc=False
         ),
         Config(
             lr=0.05
@@ -104,15 +96,13 @@ def main():
     label_list = [
         "low_complexity",
         "large_phys",
-        "large_phys_no_extrap",
-        "large_phys_no_data",
-        "no_ic",
+        "no_bc",
         "high_lr",
         "low_lr"
     ]
 
     for cfg, label in zip(cfg_list, label_list):
-        train_model(cfg, label)
+        train_model(cfg, OUTPUT_PATH / f"Gauss_nu_0.05_{label}")
     
 
 if __name__ == "__main__":

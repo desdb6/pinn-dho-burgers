@@ -71,13 +71,14 @@ def train_model(cfg: Config, output_path: str) -> None:
 
 
 if __name__ == "__main__":
-    ics = ["Gauss", "Step_up", "N_wave"]
-    nu_values = [0.1, 0.05, 0.01]
+    ics = ["Gauss"]
+    nu_values = [0.05]
     for ic in ics:
         for nu in nu_values:
             cfg = Config(
                 ic=ic,
                 nu=nu,
+                use_data=True,
                 use_physics=False,
                 use_ic=False,
                 use_bc=False

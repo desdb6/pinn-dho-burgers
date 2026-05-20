@@ -133,21 +133,21 @@ The constants $A$ and $B$ are again determined by the initial conditions:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/analytic_solution_overdamped.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/analytic_solution_overdamped.png}
     \caption{Analytic solution for the overdamped harmonic oscillator.}
     \label{fig:analytic_solution_overdamped}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/analytic_solution_criticallydamped.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/analytic_solution_criticallydamped.png}
     \caption{Analytic solution for the critically damped harmonic oscillator.}
     \label{fig:analytic_solution_critically_damped}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/analytic_solution_underdamped.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/analytic_solution_underdamped.png}
     \caption{Analytic solution for the underdamped harmonic oscillator.}
     \label{fig:analytic_solution_underdamped}
 \end{figure}
@@ -195,7 +195,7 @@ To investigate the effect of the initial condition term, the term can be dropped
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/ic_effect.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/ic_effect.png}
     \caption{Predicted solutions to the ODE of the $\mathcal{L}_{i.c.}$ is included and excluded. In this specific case, the $\mathcal{L}_{i.c.}$ is not absolutely necessary, because the noisy observation points give enoug information for the model to accurately predict the initial conditions.}
     \label{fig:ic_comp}
 \end{figure}
@@ -424,7 +424,7 @@ The \verb|unsqueeze()| method takes a pytorch tensor of rank $n$ and adds a dime
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/unsqueeze.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/unsqueeze.png}
     \caption{Unsqueezing of a $2\times2$ tensor into $1\times2\times2$,  $2\times1\times2$, and $2\times2\times1$ tensors by using the  \texttt{unsqueeze()} method of the \texttt{torch.tensor} class.  \cite{so_unsqueeze2019}}
     \label{fig:unsqueeze}
 \end{figure}
@@ -548,14 +548,19 @@ In this section, I will give a quick demonstration of three PINNs, used to predi
 \toprule
 \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
 \midrule
-\texttt{hidden}              & Hidden units per layer        & 64     \\
-\texttt{n\_layers}           & Number of hidden layers       & 5      \\
-\texttt{n\_epochs}           & Maximum training epochs       & 30000  \\
-\texttt{lr}                  & Initial learning rate         & $5\times10^{-3}$ \\
-\texttt{patience}            & Early stopping patience       & 1000   \\
-\texttt{patience\_threshold} & Min improvement to reset patience & $1\times10^{-5}$ \\
-\texttt{lambda\_phys}        & Physics loss weight & $1\times10^{-2}$ \\
-\texttt{lambda\_ic}          & Initial condition loss weight & $1\times10^{1}$ \\
+\texttt{hidden}               & Hidden units per layer            & 64                   \\
+\texttt{n\_layers}            & Number of hidden layers           & 5                    \\
+\texttt{n\_epochs}            & Maximum training epochs           & 30000                \\
+\texttt{lr}                   & Initial learning rate             & $5\times10^{-3}$     \\
+\texttt{patience}             & Early stopping patience           & 1000                 \\
+\texttt{patience\_threshold}  & Min improvement to reset patience & $1\times10^{-5}$     \\
+\texttt{scheduler\_step}      & LR scheduler step size            & 3000                 \\
+\texttt{scheduler\_gamma}     & LR scheduler decay factor         & $0.5$                \\
+\texttt{lambda\_phys}         & Physics loss weight               & $1\times10^{-2}$     \\
+\texttt{lambda\_ic}           & Initial condition loss weight     & $1\times10^{1}$      \\
+\texttt{n\_col\_dom}          & Collocation points (domain)       & 500                  \\
+\texttt{n\_obs}               & Observation points                & 15                   \\
+\texttt{sigma}                & Observation noise $\sigma$        & $5\times10^{-2}$     \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -580,7 +585,7 @@ The training was stopped early after $\sim1600$ epochs and the final prediction 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_overdamped/summary.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_forward_model_overdamped/summary.png}
     \caption{Summary plot for the overdamped case.}
     \label{fig:demo_forward_model_overdamped/summary}
 \end{figure}
@@ -609,7 +614,7 @@ The training was stopped early after $\sim1400$ epochs and the final prediction 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_criticallydamped/summary.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_forward_model_criticallydamped/summary.png}
     \caption{Summary plot for the critically damped case.}
     \label{fig:demo_forward_model_criticallydamped/summary}
 \end{figure}
@@ -634,7 +639,7 @@ The training was stopped early after $\sim4700$ epochs and the final prediction 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_underdamped/summary.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_forward_model_underdamped/summary.png}
     \caption{Summary plot for the underdamped case.}
     \label{fig:demo_forward_model_underdamped/summary}
 \end{figure}
@@ -647,28 +652,28 @@ Since the underdamped regime is the most interesting, I will show the rest of th
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Images/demo_forward_model_underdamped/analytic_solution.png}
+    \includegraphics[width=0.6\textwidth]{Images_DHO/demo_forward_model_underdamped/analytic_solution.png}
     \caption{Predicted solution for the underdamped case.}
     \label{fig:demo_forward_model_underdamped/analytic_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{Images/demo_forward_model_underdamped/predicted_solution.png}
+    \includegraphics[width=0.6\textwidth]{Images_DHO/demo_forward_model_underdamped/predicted_solution.png}
     \caption{Predicted solution for the underdamped case.}
     \label{fig:demo_forward_model_underdamped/predicted_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Images/demo_forward_model_underdamped/epoch_snapshots.png}
+    \includegraphics[width=0.8\textwidth]{Images_DHO/demo_forward_model_underdamped/epoch_snapshots.png}
     \caption{Epoch snapshots for the underdamped case.}
     \label{fig:demo_forward_model_underdamped/epoch_snapshots}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_underdamped/losses.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_forward_model_underdamped/losses.png}
     \caption{Loss convergence plot for the underdamped case.}
     \label{fig:demo_forward_model_underdamped/losses}
 \end{figure}
@@ -679,7 +684,7 @@ These plots give us some useful insights. The epoch plot (Figure \ref{fig:demo_f
 Before tuning the hyperparameters or attempting to solve the inverse problem, I want to study the effect of some of the loss terms. Firstly, in all previous simulations, the collocation points were allowed to be chosen in the extrapolated domain. This makes the extrapolation not fully blind, but physics-informed. In this experiment, the collocation points will only be chosen in the training domain, and no other hyperparameters will be changed.. This results in an actually blind test, as shown in Fugure \ref{fig:demo_forward_model_underdamped_extrapblind/summary}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_underdamped_extrapblind/summary.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_forward_model_underdamped_extrapblind/summary.png}
     \caption{Summary plot for a PINN whithout collocation points in the extrapolated domain. This leads to a fully blind predicition for $t>t_{dom}$.}
     \label{fig:demo_forward_model_underdamped_extrapblind/summary}
 \end{figure}
@@ -689,7 +694,7 @@ In the training domain, the predicted solution is virtually the same as in the p
 Another interesting experiment is to compare the results to a non-physics informed neural network, as was done in the provided code. For this, the physics terms $\mathcal{L}_{phys}$ and $\mathcal{L}_{i.c.}$ are dropped from the loss function, and the model is retrained with the same hyperparameters. This gives the following results:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_forward_model_underdamped_ML/summary.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_forward_model_underdamped_ML/summary.png}
     \caption{Summary plot for a non-physics informed neural network.}
     \label{fig:demo_forward_model_underdamped_ML/summary}
 \end{figure}
@@ -704,7 +709,7 @@ I have chosen to focus on the underdamped case, as it has the most interesting d
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_underdamped/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_underdamped/predicted_solution.png}
     \caption{Predicted solution with standard hyperparameters shown in Table \ref{tab:standard_parameters_DHO}}
 \end{figure}
 
@@ -712,7 +717,7 @@ I have chosen to focus on the underdamped case, as it has the most interesting d
 The first two parameters we will investigate determine the \textit{model complexity}, in other words the number of parameters to be optimised. To investiugate this, we will train a model with a very low complexity, more specifically $\verb|n_layers|=2$ and $\verb|hidden|=4$. This model thus only has 8 nodes, divided between two layers. This ersults in the following fit:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/low_complexity/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/low_complexity/predicted_solution.png}
     \caption{Predicted solution from a model with a very low complexity.}
     \label{fig:demo_forward_model_underdamped_ML/summary}
 \end{figure}
@@ -722,7 +727,7 @@ This model is not able to fit the analytic solution over the entire training dom
 Another cricual parameter is the learning rate of the model. I will study two cases; one where the learning rate is chosen too high and one where the learning rate is chosen too low. When the learning rate is set very high, say $\verb|lr|=0.05$, we get the following results:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/high_lr/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/high_lr/predicted_solution.png}
     \caption{Predicted solution with $lr=0.05$.}
     \label{fig:demo_forward_model_hyperparameters/high_lr/predicted_solution}
 \end{figure}
@@ -732,7 +737,7 @@ The learning rate is chosen so high that the model does not converge to an optim
 When the learning rate is set very high, say $\verb|lr|=0.001$, we get the following results:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/low_lr/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/low_lr/predicted_solution.png}
     \caption{Predicted solution with $lr=0.05$.}
     \label{fig:demo_forward_model_hyperparameters/low_lr/predicted_solution}
 \end{figure}
@@ -742,7 +747,7 @@ The model has not fully fitted to the analytic solution. This is the case becaus
 We have already investigated what happend when $\lambda_{phys}$ is set to zero. Let us now choose a very high value, say $\lambda_{phys}=100$. This results in the following solution:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/large_phys/predicted_solution.png}
     \caption{Predicted solution with $\lambda_{phys}=100$.}
     \label{fig:demo_forward_model_hyperparameters/large_phys/predicted_solution}
 \end{figure}
@@ -751,7 +756,7 @@ Surprisingly, the model can suddenly pake an almost perfect prediction about the
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys_no_extrap/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/large_phys_no_extrap/predicted_solution.png}
     \caption{Predicted solution with $\lambda_{phys}=100$ and no collocation points in the extrapolated domain.}
     \label{fig:demo_forward_model_hyperparameters/large_phys_no_extrap/predicted_solution}
 \end{figure}
@@ -761,7 +766,7 @@ The model does not seem to dit to the oscillatory behavior, but it does decrease
 Finally, I want to see if the model can fit to the solution \ref{without} any observation points. This results in the following prediction:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images/demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution.png}
     \caption{Predicted solution with $\lambda_{phys}=100$ and no noisy observation points for training.}
     \label{fig:demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution}
 \end{figure}
@@ -859,14 +864,14 @@ For the overdamped demonstration example, the randomised and predicted parameter
 Figures \ref{fig:demo_backward_model_overdamped/predicted_solution} and \ref{fig:demo_backward_model_overdamped/parameter_convergence} show the predicted solution and parameter convergence to the true values.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_backward_model_overdamped/predicted_solution.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_backward_model_overdamped/predicted_solution.png}
     \caption{Predicted solution and parameters for an overdamped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_overdamped/predicted_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_backward_model_overdamped/parameter_convergence.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_backward_model_overdamped/parameter_convergence.png}
     \caption{Parameter convergence to true values for an overdamped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_overdamped/parameter_convergence}
 \end{figure}
@@ -890,14 +895,14 @@ For the critically damped demonstration example, $\zeta$ can obviously not be ra
 Figures \ref{fig:demo_backward_model_criticallydamped/predicted_solution} and \ref{fig:demo_backward_model_criticallydamped/parameter_convergence} show the predicted solution and parameter convergence to the true values.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_backward_model_criticallydamped/predicted_solution.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_backward_model_criticallydamped/predicted_solution.png}
     \caption{Predicted solution and parameters for a critically damped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_criticallydamped/predicted_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_backward_model_criticallydamped/parameter_convergence.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_backward_model_criticallydamped/parameter_convergence.png}
     \caption{Parameter convergence to true values for a critically damped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_criticallydamped/parameter_convergence}
 \end{figure}
@@ -922,14 +927,14 @@ Figures \ref{fig:demo_backward_model_underdamped/predicted_solution} and \ref{fi
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_backward_model_underdamped/predicted_solution.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_backward_model_underdamped/predicted_solution.png}
     \caption{Predicted solution and parameters for an underdamped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_underdamped/predicted_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Images/demo_backward_model_underdamped/parameter_convergence.png}
+    \includegraphics[width=0.75\textwidth]{Images_DHO/demo_backward_model_underdamped/parameter_convergence.png}
     \caption{Parameter convergence to true values for an underdamped harmonic oscillator with randomised parameters.}
     \label{fig:demo_backward_model_underdamped/parameter_convergence}
 \end{figure}
@@ -946,14 +951,14 @@ In order to account for both of these effects, we can run a large amount of para
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/parameter_estimation_4/scatter_zeta_full.png}
+        \includegraphics[width=\textwidth]{Images_DHO/parameter_estimation_4/scatter_zeta_full.png}
         \caption{Scatter plot of 304 true and predicted $\zeta$ pairs.}
         \label{fig:parameter_estimation_2/scatter_zeta_full}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/parameter_estimation_4/scatter_omega_0_full.png}
+        \includegraphics[width=\textwidth]{Images_DHO/parameter_estimation_4/scatter_omega_0_full.png}
         \caption{Scatter plot of 304 true and predicted $\omega_0$ pairs.}
         \label{fig:parameter_estimation_2/scatter_omega_0_full}
     \end{subfigure}
@@ -982,7 +987,7 @@ The $RSME$ indeed increases for the critically and overdamped cases. In order to
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{Images/parameter_estimation_4/parameter_space_rmse_full.png}
+    \includegraphics[width=0.65\textwidth]{Images_DHO/parameter_estimation_4/parameter_space_rmse_full.png}
     \caption{Parameter space of 304 true $(\zeta, \omega_0)$ pairs and the $RMSE$ compared to the predicted values.}
     \label{fig:parameter_estimation_2/parameter_space_rmse_full}
 \end{figure}
@@ -993,14 +998,14 @@ Again, we can see that large parameter values generally lead to a larger $RMSE$.
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/analytic_solutions_zeta_underdamped.png}
+        \includegraphics[width=\textwidth]{Images_DHO/analytic_solutions_zeta_underdamped.png}
         \caption{Underdamped solutions for different $\zeta$}
         \label{fig:analytic_solutions_zeta_underdamped}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/analytic_solutions_zeta_overdamped.png}
+        \includegraphics[width=\textwidth]{Images_DHO/analytic_solutions_zeta_overdamped.png}
         \caption{Overdamped solutions for different $\zeta$}
         \label{fig:analytic_solutions_zeta_overdamped}
     \end{subfigure}
@@ -1009,14 +1014,14 @@ Again, we can see that large parameter values generally lead to a larger $RMSE$.
 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/analytic_solutions_omega_underdamped.png}
+        \includegraphics[width=\textwidth]{Images_DHO/analytic_solutions_omega_underdamped.png}
         \caption{Underdamped solutions for different $\omega_0$}
         \label{fig:analytic_solutions_omega_underdamped}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/analytic_solutions_omega_overdamped.png}
+        \includegraphics[width=\textwidth]{Images_DHO/analytic_solutions_omega_overdamped.png}
         \caption{Overdamped solutions for different $\omega_0$}
         \label{fig:analytic_solutions_omega_overdamped}
     \end{subfigure}
@@ -1073,7 +1078,7 @@ This implies that the solution $u$ remains constant along curves $x(t)=u_0(x)t+x
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{Images/gauss_characteristics.png}
+    \includegraphics[width=0.9\textwidth]{Images_DHO/gauss_characteristics.png}
     \caption{Method of characteristics applied to a Gaussian initial condition.}
     \label{fig:gauss_characteristics}
 \end{figure}
@@ -1083,14 +1088,14 @@ This implies that the solution $u$ remains constant along curves $x(t)=u_0(x)t+x
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/gauss_ic.png}
+        \includegraphics[width=\textwidth]{Images_DHO/gauss_ic.png}
         \caption{Initial Gauss condition.}
         \label{fig:gauss_ic}
     \end{subfigure}
     \hfill
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{Images/gauss_t.png}
+        \includegraphics[width=\textwidth]{Images_DHO/gauss_t.png}
         \caption{Gauss at $t=1$.}
         \label{fig:gauss_t}
     \end{subfigure}
@@ -1156,7 +1161,7 @@ With this solution, we can recover $u(x,\ t)$ for ant value of $t$. For some ini
 
 It is obviously impossible to evaluate the convolution integral from $-\infty$ to $+\infty$ numerically. However, if we constrain the domain of the integral to $[0,\, L]$ where $L$ is the length of our system, boundary effects will occur since the heat kernel will be cut off at the edges. To fix this, we pad the sides of the initial condition with a constant function matching the Dirichlet boundary condition so the domain is extrapolated. We then compute the ground truth solution using the Carl-Hopf method, and remove the paddings. In this way, we can also apply Dirichlet boundary conditions at a finite interval.\\
 
-For validation, it is wise to calculate the $RMSE$ of the physics residual. For a gaussian initial condition with $\nu=0.01$ and $t_end=10$, this yields:
+For validation, it is wise to calculate the $RMSE$ of the physics residual. For a gaussian initial condition with $\nu=0.01$ and $t_{end}=10$, this yields:
 \begin{equation*}
     RMSE=5.19\cdot 10^{-6}
 \end{equation*}
@@ -1166,7 +1171,11 @@ Using this method, I calculate the values for $u(x,\ t)$ on a dense grid of poin
 \section{PINNs for the Burger's equation}
 With the ground truth data simulation method chosen, we can now train PINNs to solve the viscid Burger's equation. Just like for the damped harmonic oscillator, I will discuss the code implementation and show some examples, study the different loss terms and hyperparameters, and finally attempt to solve the inverse problem.
 \subsection{Code implementation}
-The implementation of the neural network is strongly based on the implementation of the damped harmonic oscillator PINN. The same improvements I have previously discussed apply; randomised training data and collocation points, early stopping, and model saving have all been implemented. The most important change is obviously the model itself, which now takes two inputs $(x, t)$ instead of one input $(t)$. This means that the loss functions and plotting methods also need to be adapted to handle two dimensional data. Some more adaptations that require an bit more in-depth explanation are included below.
+The implementation of the neural network is strongly based on the implementation of the damped harmonic oscillator PINN. The same improvements I have previously discussed apply; randomised training data and collocation points, early stopping, and model saving have all been implemented. The most important change is obviously the model itself, which now takes two inputs $(x, t)$ instead of one input $(t)$. This means that the loss functions and plotting methods also need to be adapted to handle two dimensional data.\\
+
+Furthermore, we are instructed to not give the model any training observations when solving the PDE in the first part of this task; data points can only be added in the second part where we need to extract $\nu$. It is obviously not possible to extract equation parameters without data points. In order to implement this, I have defined a new parameter \verb|use_data| in the \verb|Config| class, which acts as a switch for adding data points to the training loop. In the first part of this exercise, the variable will be set to False.\\
+
+Some more adaptations that require an bit more in-depth explanation are included below.
 \subsubsection{File structure}
 The structure of the code is roughly the same as for the damped harmonic oscillator:
 \begin{tcolorbox}[title=Burger's equation file structure, colback=black!10!white, colframe=black!40!white, sharp corners]
@@ -1192,29 +1201,410 @@ We introduce a new loss term: $\mathcal{L}_{b.c.}$ to force the PINN to respect 
 \begin{equation}
     \begin{split}
         \mathcal{L}_{b.c.} &= \frac{1}{N}\sum^N_{i=1}\left[(y_{i,\ left}-\hat y_{i,\ left})^2 + (y_{i,\ right}-\hat y_{i,\ right})^2\right]\\
-        \mathcal{L}_{tot} &= \mathcal{L}_{data} + \lambda_{i.c.}\mathcal{L}_{i.c.} + \lambda_{b.c.}\mathcal{L}_{b.c.} + \lambda_{phys}\mathcal{L}_{phys}
+        \mathcal{L}_{tot} &= \lambda_{i.c.}\mathcal{L}_{i.c.} + \lambda_{b.c.}\mathcal{L}_{b.c.} + \lambda_{phys}\mathcal{L}_{phys}
     \end{split}
 \end{equation}
 \subsubsection{Plotting methods}
 I ahve implemented a wide range of plotting methods, which are described below:
 \begin{itemize}
-    \item 
+    \item A plot of the characteristics of the inviscid equation and the predicted shock time $t_{shock}$.
+    \item A plot of the ground truth solution calculated using the Cole-Hopf transformation at four different times ($t=0,\ t=2,\ t=4,\ t=6$).
+    \item A plot of the ground truth and predicted solution at four different times ($t=0,\ t=2,\ t=4,\ t=6$).
+    \item A plot of the ground truth and predicted solution at eoght different, evenly spaced times from $t=0$ to $t=t_{extrap}$.
+    \item A plot of the ground truth and predicted solution at three different times ($t=0,\ t=t_{shock}/2,\ t=t_{shock}$). This is the plot that is explictly requested in the assignment.
+    \item A 2D plot of the full ground truth solution (displayed as a matrix).
+    \item A 2D plot of the full predicted solution (displayed as a matrix).
+    \item A plot of the different loss terms as a funtion of the epochs.
+    \item A plot with 6 subplots showing the convergence of the predicted solution as a function of the epochs.
+    \item A summary plot with 6 panels containing the following:
+    \begin{enumerate}
+        \item A 2D plot of the full ground truth solution.
+        \item A 2D plot of the full predicted solution.
+        \item A 2D plot of the square of the physics residual $|u_t+uu_x-\nu uu_{xx}|^2$.
+        \item A 2D plot of the data MSE $|\hat u(x, t)-u(x, t)|^2$
+        \item A 3D surface plot of the predicted solution with noisy observation points\footnote{As before, these points are not actually used during training but are generated afterwards to give an idea of what the observation points look like.}
+        \item A plot of the different loss terms as a funtion of the epochs.
+    \end{enumerate}
 \end{itemize}
+An example of every plot will be shown in section \ref{ch:gauss}.
 \subsection{Code demonstration}
+In this section, we will demonstrate PINNs for three different initial conditions (Gauss, N-wave and Step-up functions), and three different values for the viscosity ($\nu=0.1,\ 0.05,\ 0.01$). In all three examples, we will use the following hyperparameters:
 
-\subsection{Comparison between blind and physics informed extrapolation}
+\begin{table}[H]
+\centering
+\caption{PINN Hyperparameters}\label{tab:standard_parameters_DHO}
+\begin{tabular}{llc}
+\toprule
+\textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
+\midrule
+\texttt{hidden}               & Hidden units per layer            & 96                   \\
+\texttt{n\_layers}            & Number of hidden layers           & 8                    \\
+\texttt{n\_epochs}            & Maximum training epochs           & 30000                \\
+\texttt{lr}                   & Initial learning rate             & $2\times10^{-3}$     \\
+\texttt{patience}             & Early stopping patience           & 5000                 \\
+\texttt{patience\_threshold}  & Min improvement to reset patience & $2\times10^{-6}$     \\
+\texttt{scheduler\_step}      & LR scheduler step size            & 3000                 \\
+\texttt{scheduler\_gamma}     & LR scheduler decay factor         & $0.5$                \\
+\texttt{lambda\_phys}         & Physics loss weight               & $5$                  \\
+\texttt{lambda\_ic}           & Initial condition loss weight     & $1\times10^{1}$      \\
+\texttt{lambda\_bc}           & Boundary condition loss weight    & $1\times10^{1}$      \\
+\texttt{n\_col\_dom}          & Collocation points                & 200                  \\
+\texttt{n\_obs}               & Observation points                & 30                   \\
+\texttt{n\_bc}                & Boundary condition points         & 50                   \\
+\texttt{sigma}                & Observation noise $\sigma$        & $1\times10^{-2}$     \\
+\bottomrule
+\end{tabular}
+\end{table}
+Just like before, these hyperparameters have been hand-picked and are observed to give reasonable results. We will tune the hyperparameters in section \ref{ch:hyperparameters_BE}.
+
+\subsubsection{Gauss}\label{ch:gauss}
+The gauss initial condition is given by:
+\begin{equation}
+    u(x,\ t=0) = A\exp\left[-\frac{\left(x-\frac{L}{2}\right)^2}{2\sigma^2}\right]
+\end{equation}
+In this case, we have chosen $L=15,\ \sigma=1 ,\ A=0.7$ Through the method of characteristics, we can predict the time when a shockwave will form by approximating the solution by the inviscid case. This yelds $t_{shock}=2.353$. The method of characteristics is shown on Figure  
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.1/method_of_characteristics.png}
+    \caption{Method of characteristics applied to a Gaussian initial condition.}
+    \label{fig:Gauss_nu_0.1/method_of_characteristics}
+\end{figure}
+We will now solve the equation for three different values for $\nu$.\\
+
+\paragraph{$\nu=0.05$}
+The ground truth solution calculated by the Cole-Hopf transformation is shown on Figure \ref{fig:Gauss_nu_0.05_gt}.
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images_BE/Gauss_nu_0.05/gt_solution.png}
+        \caption{3D solution.}
+        \label{fig:Gauss_nu_0.05_gt_solution}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images_BE/Gauss_nu_0.05/gt_2D.png}
+        \caption{2D solution.}
+        \label{fig:Gauss_nu_0.05_gt_2D}
+    \end{subfigure}
+    \caption{Method of characteristics applied to a Gaussian initial condition.}
+    \label{fig:Gauss_nu_0.05_gt}
+\end{figure}
+
+The predicted solution at the three requested valeus for $t$ (initial condition, before shock and after shock) are shown on Figure \ref{fig:Gauss_nu_0.05/3_times}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.05/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/3_times}
+\end{figure}
+We can see that the model is able to fit to the ground truth solution very accurately. For this case, I will also demonstrate the other plotting methods. Figures \ref{fig:Gauss_nu_0.05/gt_2D} and \ref{fig:Gauss_nu_0.05/pred_2D} show the analytic and predicted solutions plotted as 2D matrices.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/gt_2D.png}
+    \caption{Ground truth solution in 2D for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/gt_2D}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/pred_2D.png}
+    \caption{Predicted solutions in 2D for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/pred_2D}
+\end{figure}
+
+We again see a very good agreement between the prediction and true solution. Figures \ref{fig:Gauss_nu_0.05/pred_solution} and \ref{fig:Gauss_nu_0.05/pred_grid} show the predicted solution at more values for $t$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/pred_solution.png}
+    \caption{Predicted solutions at 8 different times for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/pred_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/pred_grid.png}
+    \caption{Predicted solutions at 8 different times for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/pred_grid}
+\end{figure}
+
+Figure \ref{fig:Gauss_nu_0.05/losses} shows the losses as a function of the epochs.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/losses.png}
+    \caption{Convergece of loss function terms for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/losses}
+\end{figure}
+
+Figure \ref{fig:Gauss_nu_0.05/losses} is a summary plot with the most important information about the prediction.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05/summary}
+\end{figure}
+
+For brevity, I will not show all plots for each and every case. For the rest of the demonstration cases, I will only show the predicted solution at the three requested times and the summary plot.
+
+\paragraph{$\nu=0.1$}
+Let us now see what happens if the viscosity is increased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.1/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.1$.}
+    \label{fig:Gauss_nu_0.1/3_times}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.1/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.1$.}
+    \label{fig:Gauss_nu_0.1/summary}
+\end{figure}
+
+\paragraph{$\nu=0.01$}
+Let us now see what happens if the viscosity is decreased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.01/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.01$.}
+    \label{fig:Gauss_nu_0.01/3_times}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.01/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.01$.}
+    \label{fig:Gauss_nu_0.01/summary}
+\end{figure}
+
+\subsubsection{N-wave}
+The N-wave initial condition is given by:
+\begin{equation}
+    u(x,\ t=0) = 
+    \begin{cases}
+        0 & \text{if} |x| > w\\
+        -Ax & \text{if} |x| \leq w
+    \end{cases}
+\end{equation}
+Where $w$ is the width of the wave and $A$ is the height of the wave. In this case, we have chosen $L=15, \ w=3, \ A=\frac{1}{3}$. Just like with the gaussian intiial conditions, we can predict the time when a shockwave will form by approximating the solution by the inviscid case. This yelds $t_{shock}=3.000$. The method of characteristics is shown on Figure \ref{fig:N_wave_nu_0.1/method_of_characteristics}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/N_wave_nu_0.1/method_of_characteristics.png}
+    \caption{Method of characteristics applied to an N-wave initial condition.}
+    \label{fig:N_wave_nu_0.1/method_of_characteristics}
+\end{figure}
+At $t=3$, many characteristics cross and a large shockwave is formed in the middle of the domain.We will now solve the equation for three different values for $\nu$, in the same way as for the gaussian initial conditions.
+\paragraph{$\nu=0.05$}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.05/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.05$.}
+    \label{fig:N_wave_nu_0.05/3_times}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.05/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.05$.}
+    \label{fig:N_wave_nu_0.05/summary}
+\end{figure}
+
+\paragraph{$\nu=0.1$}
+Let us now see what happens if the viscosity is increased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.1/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.1$.}
+    \label{fig:N_wave_nu_0.1/3_times}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.1/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.1$.}
+    \label{fig:N_wave_nu_0.1/summary}
+\end{figure}
+
+\paragraph{$\nu=0.01$}
+Let us now see what happens if the viscosity is decreased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.01/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.01$.}
+    \label{fig:N_wave_nu_0.01/3_times}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.01/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.01$.}
+    \label{fig:N_wave_nu_0.01/summary}
+\end{figure}
+
+\subsubsection{Step-up}
+The Step-up initial condition is given by:
+\begin{equation}
+    u(x,\ t=0) = 
+    \begin{cases}
+        0 & \text{if} x < \frac{L}{2}\\
+        A & \text{if} x > \frac{L}{2}
+    \end{cases}
+\end{equation}
+Where $A$ is the height of the step function. In this case, we have chosen $L=15, \ A=1$. This solution does not produce a shockwave, since the gradient is positive everywhere. The characteristics do not cross, as shown on Figure \ref{fig:Step_up_nu_0.1/method_of_characteristics}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{Images_BE/Step_up_nu_0.1/method_of_characteristics.png}
+    \caption{Method of characteristics applied to a Step-up initial condition.}
+    \label{fig:Step_up_nu_0.1/method_of_characteristics}
+\end{figure}
+Now we will solve the equation for three different values for $\nu$, in the same way as for the gaussian and N-wave initial conditions.
+\paragraph{$\nu=0.05$}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/Step_up_nu_0.05/pred_solution.png}
+    \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.05$.}
+    \label{fig:Step_up_nu_0.05/pred_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Step_up_nu_0.05/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.05$.}
+    \label{fig:Step_up_nu_0.05/summary}
+\end{figure}
+
+\paragraph{$\nu=0.1$}
+Let us now see what happens if the viscosity is increased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/Step_up_nu_0.1/pred_solution.png}
+    \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.1$.}
+    \label{fig:Step_up_nu_0.1/pred_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Step_up_nu_0.1/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.1$.}
+    \label{fig:Step_up_nu_0.1/summary}
+\end{figure}
+
+\paragraph{$\nu=0.01$}
+Let us now see what happens if the viscosity is decreased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/Step_up_nu_0.01/pred_solution.png}
+    \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.01$.}
+    \label{fig:Step_up_nu_0.01/pred_solution}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Step_up_nu_0.01/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.01$.}
+    \label{fig:Step_up_nu_0.01/summary}
+\end{figure}
+
+\subsubsection{Inclusion of data}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_data_included/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when noisy data points are included in the training.}
+    \label{fig:Gauss_nu_0.05_data_included/summary}
+\end{figure}
+
+\subsubsection{Extrapolating capabilities}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_extrapblind/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when the mdoel is only trained on a fraction of the domain.}
+    \label{fig:Gauss_nu_0.05_extrapblind/summary}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_data_included_extrapblind/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when the mdoel is only trained on a fraction of the domain, but noisy data points are included in the training.}
+    \label{fig:Gauss_nu_0.05_data_included_extrapblind/summary}
+\end{figure}
 
 \subsection{Comparison with traditional ML model}
 
-\subsection{Hyperparameter optimisation}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_ML/summary.png}
+    \caption{Summary plot fot the predicted solution by a non-physics informed neural network for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Step_up_nu_0.05_ML/summary}
+\end{figure}
+
+\subsection{Hyperparameter optimisation}\label{ch:hyperparameters_BE}
+\subsubsection{Model complexity}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_low_complexity/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a very low model complexity.}
+    \label{fig:low_complexity/summary}
+\end{figure}
+
+\subsubsection{Learning rate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_low_lr/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a low learning rate.}
+    \label{fig:low_lr/summary}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_high_lr/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a high learning rate.}
+    \label{fig:high_lr/summary}
+\end{figure}
+
+\subsubsection{Boundary condition weights}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_no_bc/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ and no boundary condition loss term.}
+    \label{fig:no_ic/summary}
+\end{figure}
+
+
+\subsubsection{Optuna}
+\begin{table}[H]
+\centering
+\caption{Best hyperparameters found by Optuna per initial condition.}\label{tab:optuna_best_params_BE}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Parameter} & \textbf{Gauss} & \textbf{N-wave} & \textbf{Step-up} \\
+\midrule
+\texttt{best\_val}           & $3.86\times10^{-5}$ & $3.67\times10^{-4}$ & $1.19\times10^{-5}$ \\
+\midrule
+\texttt{hidden}              & 64      & 64      & 48      \\
+\texttt{n\_layers}           & 4       & 6       & 6       \\
+\texttt{lr}                  & $2.64\times10^{-3}$ & $5.88\times10^{-3}$ & $8.11\times10^{-3}$ \\
+\texttt{scheduler\_step}     & 1000    & 4000    & 2000    \\
+\texttt{scheduler\_gamma}    & 0.581   & 0.595   & 0.609   \\
+\texttt{adam\_beta1}         & 0.965   & 0.852   & 0.915   \\
+\texttt{adam\_beta2}         & 0.991   & 0.991   & 0.999   \\
+\texttt{lambda\_phys}        & $3.26\times10^{-2}$ & $7.71\times10^{-1}$ & $1.44\times10^{0}$ \\
+\texttt{lambda\_ic}          & 19.32   & 24.60   & 1.21    \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Inverse problem}
 
-\subsection{Underdamped case}
-
-\subsection{Critically damped case}
-
-\subsection{Overdamped case}
+\subsection{Demonstration}
 
 \subsection{Statistical analysis}
 

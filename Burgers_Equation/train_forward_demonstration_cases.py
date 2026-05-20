@@ -40,6 +40,10 @@ def train_model(cfg: Config, output_path: str) -> None:
         cfg.t_shock = time_to_shock
         cfg.t_dom = time_to_shock + 2.0
         cfg.t_extrap = time_to_shock + 4.0
+    elif cfg.ic=="Step_up":
+        cfg.t_shock = None
+        cfg.t_dom = 5.0
+        cfg.t_extrap = 7.0
     else:
         print("--------------------------------------------------"
               "\n"
