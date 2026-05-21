@@ -19,7 +19,7 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_n_wave_lownu"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_n_wave_lownu_complex"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():
@@ -28,7 +28,11 @@ def main():
 
     cfg = Config(
         ic="N_wave",
-        nu=0.01
+        lr=2e-3,
+        nu=0.01,
+        n_layers=15,
+        hidden=128,
+        time_to_ic=0.8
     )
 
     time_to_shock = predict_shock_time(cfg)

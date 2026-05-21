@@ -21,6 +21,7 @@ class Config:
 
     # Initial conditions
     ic: str = "Gauss"              # Initial condition type: "Gauss", "N_wave", "N_wave_chop", "Step_up", "Slope"
+    time_to_ic: float = 0          # Optional parmeter to use a smoothened out version of the initial condition
     height: float = None
     sigma_ic: float = None
     width: float = None

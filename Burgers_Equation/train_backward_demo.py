@@ -20,7 +20,7 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/backward_demo_gauss_lownu"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/backward_demo_gauss_highnu"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():
@@ -35,8 +35,16 @@ def main():
           "\n------------------------------------------------")
 
     cfg = Config(
-        ic="Gauss",
-        nu=nu
+        nu=nu,
+        hidden=112,
+        n_layers=9,
+        lambda_phys=1e1,
+        lambda_ic=1e2,
+        lr=0.003,
+        scheduler_gamma=0.6,
+        scheduler_step=3000,
+        patience_thershold=1e-5,
+        use_data=True
     )
 
     time_to_shock = predict_shock_time(cfg)

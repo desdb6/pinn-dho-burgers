@@ -11,8 +11,6 @@ import matplotlib.animation as animation
 from tqdm import tqdm
 from config import Config
 
-N_WAVE_T0=0.5
-
 def gauss(cfg: Config) -> np.ndarray:
     """
     Generate a gauss curve.
@@ -91,23 +89,24 @@ def u_0(cfg: Config) -> np.ndarray:
     Generate the initial condition u(x, 0) based on the config.
     """
     if cfg.ic == "Gauss":
-        return gauss(cfg)
+        u_init = gauss(cfg)
     elif cfg.ic == "Step_up":
-        return step_up(cfg)
+        u_init = step_up(cfg)
     elif cfg.ic == "N_wave":
-        if N_WAVE_T0 > 0:
-            u_0 = n_wave(cfg)
-            return solve_burgers_padded(u_0, N_WAVE_T0, cfg, 200)
-        else:
-            return n_wave(cfg)
+        u_init = n_wave(cfg)
     elif cfg.ic == "N_wave_chop":
-        return n_wave_chop(cfg)
+        u_init = n_wave_chop(cfg)
     elif cfg.ic == "Slope":
-        return negative_slope(cfg)
+        u_init = negative_slope(cfg)
     elif cfg.ic == "Step_down":
-        return step_down(cfg)
+        u_init = step_down(cfg)
     else:
         raise ValueError(f"Unknown initial condition type: {cfg.ic}")
+    
+    if cfg.time_to_ic > 0:
+        return solve_burgers_padded(u_init, cfg.time_to_ic, cfg, 200)
+    else:
+        return u_init
 
 # -- Cole-Hopf transformation ------------------------------------------------
 def cole_hopf_trans(u_0: np.ndarray, cfg: Config) -> np.ndarray:

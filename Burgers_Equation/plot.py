@@ -305,8 +305,6 @@ def plot_solution_grid(
                label="Numerical solution $u(x, t)$"),
         Line2D([0], [0], color=model_color, lw=2.0,
                label=rf"{model_label} prediction $\hat{{u}}(x, t)$"),
-        Line2D([0], [0], color=BLUE, lw=0, marker="o", markersize=5,
-               label=rf"Observations (N={len(data['t_obs'])})"),
     ]
     fig.legend(handles=legend_elements, loc="lower center",
                ncol=3, fontsize=12, framealpha=0.6,
