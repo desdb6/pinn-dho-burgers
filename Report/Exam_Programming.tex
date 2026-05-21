@@ -772,14 +772,20 @@ Finally, I want to see if the model can fit to the solution \ref{without} any ob
 \end{figure}
 The model is in fact able to reconstruct the analytic solution without any data points being provided. This does however negat the point of using a neural network, since it is also possible to reconstruct the solution with finite-difference methods (ex. Euler method or Runge-Kutta). PINNs are more applicable to backwards problems, where we need to extract the (unknown) physical parameters from observational data. This means that we need to balance the loss terms so that both the observation points and the physics of the system are taken into account in the training loop. 
 
-\subsubsection{Optuna}
+\subsubsection{Optuna}\label{ch:optuna_DHO}
 In order to find an optimal model complexity and learning rate, as well as tune the balance of the loss function, I have chosen to use the implement a use the \verb|optuna| library to employ a \textit{Tree-Structured Parzen Estimator} with the \verb|optuna.samplers.TPESampler| class. This has a few advantages \cite{watanabe2025treestructuredparzenestimatorunderstanding}:
 \begin{itemize}
     \item The optuna library can \textit{prune} runs that do not look promising enough to provide an optimisation of the hyperparameters. This makes the optimisation more efficient since not every run needs to be fully completed.
     \item Bayesian optimisation is an efficient technique of finding the minimum of black box functions. In this case the black box function is the $MSE$ of the best trained model.
     \item Tree-Structured Parzen Estimators are a subclass of Bayesian Optimisation algorithms which are efficient for high-dimensional spaces, which is applicable here since we have to tune many hyperparameters in order to get an optimal configuration.
 \end{itemize}
-We have chosen to separate the three cases, since the dynamics are very different for over- and underdamped cases which means the optimal hyperparameters will likely also be different. We have chosen to tune the following parameters in the following intervals:
+We have chosen to separate the three cases, since the dynamics are very different for over- and underdamped cases which means the optimal hyperparameters will likely also be different. We have chosen to tune the following parameters:
+\begin{itemize}
+    \item Model complexity: \texttt{hidden} and \texttt{n\_layers}. We have illustrated that the model complexity is an important factor that needs careful tuning. A simple network is fundamentally limited and cannot eficiently predict the underdamped case, while a very complex network is computationally heavy and is more prone to overfitting.
+    \item The loss weights \texttt{lambda\_phys} and \texttt{lambda\_ic}. These parameters can be seen as the distinguishing parameters that distinguish a PINN from a traditional ML network, so they also need to be tuned. The balance between the loss terms determines whether the model prioritises fitting the data (which can overfit or lead to non-physical behavior) or keeping the physics of the predictions consistent (which can lead to a prediction that deviates from the observations).
+    \item Learning rate: \texttt{lr}, \texttt{scheduler\_gamma}, and \texttt{scheduler\_step}. We have illustrated that the learning rate needs to be finely tuned; a small $lr$ leads to a model that stops too eraly before an optimised prediction is made, while a large $lr$ breaks the optimisation of the weights, since they are changed too much. An overly large $lr$ leads to a constant prediction.
+\end{itemize}
+More hyperparameters that could be optimised are the Adam optimiser $\beta_1$ and $\beta_2$. Hovewer, the effect of these parameters on the training process has already eticulously been studied, so these are left at the recommended values of $0.9$ and $0.999$ respectively.
 
 \begin{table}[H]
 \centering
@@ -818,7 +824,7 @@ For each case, we will run $1000$ trials and finally save the configuration that
 \bottomrule
 \end{tabular}
 \end{table}
-The optimal configurations are relatively similar. The optimal model complexity has $\sim10^4$ parameters, the physics loss weight is $\sim10^0$, the learning rate is $\sim10^-3$, the scheduler decay factor is $\sim0.5$ and the scheduler step size is $\sim3000$. We can see that the optimiser has not maximalised the physics loss weight, which indicated that the inclusion of noisy observation data in the training loop is still a good choice. Based on these results, we can make well-reasoned choices for the hyperparameters in the inverse problem.
+The optimal configurations are relatively similar. The optimal model complexity has $\sim10^4$ parameters, the physics loss weight is $\sim10^0$, the learning rate is $\sim10^{-3}$, the scheduler decay factor is $\sim0.5$ and the scheduler step size is $\sim3000$. We can see that the optimiser has not maximalised the physics loss weight, which indicated that the inclusion of noisy observation data in the training loop is still a good choice. Based on these results, we can make well-reasoned choices for the hyperparameters in the inverse problem.
 \section{Inverse problem}\label{ch:inverse_DHO}
 We will now attempt to solve the inverse problem, and try to extract the parameters $\zeta$ and $\omega_0$ from the equation by training the model on noisy observation data generated from an analytical solution with unknown, randomised parameters. This can be implemented easily by creating a new model achitecture class, \verb|InverseFCNet| with $\hat\zeta$ and $\hat\omega_0$ as model parameters and a new loss function \verb|loss_physics_inverse| which uses these parameters. $\hat\zeta$ and $\hat\omega_0$ are then treated like every other weight or bias parameter, and will be tweaked every epoch until the model training is complete.\\
 
@@ -1418,10 +1424,10 @@ The N-wave initial condition is given by:
         -Ax & \text{if} |x| \leq w
     \end{cases}
 \end{equation}
-Where $w$ is the width of the wave and $A$ is the height of the wave. In this case, we have chosen $L=15, \ w=3, \ A=\frac{1}{3}$. Just like with the gaussian initial conditions, we can predict the time when a shockwave will form by approximating the solution by the inviscid case. This yelds $t_{shock}=3.000$. The method of characteristics is shown on Figure \ref{fig:N_wave_nu_0.1/method_of_characteristics}.
+Where $w$ is the width of the wave and $A$ is the height of the wave. In this case, we have chosen $L=15, \ w=3, \ A=\frac{1}{3}$. Just like with the gaussian initial conditions, we can predict the time when a shockwave will form by approximating the solution by the inviscid case. This yelds $t_{shock}=3.000$. The method of characteristics is shown on Figure \ref{fig:N_wave_nu_0.1_bad/method_of_characteristics}.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{Images_BE/N_wave_nu_0.1/method_of_characteristics.png}
+    \includegraphics[width=0.65\textwidth]{Images_BE/N_wave_nu_0.05_bad/method_of_characteristics.png}
     \caption{Method of characteristics applied to an N-wave initial condition.}
     \label{fig:N_wave_nu_0.1/method_of_characteristics}
 \end{figure}
@@ -1442,7 +1448,7 @@ For a normal value for the viscosity, the prediction gives the following output:
     \label{fig:N_wave_nu_0.05_bad/summary}
 \end{figure}
 
-We can see that the model has a lot of trouble fitting to predicted solution, and is not capable of replicating the discontinuities the initial conditions. Since the entire solution is based on these initial conditions, the result is not very accurate. To fix this, we can use the ground truth solution at a later time as the inital conditions, since the viscosity term will have smoothened out the discontinuities. I have chosen to start the predictions at $t=0.5$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
+We can see that the model has a lot of trouble fitting to predicted solution, and is not capable of replicating the discontinuities the initial conditions. Since the entire solution is based on these initial conditions, the result is not very accurate. To fix this, we can use the ground truth solution at a later time as the inital conditions, since the viscosity term will have smoothened out the discontinuities. I have chosen to start the predictions at $t=0.5$. This results in the following predictions, where the solution converges after 7750 epochs and the final $RMSE$ is $RMSE=0.0017$
 
 \begin{figure}[H]
     \centering
@@ -1459,7 +1465,7 @@ We can see that the model has a lot of trouble fitting to predicted solution, an
 \end{figure}
 \clearpage
 \subsubsection{N-wave, $\nu=0.1$}
-Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
+Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results in the following predictions, where the solution converges after 5800 epochs and the final $RMSE$ is $RMSE=0.0027$
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.45\textwidth]{Images_BE/N_wave_nu_0.1/3_times.png}
@@ -1475,20 +1481,22 @@ Let us now see what happens if the viscosity is increased to $\nu=0.1$. This res
 \end{figure}
 \clearpage
 \subsubsection{N-wave, $\nu=0.01$}
-Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
+Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This results in the following predictions, where the solution converges after 8800 epochs and the final $RMSE$ is $RMSE=0.0696$
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images_BE/N_wave_nu_0.01/3_times.png}
+    \includegraphics[width=0.4\textwidth]{Images_BE/N_wave_nu_0.01/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.01$.}
     \label{fig:N_wave_nu_0.01/3_times}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.01/summary.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/N_wave_nu_0.01/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.01$.}
     \label{fig:N_wave_nu_0.01/summary}
 \end{figure}
+
+It seems even with the smoothened initial conditions, the PINN is having trouble solving the PDE for low viscosities. Likely the derivatives of the solution are too sharp for the dense network with $\tanh$ activation funtions to generate gradients steep enough to find the actual soltuion.
 
 \subsection{Step-up}
 The Step-up initial condition is given by:
@@ -1609,57 +1617,153 @@ The first test I want to perform is reducing the network to two layers of four n
 \end{figure}
 As expected, the model is not capable of solving the PDE woth great accuracy. Looking at the predicted 2D image and comparing it to the ground truth, it seems that the simplified network is not able to learn how shockwaves are formed. This is something we have established earlier, since the $\tanh$ activation function is smooth and needs a large number fo layers in order to generate steep gradients, such as for shockwaves. In this case, a small amount of layers and nodes cannot generate a gradient steep enough to accurately solve the Burger's equation.
 \subsubsection{Learning rate}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_low_lr/summary.png}
-    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a low learning rate.}
-    \label{fig:low_lr/summary}
-\end{figure}
-
+Next, we will change the learning rate. A very large learning rate of $lr=0.05$ gives the following result:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_high_lr/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a high learning rate.}
     \label{fig:high_lr/summary}
 \end{figure}
+Just like for the damped harmonic oscillator, the learning rate is way too high and the result is a constant solution reached after 2000 epochs, which is exactly the patience limit. In the opposite direction, a very low learning rate of $lr=0.001$, a scheduler step of 3000, and a decay factor $\gamma=0.3$ give the following results:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_low_lr/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a low learning rate.}
+    \label{fig:low_lr/summary}
+\end{figure}
+The $RMSE=0.0532$, which is a factor $\times 10$ higher than in our demonstration example. The small learning rate makes the training process too long for an optimal prediction to be made, and the training is stopped too early.
 
 \subsubsection{Boundary condition weights}
-
+I want to investigate the effect of the boundary term which I have added for this PDE. If the boundary loss term is removed from the totla loss function, we get the following prediction:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_no_bc/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ and no boundary condition loss term.}
     \label{fig:no_ic/summary}
 \end{figure}
-
+This gives very similar results compared to the case where all loss terms are included (Figure \ref{fig:Gauss_nu_0.05/summary}). This makes sense for the gaussian initial conditions; the left boundary stays at zero since no waves can pass this point, and no waves will pass the right boundary since the viscosity term stops wave from travelling past the formed shockwave. We can thus conclude that the boundary term is not really necesarry in this case. It would be more important for different PDEs, like the heat equation, where the interaction between the system and the boundaries is more pronounced.
 
 \subsubsection{Optuna}
+Finally, an algorithmic search of the best hyperparameters can be useful to gain further insights to decide on an optimal parameter set for the inverse problem. For this, we have to generate noisy observation points and add the data loss term to the total loss function, so it becomes:
+\begin{equation}\label{eq:loss_BE}
+    \mathcal{L}_{tot} = \mathcal{L}_{data}+\lambda_{i.c.}\mathcal{L}_{i.c.} + \lambda_{b.c.}\mathcal{L}_{b.c.} + \lambda_{phys}\mathcal{L}_{phys}
+\end{equation}
+The defined search intervals are shown in Table \ref{tab:optuna_hyperparams_BE}. For motivation why these parameters are chosen, see section \ref{ch:optuna_DHO}.
 \begin{table}[H]
 \centering
-\caption{Best hyperparameters found by Optuna per initial condition.}\label{tab:optuna_best_params_BE}
-\begin{tabular}{lccc}
+\caption{Optuna Hyperparameter Search Ranges for the Burger's Equation}\label{tab:optuna_hyperparams_BE}
+\begin{tabular}{llc}
 \toprule
-\textbf{Parameter} & \textbf{Gauss} & \textbf{N-wave} & \textbf{Step-up} \\
+\textbf{Parameter} & \textbf{Description} & \textbf{Search Range} \\
 \midrule
-\texttt{val\_loss}           & $3.86\times10^{-5}$ & $3.67\times10^{-4}$ & $1.19\times10^{-5}$ \\
-\midrule
-\texttt{hidden}              & 64      & 64      & 48      \\
-\texttt{n\_layers}           & 4       & 6       & 6       \\
-\texttt{lr}                  & $2.64\times10^{-3}$ & $5.88\times10^{-3}$ & $8.11\times10^{-3}$ \\
-\texttt{scheduler\_step}     & 1000    & 4000    & 2000    \\
-\texttt{scheduler\_gamma}    & 0.581   & 0.595   & 0.609   \\\\
-\texttt{lambda\_phys}        & $3.26\times10^{-2}$ & $7.71\times10^{-1}$ & $1.44\times10^{0}$ \\
-\texttt{lambda\_ic}          & 19.32   & 24.60   & 1.21    \\
+\texttt{hidden}           & Hidden units per layer         & $[16,\ 128]$,\ step 16 \\
+\texttt{n\_layers}        & Number of hidden layers        & $[2,\ 10]$,\ step 1 \\
+\texttt{lambda\_phys}     & Physics loss weight            & $[10^{-1},\ 10^{2}]$\ (log) \\
+\texttt{lambda\_ic}       & Initial condition loss weight  & $[10^{1},\ 10^{3}]$\ (log) \\
+\texttt{lambda\_bc}       & Boundary condition loss weight & $[10^{1},\ 10^{3}]$\ (log) \\
+\texttt{lr}               & Initial learning rate          & $[10^{-4},\ 10^{-2}]$\ (log) \\
+\texttt{scheduler\_gamma} & LR scheduler decay factor      & $[0.3,\ 0.9]$ \\
+\texttt{scheduler\_step}  & LR scheduler step size         & $[1000,\ 5000]$,\ step 1000 \\
 \bottomrule
 \end{tabular}
 \end{table}
+After a searching for 500 trials, the TPE algorithm finds the following optimal configuration:
+
+\begin{table}[H]
+\centering
+\caption{Best hyperparameters found by Optuna per initial condition.}\label{tab:optuna_best_params_BE}
+\begin{tabular}{lc}
+\toprule
+\textbf{Parameter} & \textbf{Value}\\
+\midrule
+$RMSE$           & $1.16\times10^{-6}$\\
+\midrule
+\texttt{hidden}              & 112   \\
+\texttt{n\_layers}           & 9     \\
+\texttt{lr}                  & $3.15\times10^{-3}$\\
+\texttt{scheduler\_step}     & 3000  \\
+\texttt{scheduler\_gamma}    & 0.635  \\
+\texttt{lambda\_phys}        & $63.05$\\
+\texttt{lambda\_ic}          & $49.64$  \\
+\texttt{lambda\_bc}          & $10.97$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+We can see that the ideal configuration heavily prioritises the physics residual over the deviation from the noisy data (whose weight is equal to 1, see \ref{eq:loss_BE}). Furthermore, the model is relatively complex, which is also to be expected.
 
 \section{Inverse problem}
+We will now attempt to solve the inverse problem for gaussian initial conditions. The implementation is very similar to the inverse problem for the damped harmonic oscillator. We implement an \verb|InverseFCNet| with a $\hat\nu$ parameter, and \verb|loss_physics_inverse| function that will be used to calculate the loss in the training loop.\\
+
+I have chosen for the following hyperparameters:
+\begin{table}[H]
+\centering
+\caption{Hyperparameters used for the Burgers equation inverse problem.}\label{tab:inverse_hyperparameters_BE}
+\begin{tabular}{lc}
+\toprule
+\textbf{Parameter} & \textbf{Value}\\
+\midrule
+\texttt{hidden}              & 112   \\
+\texttt{n\_layers}           & 9     \\
+\texttt{lr}                  & $3.0\times10^{-3}$\\
+\texttt{scheduler\_step}     & 3000  \\
+\texttt{scheduler\_gamma}    & 0.6  \\
+\texttt{lambda\_phys}        & $10$\\
+\texttt{lambda\_ic}          & $100$  \\
+\bottomrule
+\end{tabular}
+\end{table}
+ 
+I have decided to decrease the contributions of the physics loss terms, as it is very important that the data points have enough influence on the model fitting so that the parameter can be extracted from this data.\\
+
+I will now show two examples of parameter estimations, one for high viscosities and one for low viscosities. Then, I will provide a statistical analysis like done for the damped harmonic oscillator.
 
 \subsection{Demonstration}
 
+\subsubsection{High viscosity}
+For the high viscosity, the randomised viscosity is:
+\begin{equation*}
+    \nu=0.0068
+\end{equation*}
+
+
+\subsubsection{Low viscosity}
+For the low viscosity, the randomised viscosity is:
+\begin{equation*}
+    \nu=0.0121
+\end{equation*}
+
 \subsection{Statistical analysis}
+In order to make a better-reasoned and statistically backed conlcusions, I have performed a total of $767$ model training where the viscosity is estimated. The viscosity is randomised for every run, with a $\%50$ chance of a low viscosity ($0.005-0.05$) and a a $\%50$ chance of a high viscosity ($0.05-0.5$). Figure \ref{fig:nu_estimation_2/scatter_Gauss_None} shows the true-predicted $\nu$ pairs in a scatter plot.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/nu_estimation_2/scatter_Gauss_None.png}
+    \caption{Scatter plot of 767 $(\nu,\ \hat\nu)$ pairs for gaussian initial conditions.}
+    \label{fig:nu_estimation_2/scatter_Gauss_None}
+\end{figure}
+
+We can see that in general, we are able to extract the viscosity with relative good accuracy. It is also interesting to split the dataset up into high and low viscosity, as shown on Figures \ref{fig:nu_estimation_2/scatter_Gauss_high} and \ref{fig:nu_estimation_2/scatter_Gauss_low}. 
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images_BE/nu_estimation_2/scatter_Gauss_high.png}
+        \caption{High $\nu$.}
+        \label{fig:nu_estimation_2/scatter_Gauss_high}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images_BE/nu_estimation_2/scatter_Gauss_low.png}
+        \caption{Low $\nu$.}
+        \label{fig:nu_estimation_2/scatter_Gauss_low}
+    \end{subfigure}
+    \caption{Scatter plots of $(\nu,\ \hat\nu)$ pairs for gaussian initial conditions.}
+    \label{fig:nu_estimation_2/scatter_Gauss}
+\end{figure}
+
+From these plots, it is clear that the model \textit{over}estimates the viscosity for small values for $\nu$, and \textit{onder}estimates the viscosity for large values for $\nu$.
 
 \chapter{Conclusion}
 

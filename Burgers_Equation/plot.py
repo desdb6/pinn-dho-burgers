@@ -965,7 +965,7 @@ def plot_three_times(
     if inverse:
         fig.suptitle(
             rf"Ground truth and predicted solution $u(x, t)$ — $\nu = {cfg.nu:.4f} \ \hat\nu = {model.nu_hat.item():.4f}$",
-            fontsize=16, color="#2C2C2A"
+            fontsize=12, color="#2C2C2A"
         )
     else:
         fig.suptitle(
