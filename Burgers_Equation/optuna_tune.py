@@ -25,8 +25,8 @@ from utils import get_device
 
 # -- settings --------------------------------------------------------------
 SEED        = 42
-N_TRIALS    = 200
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/optuna_tuning"
+N_TRIALS    = 500
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/optuna_tuning_2"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 CSV_PATH = OUTPUT_PATH / "optuna_results.csv"
@@ -35,11 +35,9 @@ CSV_FIELDS = [
     # architecture
     "hidden", "n_layers",
     # loss weights
-    "lambda_phys", "lambda_ic",
+    "lambda_phys", "lambda_ic", "lambda_bc",
     # learning rate
     "lr", "scheduler_gamma", "scheduler_step",
-    # adam optimiser
-    "adam_beta1", "adam_beta2"
 ]
 
 ICS = ["Gauss", "N_wave", "Step_up"]
@@ -64,17 +62,17 @@ def objective(trial: optuna.Trial) -> float:
         ic = _base_cfg.ic,
         # architecture
         hidden          = trial.suggest_int(  "hidden",          16,   128, step=16),
-        n_layers        = trial.suggest_int(  "n_layers",         2,     6),
+        n_layers        = trial.suggest_int(  "n_layers",         2,     10),
         # loss weights
-        lambda_phys     = trial.suggest_float("lambda_phys",     1e-3,  1e1, log=True),
-        lambda_ic       = trial.suggest_float("lambda_ic",       1e0,   1e2, log=True),
+        lambda_phys     = trial.suggest_float("lambda_phys",     1e-1,  1e2, log=True),
+        lambda_ic       = trial.suggest_float("lambda_ic",       1e1,   1e3, log=True),
+        lambda_bc       = trial.suggest_float("lambda_bc",       1e1,   1e3, log=True),
         # learning rate and scheduler
         lr              = trial.suggest_float("lr",              1e-4,  1e-2, log=True),
         scheduler_gamma = trial.suggest_float("scheduler_gamma", 0.3,   0.9),
         scheduler_step  = trial.suggest_int(  "scheduler_step",  1000, 5000, step=1000),
-        # adam
-        adam_beta1      = trial.suggest_float("adam_beta1",      0.85,  0.99),
-        adam_beta2      = trial.suggest_float("adam_beta2",      0.99,  0.9999),
+
+        use_data=True
     )
 
     device = get_device()
@@ -103,11 +101,10 @@ def objective(trial: optuna.Trial) -> float:
         "n_layers":          cfg.n_layers,
         "lambda_phys":       cfg.lambda_phys,
         "lambda_ic":         cfg.lambda_ic,
+        "lambda_bc":         cfg.lambda_bc,
         "lr":                cfg.lr,
         "scheduler_gamma":   cfg.scheduler_gamma,
         "scheduler_step":    cfg.scheduler_step,
-        "adam_beta1":       cfg.adam_beta1,
-        "adam_beta2":       cfg.adam_beta2,
     }
 
     write_header = not CSV_PATH.exists()

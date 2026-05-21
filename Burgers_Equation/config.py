@@ -47,7 +47,7 @@ class Config:
 
     # Loss weights
     use_physics: bool = True
-    lambda_phys: float = 1
+    lambda_phys: float = 5
     use_ic: bool = True
     lambda_ic: float = 10
     use_bc: bool = True
