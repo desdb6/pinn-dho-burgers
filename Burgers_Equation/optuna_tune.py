@@ -40,7 +40,7 @@ CSV_FIELDS = [
     "lr", "scheduler_gamma", "scheduler_step",
 ]
 
-ICS = ["Gauss", "N_wave", "Step_up"]
+ICS = ["Gauss"]
 
 # -- fixed seed ------------------------------------------------------------
 def set_seed(seed: int) -> None:
