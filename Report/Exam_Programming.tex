@@ -451,10 +451,8 @@ The \verb|torch.autograd.grad| differentiates an output vector $y=(y_1, \ldots, 
 where $v$ is set by \verb|grad_outputs|. In our specific case, every value $y_i$ only depends on the corresponding time value $t_i$, which makes the Jacobian a diagonal matrix. In order to contract the Jacobian to a column vector, $v$ can be set to a row vector of ones with \verb|grad_outputs=torch.ones_like(y_hat)|. The \verb|torch.autograd.grad| acutally returns a tuple $(dy,)$ per input, so to unpack it we can simply select the first and only element using \verb|[0]|.
 
 \section{Improving the example code}
-Now that we have a good understanding of the code and have a better idea of how to improve the code, we will restart from scratch and make a new implementatoin of the code based on the provided example. In this section, I will discuss the improvements I have made, demonstrate the code for the three different damping cases, and discuss the results and effects of different factors. Finally, we will adapt the code to solve the inverse problem, where I attempt to extract the physical parameters of the system without passing them as explicit inputs to the model.
-\subsection{Code improvements}
-To begin, I will give a thorough overview of the improvements I have made to the code. These rane from fundamental changes to the training process and code structure, to more minor changes to the plotting methods and helper functions.
-\subsubsection{File structure}
+Now that we have a good understanding of the code and have a better idea of how to improve the code, we will restart from scratch and make a new implementatoin of the code based on the provided example. I will give a thorough overview of the improvements I have made to the code. These rane from fundamental changes to the training process and code structure, to more minor changes to the plotting methods and helper functions.
+\subsection{File structure}
 While the original code was implemented in a single script, I have decided to split the different functionalities and steps into multiple files. The file structure is as follows:
 \begin{tcolorbox}[title=Damped harmonic oscillator file structure, colback=black!10!white, colframe=black!40!white, sharp corners]
 \begin{verbatim}
@@ -482,8 +480,10 @@ In order to train a model using these files, a separate script needs to be creat
     \item The model is trained using the \verb|train| function from the \verb|trainer.py| file, which takes the model, data and \verb|Config| object as inputs.
 \end{enumerate}
 In the rest of this report, we will design multiple of scripts like this to do different experiments. The code for these scripts can be found along with the rest of the aforementioned files in the \verb|Damped_Oscillator| directory.
-\subsubsection{Randomising training data}
-In the provided example, the model is trained on a training set of 15 noisy observation points. The same training points are used at every single epoch, which could lead to the model overfitting or bias towards one region of the time domain as explained previously. To avoid this, I have chosen to randomise the observation points at every epoch. This gives the model more spread-out information about the entire time domain of the equation. I have chosen to keep these observation points noisy for two reasons:
+\subsection{Randomising training data}
+In the provided example, the model is trained on a training set of 15 noisy observation points. The same training points are used at every single epoch, which could lead to the model overfitting or bias towards one region of the time domain as explained previously. To avoid this, I have chosen to randomise the observation points at every epoch. This gives the model more spread-out information about the entire time domain of the equation. Unless specified otherwise, all trained models (including the inverse problem models) in this chapter of the report were provided with 15 randomised noisy datapoints per epoch.\\
+
+I have chosen to keep these observation points noisy, instead of giving the model points that lie on the exact analytic solution of the ODE, I have made this choice for two reasons:
 \begin{enumerate}
     \item Noisy observation points is more representative of real-world data, which is never perfectly clean. We are essentialy producing 'fake' observation data fot the model to train on, which is a technique that is widely used in the field of machine learning when the amount of real data is limited.
     \item The noise can also be seen as a way of forcing the model to learn the physics of the system, rather than only memorising the numerical value of the provided observation points. This can avoid overfitting and lead to better results when extrapolating the model beyond the training domain.
@@ -491,7 +491,7 @@ In the provided example, the model is trained on a training set of 15 noisy obse
 
 Just like the observation points, the collocation points are also randomised. In the provided example the same dense evenly spaced grid of collocation points is used, in my code the set of collocation points is randomly chosen at every epoch. Since there are way more collocation points than observation points, this is more to avoid the model to fine-tune to the specific spacing of the collocation grid, which is not desirable.
 
-\subsubsection{Early stopping}
+\subsection{Early stopping}
 In the provided example, the model is trained for a pre-set number of epochs. This is not optimal, since it could be possible that the model has already converged to an optimal set of parameters before all epochs have passed. to account for this, we need to implement an early stopping strategy which stops the training when the model has converged. For this, we need to choose a performance metric to monitor during the training, so that the training will stop when the metric has minimalised and the improvement has stalled.\\
 
 The most representative way to determine the accuracy of the model is to compare the predicted solution to the exact analytic solution. The metric which we want to use is the mean squared error between the predicted and exact solution over the interval:
@@ -509,12 +509,12 @@ This metric will be called the \textit{validation loss}, annotated by $\mathcal{
 \end{enumerate}
 Both of these parameters can be set in the \verb|Config| class.
 
-\subsubsection{Model saving}
+\subsection{Model saving}
 Another improvement is the saving of the best model weights after every training run. This allows us to load the trained model later instead of retraining the model every time we want to make or show a predicition. Throughout the training loop, the weights that give the lowest validation loss are saved as a variable \verb|best_state|. After the training has completed, these weights are passed as an output of the function along with the history of the different loss terms as a function of the epochs, and the prediction snapshots after a pre-set number of epochs. I have then created a helper funtion called \verb|save_model| that saves these the relevant outputs to a folder. The model weights and snapshotsare saved as \verb|.pt| files, the history is saved as a \verb|.csv| file, and the \verb|Config| parameters are saved as a \verb|.json| file.\\
 
 A second helper function, \verb|load_model|, is implemented to reload the best model weights from a specific training run and do predictions using those weights. This is done by creating a new \verb|FCNet| using the saved \verb|Config| parameters, afetr which the best weights are loaded into the model using the \verb|load_state_dict| method. The loaded model is then returned along with the training history, snapshots and \verb|Config| parameters. This model is then ready to be used to make predictions and plot results.
 
-\subsubsection{Plotting improvements}
+\subsection{Plotting improvements}
 The plotting methods from the provided example are more or less reused with some small improvements. The following plotting methods are implemented in the \verb|plot.py| file:
 \begin{itemize}
     \item A plot of the analytic ground truth solution of the differential equation (\verb|plot_analytic|). This function is entirely implemented by me.
@@ -538,8 +538,8 @@ Alternatively, one can choose to save the outputs of the training loop to a fold
 
 Examples of all plotting methods are shown in section \ref{ch:underdamped}
 
-\subsection{Code demonstration}
-In this section, I will give a quick demonstration of three PINNs, used to predict the solution to each of the three damped cases. In all three examples, we will use the following hyperparameters:
+\section{Code demonstration}
+In this section I will demonstrate the code for the three different damping cases, and discuss the results and effects of different factors. In the first part of this section, we will use the following hyperparameters do predict the solution for the overdamped, critically damped and underdamped cases.:
 
 \begin{table}[H]
 \centering
@@ -565,9 +565,9 @@ In this section, I will give a quick demonstration of three PINNs, used to predi
 \end{tabular}
 \end{table}
 
-For now, these hyperparameters are chosen because they are observed to give good results. Section \ref{ch:hyperparameters_DHO} will give a more quantitative analysis of the effect of the hyperparameters. Furthermore, the collocations points are chosen in the training \textit{and} extrapolated domain. In this way, we are not actually making a fully blind prediction about the extrapolated domain, rather a physics informed prediction. This distinction will be further analysed in section \ref{ch:extrap_DHO}. For brevity, I will only show the summary plots. All generated plots can be found in the \verb|outputs| directory. Below, I will discuss each case separately.
+For now, these hyperparameters are chosen because they are observed to give good results. Section \ref{ch:hyperparameters_DHO} will give a more in-depth analysis of the effect of the hyperparameters. Furthermore, the collocations points are chosen in the training \textit{and} extrapolated domain. In this way, we are not actually making a fully blind prediction about the extrapolated domain, rather a physics informed prediction. This distinction will be further analysed in section \ref{ch:extrap_DHO}. For brevity, I will only show the summary plots, but all generated plots can be found in the \verb|Damped_Oscillator/outputs| directory. Below, I will discuss each case separately.
 
-\subsubsection{Overdamped demonstration}
+\subsection{Overdamped}
 For the overdamped case, I chose the following parameters:
 \begin{table}[H]
 \centering
@@ -596,7 +596,7 @@ When looking at the MSE and physics residual plots, we can see that the model st
 
 We can see that the model perfroms exceptionally well for the extrapolated domain. However, since the solution to the ODE is virtually zero, this is not an indicator for the model performance. The extrapolating capabilities will be interpreted when the solution is not stationary in the extrapolated domain, such as for the underdamped case.
 
-\subsubsection{Critically damped demonstration}
+\subsection{Critically damped}
 For the critically damped case, I chose the following parameters:
 \begin{table}[H]
 \centering
@@ -621,7 +621,7 @@ The training was stopped early after $\sim1400$ epochs and the final prediction 
 
 The critically damped case is very similar to the overdamped case, as it can be seen as a limit case of the overdamped solution. The $RMSE$ and number of epochs to reach a solution are very similar indeed. The validation MSE and the physics residual plots also look very simular to those shown on Figure \ref{fig:demo_forward_model_overdamped/summary}. Again, the extrapolation is very good, but trivial at $y=0$.
 
-\subsubsection{Underdamped demonstration}\label{ch:underdamped}
+\subsection{Underdamped}\label{ch:underdamped}
 For the overdamped case, I chose the following parameters:
 \begin{table}[H]
 \centering
@@ -719,7 +719,7 @@ The first two parameters we will investigate determine the \textit{model complex
     \centering
     \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/low_complexity/predicted_solution.png}
     \caption{Predicted solution from a model with a very low complexity.}
-    \label{fig:demo_forward_model_underdamped_ML/summary}
+    \label{fig:demo_forward_model_hyperparameters/low_complexity/predicted_solution}
 \end{figure}
 This model is not able to fit the analytic solution over the entire training domain. The complexity is too low for the model to fit to multiple oscillations, so the improvements stall after the prediction has fitted to the first oscillation of the analytic solution. As explained before, it is important to tune the model complexity s that the model is complex enough for the given task, but not overly complex to avoid overfitting or conputationally model heavy training.
 
@@ -820,7 +820,7 @@ For each case, we will run $1000$ trials and finally save the configuration that
 \end{table}
 The optimal configurations are relatively similar. The optimal model complexity has $\sim10^4$ parameters, the physics loss weight is $\sim10^0$, the learning rate is $\sim10^-3$, the scheduler decay factor is $\sim0.5$ and the scheduler step size is $\sim3000$. We can see that the optimiser has not maximalised the physics loss weight, which indicated that the inclusion of noisy observation data in the training loop is still a good choice. Based on these results, we can make well-reasoned choices for the hyperparameters in the inverse problem.
 \section{Inverse problem}\label{ch:inverse_DHO}
-We will now try to extract the parameters $\zeta$ and $\omega_0$ from the equation by training the model on noisy observation data generated from an analytical solution with unknown, randomised parameters. This can be implemented easily by creating a new model achitecture class, \verb|InverseFCNet| with $\hat\zeta$ and $\hat\omega_0$ as model parameters and a new loss function \verb|loss_physics_inverse| which uses these parameters. $\hat\zeta$ and $\hat\omega_0$ are then treated like every other weight or bias parameter, and will be tweaked every epoch until the model training is complete.\\
+We will now attempt to solve the inverse problem, and try to extract the parameters $\zeta$ and $\omega_0$ from the equation by training the model on noisy observation data generated from an analytical solution with unknown, randomised parameters. This can be implemented easily by creating a new model achitecture class, \verb|InverseFCNet| with $\hat\zeta$ and $\hat\omega_0$ as model parameters and a new loss function \verb|loss_physics_inverse| which uses these parameters. $\hat\zeta$ and $\hat\omega_0$ are then treated like every other weight or bias parameter, and will be tweaked every epoch until the model training is complete.\\
 
 Based on the previous optimised hyperparameters, I have chosen for the following hyperparameters for the inverse problem:
 \begin{table}[H]
@@ -1103,7 +1103,7 @@ This implies that the solution $u$ remains constant along curves $x(t)=u_0(x)t+x
     \label{fig:gauss_ic_t}
 \end{figure}
 
-This is a powerful method to predict when a shock will occur; a shockwave takes place when two characteristics cross, which is equal to $t = -\frac{1}{\min_x u_x(x,\ t=0)}$. However, we will be concerned with the viscid equation. To get ground truth solutions, we must look at other solving algorithms.
+This is a powerful method to predict when a shock will occur; a shockwave takes place when two characteristics cross, which is equal to $t = -\frac{1}{\min_x u_x(x,\ t=0)}$. This \textit{shock time} is also indicated on Figure \ref{fig:gauss_characteristics}. However, we will be concerned with the viscid equation when training a PINN. To get ground truth solutions, we must look at other solving algorithms which are also capable of solving the viscid equation.
 
 \subsection{Numerical PDE solvers}
 The first option is to implement numerical iterative methods, which use finite-differences to discretize the derivatives in the equation. The solution is then calculated by dividing the releavnt domain into a grid with spacings $\Delta x$ and $\Delta t$, and continously solving for the soltuion at the next $\Delta t$. I implemented two different discretisation schemes:
@@ -1169,14 +1169,14 @@ This is a very small residual, which confirms the transformation can give us acc
 
 Using this method, I calculate the values for $u(x,\ t)$ on a dense grid of points. In order to randomise the data generation even more and avoid fine tuning to the specific spacings of this grid, I will make noisy data points by making a bilinear interpolation of the ground truth solution grid.
 \section{PINNs for the Burger's equation}
-With the ground truth data simulation method chosen, we can now train PINNs to solve the viscid Burger's equation. Just like for the damped harmonic oscillator, I will discuss the code implementation and show some examples, study the different loss terms and hyperparameters, and finally attempt to solve the inverse problem.
-\subsection{Code implementation}
+With the ground truth data simulation method chosen, we can now train PINNs to solve the viscid Burger's equation. Just like for the damped harmonic oscillator, I will discuss the code implementation and show some examples, study the different loss terms and hyperparameters, and finally attempt to solve the inverse problem.\\
+
 The implementation of the neural network is strongly based on the implementation of the damped harmonic oscillator PINN. The same improvements I have previously discussed apply; randomised training data and collocation points, early stopping, and model saving have all been implemented. The most important change is obviously the model itself, which now takes two inputs $(x, t)$ instead of one input $(t)$. This means that the loss functions and plotting methods also need to be adapted to handle two dimensional data.\\
 
 Furthermore, we are instructed to not give the model any training observations when solving the PDE in the first part of this task; data points can only be added in the second part where we need to extract $\nu$. It is obviously not possible to extract equation parameters without data points. In order to implement this, I have defined a new parameter \verb|use_data| in the \verb|Config| class, which acts as a switch for adding data points to the training loop. In the first part of this exercise, the variable will be set to False.\\
 
 Some more adaptations that require an bit more in-depth explanation are included below.
-\subsubsection{File structure}
+\subsection{File structure}
 The structure of the code is roughly the same as for the damped harmonic oscillator:
 \begin{tcolorbox}[title=Burger's equation file structure, colback=black!10!white, colframe=black!40!white, sharp corners]
 \begin{verbatim}
@@ -1196,7 +1196,7 @@ Burgers_Equation/
 \end{verbatim}
 \end{tcolorbox}
 The only notable difference compared to the damped harmonic oscillator is the inclusion of the \verb|analytic.py| file. The ground truth is now much more complex to calculate than for the damped harmonic oscillator, so I have chosen to do all the ground truth solution generation in a separate file. 
-\subsubsection{Boundary condition loss}
+\subsection{Boundary condition loss}
 We introduce a new loss term: $\mathcal{L}_{b.c.}$ to force the PINN to respect the boundary conditions of the system. Every epoch, 50 boundary condition points are chosen randomly along both boundaries of the system (at $x=0$ and $x=L$) and the predicted value $\hat y$ and derivative $d\hat y$ are evaluated (using \verb|autograd|). The loss term $\mathcal{L}_{b.c.}$ and total loss are then calculated as:
 \begin{equation}
     \begin{split}
@@ -1204,14 +1204,14 @@ We introduce a new loss term: $\mathcal{L}_{b.c.}$ to force the PINN to respect 
         \mathcal{L}_{tot} &= \lambda_{i.c.}\mathcal{L}_{i.c.} + \lambda_{b.c.}\mathcal{L}_{b.c.} + \lambda_{phys}\mathcal{L}_{phys}
     \end{split}
 \end{equation}
-\subsubsection{Plotting methods}
+\subsection{Plotting methods}
 I ahve implemented a wide range of plotting methods, which are described below:
 \begin{itemize}
     \item A plot of the characteristics of the inviscid equation and the predicted shock time $t_{shock}$.
     \item A plot of the ground truth solution calculated using the Cole-Hopf transformation at four different times ($t=0,\ t=2,\ t=4,\ t=6$).
     \item A plot of the ground truth and predicted solution at four different times ($t=0,\ t=2,\ t=4,\ t=6$).
     \item A plot of the ground truth and predicted solution at eoght different, evenly spaced times from $t=0$ to $t=t_{extrap}$.
-    \item A plot of the ground truth and predicted solution at three different times ($t=0,\ t=t_{shock}/2,\ t=t_{shock}$). This is the plot that is explictly requested in the assignment.
+    \item A plot of the ground truth and predicted solution at three different times ($t=0,\ t=t_{shock}/2,\ t=t_{shock}$)\footnote{This is the plot that is explictly requested in the assignment.}.
     \item A 2D plot of the full ground truth solution (displayed as a matrix).
     \item A 2D plot of the full predicted solution (displayed as a matrix).
     \item A plot of the different loss terms as a funtion of the epochs.
@@ -1221,18 +1221,18 @@ I ahve implemented a wide range of plotting methods, which are described below:
         \item A 2D plot of the full ground truth solution.
         \item A 2D plot of the full predicted solution.
         \item A 2D plot of the square of the physics residual $|u_t+uu_x-\nu uu_{xx}|^2$.
-        \item A 2D plot of the data MSE $|\hat u(x, t)-u(x, t)|^2$
-        \item A 3D surface plot of the predicted solution with noisy observation points\footnote{As before, these points are not actually used during training but are generated afterwards to give an idea of what the observation points look like.}
+        \item A 3D surface plot of the predicted solution.
         \item A plot of the different loss terms as a funtion of the epochs.
+        \item A 2D plot of the validation MSE $|\hat u(x, t)-u(x, t)|^2$
     \end{enumerate}
 \end{itemize}
 An example of every plot will be shown in section \ref{ch:gauss}.
-\subsection{Code demonstration}
-In this section, we will demonstrate PINNs for three different initial conditions (Gauss, N-wave and Step-up functions), and three different values for the viscosity ($\nu=0.1,\ 0.05,\ 0.01$). In all three examples, we will use the following hyperparameters:
+\section{Code demonstration}
+In this section, we will demonstrate PINNs for three different initial conditions (Gauss, N-wave and Step-up functions), and three different values for the viscosity ($\nu=0.1,\ 0.05,\ 0.01$). Unless specified otherwise, we will use the following hyperparameters:
 
 \begin{table}[H]
 \centering
-\caption{PINN Hyperparameters}\label{tab:standard_parameters_DHO}
+\caption{PINN Hyperparameters}\label{tab:standard_parameters_BE}
 \begin{tabular}{llc}
 \toprule
 \textbf{Parameter} & \textbf{Description} & \textbf{Value} \\
@@ -1249,15 +1249,13 @@ In this section, we will demonstrate PINNs for three different initial condition
 \texttt{lambda\_ic}           & Initial condition loss weight     & $1\times10^{1}$      \\
 \texttt{lambda\_bc}           & Boundary condition loss weight    & $1\times10^{1}$      \\
 \texttt{n\_col\_dom}          & Collocation points                & 200                  \\
-\texttt{n\_obs}               & Observation points                & 30                   \\
 \texttt{n\_bc}                & Boundary condition points         & 50                   \\
-\texttt{sigma}                & Observation noise $\sigma$        & $1\times10^{-2}$     \\
 \bottomrule
 \end{tabular}
 \end{table}
-Just like before, these hyperparameters have been hand-picked and are observed to give reasonable results. We will tune the hyperparameters in section \ref{ch:hyperparameters_BE}.
+Just like before, these hyperparameters have been hand-picked and are observed to give reasonable results. We will tune the hyperparameters (with inclusion of observation points) in section \ref{ch:hyperparameters_BE}.
 
-\subsubsection{Gauss}\label{ch:gauss}
+\subsection{Gauss}\label{ch:gauss}
 The gauss initial condition is given by:
 \begin{equation}
     u(x,\ t=0) = A\exp\left[-\frac{\left(x-\frac{L}{2}\right)^2}{2\sigma^2}\right]
@@ -1269,78 +1267,86 @@ In this case, we have chosen $L=15,\ \sigma=1 ,\ A=0.7$ Through the method of ch
     \caption{Method of characteristics applied to a Gaussian initial condition.}
     \label{fig:Gauss_nu_0.1/method_of_characteristics}
 \end{figure}
-We will now solve the equation for three different values for $\nu$.\\
+We will now train PINNs to predict the solution to the equation for three different values for $\nu$. In the next sections, I will discuss these results.\\
 
-\paragraph{$\nu=0.05$}
-The ground truth solution calculated by the Cole-Hopf transformation is shown on Figure \ref{fig:Gauss_nu_0.05_gt}.
+\subsubsection{Gauss, $\nu=0.05$}
+To begin, we choose $\nu=0.05$. This is a good strating value, since it is not too high or too low. The ground truth solution calculated by the Cole-Hopf transformation is shown on Figure \ref{fig:Gauss_nu_0.05_gt}.
 \begin{figure}[H]
     \centering
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.58\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Images_BE/Gauss_nu_0.05/gt_solution.png}
         \caption{3D solution.}
         \label{fig:Gauss_nu_0.05_gt_solution}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth]{Images_BE/Gauss_nu_0.05/gt_2D.png}
         \caption{2D solution.}
         \label{fig:Gauss_nu_0.05_gt_2D}
     \end{subfigure}
-    \caption{Method of characteristics applied to a Gaussian initial condition.}
+    \caption{Ground truth solution to the gaussian initial conditions calculated witht eh Cole-Hopf transformation.}
     \label{fig:Gauss_nu_0.05_gt}
 \end{figure}
+We can indeed observe the formation of a shock front in the ground truth solution. The gaussian wave tilts to the right, which creates a steep gradient. A more or less stationary configuration is reached when the gradient becomes so steep that viscosity term becomes so large that it prevents the gradient from becoming even steeper.\\
 
-The predicted solution at the three requested valeus for $t$ (initial condition, before shock and after shock) are shown on Figure \ref{fig:Gauss_nu_0.05/3_times}
+On the 2D-plot, we can see that the viscous term causes the shockwave to occur later than the predicted time. In fact, a shockwave in its most formal definition is never formed, since the viscous term prevents the formation of discontinuïties. When we talk about a shockwave in this context, we are referring to the point where the gradiënt becomes so steep that the viscous term has slowed down the propagation of the field to a relatively stationary regime.\\
+
+The PINN is now trained, and the predicted solution at the three requested valeus for $t$ (initial condition, before shock and after shock) are shown on Figure \ref{fig:Gauss_nu_0.05/3_times}. The training is stopped early after $9450$ epochs and the final $RMSE$ is $RMSE=0.0052$. From these results, we can see that the model is able to fit to the ground truth to a gaussian initial condition with this viscosity solution very accurately. For this case, I will also demonstrate all the other plotting methods that I have implemented in the code. Figures \ref{fig:Gauss_nu_0.05/gt_2D} and \ref{fig:Gauss_nu_0.05/pred_2D} show the analytic and predicted solutions plotted as 2D matrices.
+
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.05/3_times.png}
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.05$.}
     \label{fig:Gauss_nu_0.05/3_times}
 \end{figure}
-We can see that the model is able to fit to the ground truth solution very accurately. For this case, I will also demonstrate the other plotting methods. Figures \ref{fig:Gauss_nu_0.05/gt_2D} and \ref{fig:Gauss_nu_0.05/pred_2D} show the analytic and predicted solutions plotted as 2D matrices.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/gt_2D.png}
-    \caption{Ground truth solution in 2D for gaussian initial conditions and $\nu=0.05$.}
-    \label{fig:Gauss_nu_0.05/gt_2D}
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images_BE/Gauss_nu_0.05/gt_2D.png}
+        \caption{Ground truth solution in 2D for gaussian initial conditions and $\nu=0.05$.}
+        \label{fig:Gauss_nu_0.05/gt_2D}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images_BE/Gauss_nu_0.05/pred_2D.png}
+        \caption{Predicted solutions in 2D for gaussian initial conditions and $\nu=0.05$.}
+        \label{fig:Gauss_nu_0.05/pred_2D}
+    \end{subfigure}
+    \caption{Ground truth and predicted solutions in 2D for gaussian initial conditions and $\nu=0.05$.}
+    \label{fig:Gauss_nu_0.05_2D}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/pred_2D.png}
-    \caption{Predicted solutions in 2D for gaussian initial conditions and $\nu=0.05$.}
-    \label{fig:Gauss_nu_0.05/pred_2D}
-\end{figure}
-
-We again see a very good agreement between the prediction and true solution. Figures \ref{fig:Gauss_nu_0.05/pred_solution} and \ref{fig:Gauss_nu_0.05/pred_grid} show the predicted solution at more values for $t$.
+We again see a very good agreement between the prediction and true solution. These plots are useful because they give a full overview of the solution, something which is not possible when plotting slices of the solution $u(x,\ t)$ with constant $t$ like in Figure \ref{fig:Gauss_nu_0.05/3_times}. However, it is more difficult to spot small deviations form the ground truth solution since the solutions cannot directly be compared like in Figure \ref{fig:Gauss_nu_0.05/3_times}. Both plotting the entire solution as a 2D image, and plotting mutple time slices at discrete times have their advantages and disadvantages. Figures \ref{fig:Gauss_nu_0.05/pred_solution} and \ref{fig:Gauss_nu_0.05/pred_grid} show the predicted solution at more values for $t$.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/pred_solution.png}
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05/pred_solution.png}
     \caption{Predicted solutions at 8 different times for gaussian initial conditions and $\nu=0.05$.}
     \label{fig:Gauss_nu_0.05/pred_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/pred_grid.png}
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05/pred_grid.png}
     \caption{Predicted solutions at 8 different times for gaussian initial conditions and $\nu=0.05$.}
     \label{fig:Gauss_nu_0.05/pred_grid}
 \end{figure}
 
-Figure \ref{fig:Gauss_nu_0.05/losses} shows the losses as a function of the epochs.
+I have chosen to implement these plots since they can be useful in cases where the predicted solution deviates strongly from the ground truth solution. The network can usually fit to the initial condition accurately, after which more errors can start to occur for larger and larger values of $t$. Plotting the solution at many different times can then help to pinpoint where the solution starts to deviate strongly, and what exactly is going wrong. In this case, the predicted solution is very accurate so not a lot of additional information can be extracted by these plots. Figure \ref{fig:Gauss_nu_0.05/losses} shows the losses as a function of the epochs.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\textwidth]{Images_BE/Gauss_nu_0.05/losses.png}
-    \caption{Convergece of loss function terms for gaussian initial conditions and $\nu=0.05$.}
+    \caption{Convergence of loss function terms for gaussian initial conditions and $\nu=0.05$.}
     \label{fig:Gauss_nu_0.05/losses}
 \end{figure}
 
-Figure \ref{fig:Gauss_nu_0.05/losses} is a summary plot with the most important information about the prediction.
+The loss plot is usefull to see which contributions to the loss functions are the greatest, and to pinpoint when the model starts to overfit. $\mathcal{L}_{b.c.}$ and $\mathcal{L}_{b.c.}$ decrease the fastest, since they are the largest contributions to the total loss function and largely determine the optimisation of the parameters in the early stages of training. interestingly, the physics and validation loss functions show a large jump around $8000$ epochs. After this, the solution never reaches the lowest validation loss again and the training is stopped early. Since the validation loss is not decreasing fast enough, this is an indication that the learning rate or patience might have to be increased. Hovewer, the final solution is still very accurate, so this is a only a minor problem. Figure \ref{fig:Gauss_nu_0.05/losses} is a summary plot with the most important information about the prediction.
 
 \begin{figure}[H]
     \centering
@@ -1349,26 +1355,45 @@ Figure \ref{fig:Gauss_nu_0.05/losses} is a summary plot with the most important 
     \label{fig:Gauss_nu_0.05/summary}
 \end{figure}
 
-For brevity, I will not show all plots for each and every case. For the rest of the demonstration cases, I will only show the predicted solution at the three requested times and the summary plot.
+This plot gives a good general overview of the model performance. When looking at the 2D residual plots, we can observe that the error is the largest where the gradient of the solution is the largest. This makes sense, as the model uses a smooth activation funtion ($\tanh$) which makes it 'unnatural' to represent very sharp features; it will then also have the most trouble fitting to there regions. The final residual is hovewer still small, and the model performance is generally good.\\
 
-\paragraph{$\nu=0.1$}
-Let us now see what happens if the viscosity is increased.
+To avoid this report from becoming too long, I will not show all generated plots for each and every case. For the rest of the demonstration cases, I will only show a plot of the rpedicted solution at different times, and the summary plot. They should give a good general idea of the model performance, but all generated plots can be found in the \verb|Burgers_Equation/outputs| directory.
+\clearpage
+
+\subsubsection{Gauss, $\nu=0.1$}
+Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results the prediction shown on Figures \ref{fig:Gauss_nu_0.1/3_times} and \ref{fig:Gauss_nu_0.1/summary}. A solution is reached after $6050$ epochs and the final $RMSE$ is $RMSE=0.0025$.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.1/3_times.png}
+    \includegraphics[width=0.45\textwidth]{Images_BE/Gauss_nu_0.1/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.1$.}
     \label{fig:Gauss_nu_0.1/3_times}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.1/summary.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/Gauss_nu_0.1/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.1$.}
     \label{fig:Gauss_nu_0.1/summary}
 \end{figure}
+The model is able to predict the solution with a higher viscosity with an even better accuracy, and the results look very similar to the results with $\nu=0.05$. This is not surprising as the ground truth solution actually looks pretty similar to the previous case; the higher viscosity just prevents the formation of an even steeper gradient, which is exactly what the model struggles to predict. A higher viscosity actually makes the solution easier to predict.
+\subsubsection{Gauss, $\nu=0.01$}
+Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This results in the following prediction:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{Images_BE/Gauss_nu_0.01_bad/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.01$.}
+    \label{fig:Gauss_nu_0.01/3_times_bad}
+\end{figure}
 
-\paragraph{$\nu=0.01$}
-Let us now see what happens if the viscosity is decreased.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images_BE/Gauss_nu_0.01/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.01$.}
+    \label{fig:Gauss_nu_0.01/summary_bad}
+\end{figure}
+
+As we can see, the model fails to predict the correct solution. It seems that the steeper gradient prevents the model from fitting accurately to the ground truth solution. To get a better result, the hyperparameters need to be tweaked. I have decided to increase the number of layers from 8 to 10, decrease the learning rate to $1\cdot 10^{-3}$, and increase the physics loss weight to $5$. The solution then converges after $11167$ epochs with a final $RMSE=$ of $RMSE=0.0064$
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.01/3_times.png}
@@ -1382,8 +1407,9 @@ Let us now see what happens if the viscosity is decreased.
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.01$.}
     \label{fig:Gauss_nu_0.01/summary}
 \end{figure}
+This now gives better results. The model complexity had to be increased for the model to be able to learn the steep gradient. This will be discussed in more detail in section \ref{ch:complexity_BE}.
 
-\subsubsection{N-wave}
+\subsection{N-wave}
 The N-wave initial condition is given by:
 \begin{equation}
     u(x,\ t=0) = 
@@ -1392,15 +1418,32 @@ The N-wave initial condition is given by:
         -Ax & \text{if} |x| \leq w
     \end{cases}
 \end{equation}
-Where $w$ is the width of the wave and $A$ is the height of the wave. In this case, we have chosen $L=15, \ w=3, \ A=\frac{1}{3}$. Just like with the gaussian intiial conditions, we can predict the time when a shockwave will form by approximating the solution by the inviscid case. This yelds $t_{shock}=3.000$. The method of characteristics is shown on Figure \ref{fig:N_wave_nu_0.1/method_of_characteristics}.
+Where $w$ is the width of the wave and $A$ is the height of the wave. In this case, we have chosen $L=15, \ w=3, \ A=\frac{1}{3}$. Just like with the gaussian initial conditions, we can predict the time when a shockwave will form by approximating the solution by the inviscid case. This yelds $t_{shock}=3.000$. The method of characteristics is shown on Figure \ref{fig:N_wave_nu_0.1/method_of_characteristics}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\textwidth]{Images_BE/N_wave_nu_0.1/method_of_characteristics.png}
     \caption{Method of characteristics applied to an N-wave initial condition.}
     \label{fig:N_wave_nu_0.1/method_of_characteristics}
 \end{figure}
-At $t=3$, many characteristics cross and a large shockwave is formed in the middle of the domain.We will now solve the equation for three different values for $\nu$, in the same way as for the gaussian initial conditions.
-\paragraph{$\nu=0.05$}
+At $t=3$, many characteristics cross and a large shockwave is formed in the middle of the domain. We will now solve the equation for three different values for $\nu$, in the same way as for the gaussian initial conditions.
+\subsubsection{N-wave, $\nu=0.05$}
+For a normal value for the viscosity, the prediction gives the following output:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.05_bad/3_times.png}
+    \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.05$.}
+    \label{fig:N_wave_nu_0.05_bad/3_times}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.05_bad/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.05$.}
+    \label{fig:N_wave_nu_0.05_bad/summary}
+\end{figure}
+
+We can see that the model has a lot of trouble fitting to predicted solution, and is not capable of replicating the discontinuities the initial conditions. Since the entire solution is based on these initial conditions, the result is not very accurate. To fix this, we can use the ground truth solution at a later time as the inital conditions, since the viscosity term will have smoothened out the discontinuities. I have chosen to start the predictions at $t=0.5$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.05/3_times.png}
@@ -1414,9 +1457,9 @@ At $t=3$, many characteristics cross and a large shockwave is formed in the midd
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.05$.}
     \label{fig:N_wave_nu_0.05/summary}
 \end{figure}
-
-\paragraph{$\nu=0.1$}
-Let us now see what happens if the viscosity is increased.
+\clearpage
+\subsubsection{N-wave, $\nu=0.1$}
+Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.1/3_times.png}
@@ -1430,12 +1473,12 @@ Let us now see what happens if the viscosity is increased.
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.1$.}
     \label{fig:N_wave_nu_0.1/summary}
 \end{figure}
-
-\paragraph{$\nu=0.01$}
-Let us now see what happens if the viscosity is decreased.
+\clearpage
+\subsubsection{N-wave, $\nu=0.01$}
+Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.01/3_times.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/N_wave_nu_0.01/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.01$.}
     \label{fig:N_wave_nu_0.01/3_times}
 \end{figure}
@@ -1446,8 +1489,8 @@ Let us now see what happens if the viscosity is decreased.
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.01$.}
     \label{fig:N_wave_nu_0.01/summary}
 \end{figure}
-
-\subsubsection{Step-up}
+\clearpage
+\subsection{Step-up}
 The Step-up initial condition is given by:
 \begin{equation}
     u(x,\ t=0) = 
@@ -1463,11 +1506,13 @@ Where $A$ is the height of the step function. In this case, we have chosen $L=15
     \caption{Method of characteristics applied to a Step-up initial condition.}
     \label{fig:Step_up_nu_0.1/method_of_characteristics}
 \end{figure}
-Now we will solve the equation for three different values for $\nu$, in the same way as for the gaussian and N-wave initial conditions.
-\paragraph{$\nu=0.05$}
+This means that it is impossible to provide the requested plots before and at the shock time. Instead, I will show a grid of the solution at four different times. Now we will solve the equation for three different values for $\nu$, in the same way as for the gaussian and N-wave initial conditions.
+\clearpage
+\subsubsection{Step-up, $\nu=0.05$}
+The solution converges after 4200 epochs with a final $RMSE$ of $RMSE=0.0146$. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/Step_up_nu_0.05/pred_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/Step_up_nu_0.05/pred_solution.png}
     \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.05$.}
     \label{fig:Step_up_nu_0.05/pred_solution}
 \end{figure}
@@ -1478,12 +1523,13 @@ Now we will solve the equation for three different values for $\nu$, in the same
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.05$.}
     \label{fig:Step_up_nu_0.05/summary}
 \end{figure}
-
-\paragraph{$\nu=0.1$}
-Let us now see what happens if the viscosity is increased.
+It seems that the model has less trouble fitting to the initial conditions of the step-up function despite the discontinuïty. The dynamics of the system are easier than the N-wave initial condition, as there is no shockwave formation and the gradient decreases over time, which can be fitted by the model.
+\clearpage
+\subsubsection{Step-up, $\nu=0.1$}
+Let us now see what happens if the viscosity is increased $\nu=0.1$. The solution converges after 3950 epochs with a final $RMSE$ of $RMSE=0.0191$. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/Step_up_nu_0.1/pred_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/Step_up_nu_0.1/pred_solution.png}
     \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.1$.}
     \label{fig:Step_up_nu_0.1/pred_solution}
 \end{figure}
@@ -1495,11 +1541,11 @@ Let us now see what happens if the viscosity is increased.
     \label{fig:Step_up_nu_0.1/summary}
 \end{figure}
 
-\paragraph{$\nu=0.01$}
-Let us now see what happens if the viscosity is decreased.
+\subsubsection{Step-up, $\nu=0.01$}
+Let us now see what happens if the viscosity is decreased to $\nu=0.01$. The solution converges after 5800 epochs with a final $RMSE$ of $RMSE=0.0085$.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/Step_up_nu_0.01/pred_solution.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/Step_up_nu_0.01/pred_solution.png}
     \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.01$.}
     \label{fig:Step_up_nu_0.01/pred_solution}
 \end{figure}
@@ -1511,7 +1557,7 @@ Let us now see what happens if the viscosity is decreased.
     \label{fig:Step_up_nu_0.01/summary}
 \end{figure}
 
-\subsubsection{Inclusion of data}
+\subsection{Inclusion of data}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_data_included/summary.png}
@@ -1519,7 +1565,7 @@ Let us now see what happens if the viscosity is decreased.
     \label{fig:Gauss_nu_0.05_data_included/summary}
 \end{figure}
 
-\subsubsection{Extrapolating capabilities}
+\subsection{Extrapolating capabilities}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_extrapblind/summary.png}
@@ -1544,7 +1590,7 @@ Let us now see what happens if the viscosity is decreased.
 \end{figure}
 
 \subsection{Hyperparameter optimisation}\label{ch:hyperparameters_BE}
-\subsubsection{Model complexity}
+\subsubsection{Model complexity}\label{ch:complexity_BE}
 
 \begin{figure}[H]
     \centering
@@ -1587,15 +1633,13 @@ Let us now see what happens if the viscosity is decreased.
 \toprule
 \textbf{Parameter} & \textbf{Gauss} & \textbf{N-wave} & \textbf{Step-up} \\
 \midrule
-\texttt{best\_val}           & $3.86\times10^{-5}$ & $3.67\times10^{-4}$ & $1.19\times10^{-5}$ \\
+\texttt{val\_loss}           & $3.86\times10^{-5}$ & $3.67\times10^{-4}$ & $1.19\times10^{-5}$ \\
 \midrule
 \texttt{hidden}              & 64      & 64      & 48      \\
 \texttt{n\_layers}           & 4       & 6       & 6       \\
 \texttt{lr}                  & $2.64\times10^{-3}$ & $5.88\times10^{-3}$ & $8.11\times10^{-3}$ \\
 \texttt{scheduler\_step}     & 1000    & 4000    & 2000    \\
-\texttt{scheduler\_gamma}    & 0.581   & 0.595   & 0.609   \\
-\texttt{adam\_beta1}         & 0.965   & 0.852   & 0.915   \\
-\texttt{adam\_beta2}         & 0.991   & 0.991   & 0.999   \\
+\texttt{scheduler\_gamma}    & 0.581   & 0.595   & 0.609   \\\\
 \texttt{lambda\_phys}        & $3.26\times10^{-2}$ & $7.71\times10^{-1}$ & $1.44\times10^{0}$ \\
 \texttt{lambda\_ic}          & 19.32   & 24.60   & 1.21    \\
 \bottomrule
