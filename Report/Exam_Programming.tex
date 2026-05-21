@@ -1361,21 +1361,21 @@ To avoid this report from becoming too long, I will not show all generated plots
 \clearpage
 
 \subsubsection{Gauss, $\nu=0.1$}
-Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results the prediction shown on Figures \ref{fig:Gauss_nu_0.1/3_times} and \ref{fig:Gauss_nu_0.1/summary}. A solution is reached after $6050$ epochs and the final $RMSE$ is $RMSE=0.0025$.
+Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results the prediction shown on Figures \ref{fig:Gauss_nu_0.1/3_times} and \ref{fig:Gauss_nu_0.1/summary}. A solution is reached after $6050$ epochs and the final $RMSE$ is $RMSE=0.0025$. The model is able to predict the solution with a higher viscosity with an even better accuracy, and the results look very similar to the results with $\nu=0.05$. This is not surprising as the ground truth solution actually looks pretty similar to the previous case; the higher viscosity just prevents the formation of an even steeper gradient, which is exactly what the model struggles to predict. A higher viscosity actually makes the solution easier to predict.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.45\textwidth]{Images_BE/Gauss_nu_0.1/3_times.png}
+    \includegraphics[width=0.4\textwidth]{Images_BE/Gauss_nu_0.1/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.1$.}
     \label{fig:Gauss_nu_0.1/3_times}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images_BE/Gauss_nu_0.1/summary.png}
+    \includegraphics[width=0.6\textwidth]{Images_BE/Gauss_nu_0.1/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.1$.}
     \label{fig:Gauss_nu_0.1/summary}
 \end{figure}
-The model is able to predict the solution with a higher viscosity with an even better accuracy, and the results look very similar to the results with $\nu=0.05$. This is not surprising as the ground truth solution actually looks pretty similar to the previous case; the higher viscosity just prevents the formation of an even steeper gradient, which is exactly what the model struggles to predict. A higher viscosity actually makes the solution easier to predict.
+
 \subsubsection{Gauss, $\nu=0.01$}
 Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This results in the following prediction:
 \begin{figure}[H]
@@ -1392,18 +1392,18 @@ Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This re
     \label{fig:Gauss_nu_0.01/summary_bad}
 \end{figure}
 
-As we can see, the model fails to predict the correct solution. It seems that the steeper gradient prevents the model from fitting accurately to the ground truth solution. To get a better result, the hyperparameters need to be tweaked. I have decided to increase the number of layers from 8 to 10, decrease the learning rate to $1\cdot 10^{-3}$, and increase the physics loss weight to $5$. The solution then converges after $11167$ epochs with a final $RMSE=$ of $RMSE=0.0064$
+As we can see, the model fails to predict the correct solution. It seems that the steeper gradient prevents the model from fitting accurately to the ground truth solution. To get a better result, the hyperparameters need to be tweaked. I have decided to increase the number of layers from 8 to 10, decrease the learning rate to $1\cdot 10^{-3}$, and increase the physics loss weight to $5$. The solution then converges after $11167$ epochs with a final $RMSE$ of $RMSE=0.0064$
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/Gauss_nu_0.01/3_times.png}
+    \includegraphics[width=0.4\textwidth]{Images_BE/Gauss_nu_0.01/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for gaussian initial conditions and $\nu=0.01$.}
     \label{fig:Gauss_nu_0.01/3_times}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.01/summary.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/Gauss_nu_0.01/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.01$.}
     \label{fig:Gauss_nu_0.01/summary}
 \end{figure}
@@ -1446,14 +1446,14 @@ We can see that the model has a lot of trouble fitting to predicted solution, an
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.05/3_times.png}
+    \includegraphics[width=0.4\textwidth]{Images_BE/N_wave_nu_0.05/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.05$.}
     \label{fig:N_wave_nu_0.05/3_times}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.05/summary.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/N_wave_nu_0.05/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.05$.}
     \label{fig:N_wave_nu_0.05/summary}
 \end{figure}
@@ -1462,14 +1462,14 @@ We can see that the model has a lot of trouble fitting to predicted solution, an
 Let us now see what happens if the viscosity is increased to $\nu=0.1$. This results in the following predictions, where the solution converges after epochs and the final $RMSE$ is
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth]{Images_BE/N_wave_nu_0.1/3_times.png}
+    \includegraphics[width=0.45\textwidth]{Images_BE/N_wave_nu_0.1/3_times.png}
     \caption{Predicted solutions at start time, before shock time and at shock time for N-wave initial conditions and $\nu=0.1$.}
     \label{fig:N_wave_nu_0.1/3_times}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/N_wave_nu_0.1/summary.png}
+    \includegraphics[width=0.7\textwidth]{Images_BE/N_wave_nu_0.1/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.1$.}
     \label{fig:N_wave_nu_0.1/summary}
 \end{figure}
@@ -1489,7 +1489,7 @@ Let us now see what happens if the viscosity is decreased to $\nu=0.01$. This re
     \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.01$.}
     \label{fig:N_wave_nu_0.01/summary}
 \end{figure}
-\clearpage
+
 \subsection{Step-up}
 The Step-up initial condition is given by:
 \begin{equation}
@@ -1507,12 +1507,12 @@ Where $A$ is the height of the step function. In this case, we have chosen $L=15
     \label{fig:Step_up_nu_0.1/method_of_characteristics}
 \end{figure}
 This means that it is impossible to provide the requested plots before and at the shock time. Instead, I will show a grid of the solution at four different times. Now we will solve the equation for three different values for $\nu$, in the same way as for the gaussian and N-wave initial conditions.
-\clearpage
+
 \subsubsection{Step-up, $\nu=0.05$}
 The solution converges after 4200 epochs with a final $RMSE$ of $RMSE=0.0146$. 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{Images_BE/Step_up_nu_0.05/pred_solution.png}
+    \includegraphics[width=0.6\textwidth]{Images_BE/Step_up_nu_0.05/pred_solution.png}
     \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.05$.}
     \label{fig:Step_up_nu_0.05/pred_solution}
 \end{figure}
@@ -1546,59 +1546,68 @@ Let us now see what happens if the viscosity is decreased to $\nu=0.01$. The sol
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Images_BE/Step_up_nu_0.01/pred_solution.png}
-    \caption{Predicted solutions at four different times for N-wave initial conditions and $\nu=0.01$.}
+    \caption{Predicted solutions at four different times for step-up initial conditions and $\nu=0.01$.}
     \label{fig:Step_up_nu_0.01/pred_solution}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Step_up_nu_0.01/summary.png}
-    \caption{Summary plot fot the predicted solution by a PINN for N-wave initial conditions and $\nu=0.01$.}
+    \caption{Summary plot fot the predicted solution by a PINN for step-up initial conditions and $\nu=0.01$.}
     \label{fig:Step_up_nu_0.01/summary}
 \end{figure}
+Interestingly, the $RMSE$ does not seem to increase with decreasing viscosity like in the previous two examples. This is because with a step-up initial condition, a lower viscosity will not lead to a steeper gradient since no shockwave is formed. We only have a rarefaction, where a solution with a lower value for $\nu$ can be fitted with comparable accuracy to a solution with higher $\nu$.
+\clearpage
+We will now discuss the effect of different parameters for the trained models. Since the gaussian initial conditions gave the most accurate results and profuce a shockwave, I will stick to this inital condition with $\nu=0.05$ for the rest of the report.
 
 \subsection{Inclusion of data}
+The code is implemented in such a way that we can include training data in the training loop by modifying the Config class. We want to compare the results with and without training data. The predicted solution where data is included in the training is shown below:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_data_included/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when noisy data points are included in the training.}
     \label{fig:Gauss_nu_0.05_data_included/summary}
 \end{figure}
-
-\subsection{Extrapolating capabilities}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_extrapblind/summary.png}
-    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when the mdoel is only trained on a fraction of the domain.}
-    \label{fig:Gauss_nu_0.05_extrapblind/summary}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_data_included_extrapblind/summary.png}
-    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when the mdoel is only trained on a fraction of the domain, but noisy data points are included in the training.}
-    \label{fig:Gauss_nu_0.05_data_included_extrapblind/summary}
-\end{figure}
+The training has been stopped after 4600 epochs with $RMSE=0.0042$. This is a little better than when data is omitted from the training ($RMSE=0.0052$). However, the prediction was already very good without data, so no major improvements were expected.
 
 \subsection{Comparison with traditional ML model}
-
+Let us now compare the results of a model which is \textit{only} trained on the data poins, like a traditional dense network. I have chosen to also define an extrapolation region where no training points are generated, so that we can test if the model is capable of generalising to unseen regions. This results in the following prediction: 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_ML/summary.png}
     \caption{Summary plot fot the predicted solution by a non-physics informed neural network for gaussian initial conditions and $\nu=0.05$.}
     \label{fig:Step_up_nu_0.05_ML/summary}
 \end{figure}
+The final prediction yields $RMSE=0.0330$, which is a lot worse than the physics-informed networks. This means that fitting the ML to observed data is actually worse than solving the PDE using a PINN. Furthermore, we can clearly observe that the model performs a whole lot worse in the extrapolated region, as the residual grows fast towards the end of the time domain.
+
+\subsection{Extrapolating capabilities}
+As discussed earlier, one advantage of PINNs is that they perform better in extrapolated domains than traditional machine learning models. This can be tested by applying the same approach as for the traditional dense network, but using collocation points instead of observation points. First, we test a purely physics-based model. When no collocation points in the extrapolated region are provided, the model gives the following prediction:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_extrapblind/summary.png}
+    \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when the model is only trained on a fraction of the domain.}
+    \label{fig:Gauss_nu_0.05_extrapblind/summary}
+\end{figure}
+When comparing the residuals in the extrapolated domain to those for the non-physics based network (see Figure \ref{fig:Step_up_nu_0.05_ML/summary}), we can see that this model performs significantly better; the residuals are a factor $\times 50-100$ lower. This validates our claim that a PINN is a lot better at generalisation than a standard dense network.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_data_included_extrapblind/summary.png}
+%     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ when the model is only trained on a fraction of the domain, but noisy data points are included in the training.}
+%     \label{fig:Gauss_nu_0.05_data_included_extrapblind/summary}
+% \end{figure}
 
 \subsection{Hyperparameter optimisation}\label{ch:hyperparameters_BE}
+With the inverse problem in mind, it is wise to look at the effect of different hyperparameters on the model predictions to determine an optimal hyperparameter set. Like in the previous chapter about the damped harmonic oscillator, I will discuss some of the most important factors and then apply a Tree-Stuctured Parzen Estimator using \verb|optuna|.
 \subsubsection{Model complexity}\label{ch:complexity_BE}
-
+The first test I want to perform is reducing the network to two layers of four nodes. This gives the following prediction:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\textwidth]{Images_BE/Gauss_nu_0.05_low_complexity/summary.png}
     \caption{Summary plot fot the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ with a very low model complexity.}
     \label{fig:low_complexity/summary}
 \end{figure}
-
+As expected, the model is not capable of solving the PDE woth great accuracy. Looking at the predicted 2D image and comparing it to the ground truth, it seems that the simplified network is not able to learn how shockwaves are formed. This is something we have established earlier, since the $\tanh$ activation function is smooth and needs a large number fo layers in order to generate steep gradients, such as for shockwaves. In this case, a small amount of layers and nodes cannot generate a gradient steep enough to accurately solve the Burger's equation.
 \subsubsection{Learning rate}
 
 \begin{figure}[H]
