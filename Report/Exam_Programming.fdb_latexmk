@@ -1,8 +1,8 @@
 # Fdb version 4
-["bibtex Exam_Programming"] 1779354872.21596 "Exam_Programming.aux" "Exam_Programming.bbl" "Exam_Programming" 1779354921.46052 0
+["bibtex Exam_Programming"] 1779355403.15346 "Exam_Programming.aux" "Exam_Programming.bbl" "Exam_Programming" 1779355403.44513 2
   "./bibliography.bib" 1779205842 5133 e87ccda1f0225389579419d0d6a5bd25 ""
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/bibtex/bst/bibtex/abbrv.bst" 1291864736 20329 b5fed53e10044d0f8112183785c759b1 ""
-  "Exam_Programming.aux" 1779354920 61354 32230dd0e9269f27c1ca4dda641e9a87 "pdflatex"
+  "Exam_Programming.aux" 1779355395 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
   (generated)
   "Exam_Programming.bbl"
   "Exam_Programming.blg"
@@ -235,12 +235,12 @@
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/tex/latex/xkeyval/xkeyval.sty" 1656236919 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/tex/latex/xpatch/xpatch.sty" 1585221260 8510 7803f78066c4f9d008405191a4b43073 ""
   "C:/Users/desde/AppData/Local/Programs/MiKTeX/tex/latex/xstring/xstring.sty" 1693735632 123 a302f2c651a95033260db60e51527ae8 ""
-  "Exam_Programming.aux" 1779354920 61354 32230dd0e9269f27c1ca4dda641e9a87 "pdflatex"
-  "Exam_Programming.bbl" 1779354872 2330 9e49f560e99590b28df4ba46c52d9c11 "bibtex Exam_Programming"
+  "Exam_Programming.aux" 1779355395 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "Exam_Programming.bbl" 1779355403 0 d41d8cd98f00b204e9800998ecf8427e "bibtex Exam_Programming"
   "Exam_Programming.brf" 1779354920 915 42c033948554899d6a35c7121dfbd7a5 "pdflatex"
-  "Exam_Programming.out" 1779354875 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "Exam_Programming.out" 0 -1 0 "pdflatex"
   "Exam_Programming.tex" 1779354822 131202 ef9fd18a2b4a0bb980f541ffc94e7e4b ""
-  "Exam_Programming.toc" 1779354920 6283 84d702458a8e0ebc67ca6f3d04533c26 "pdflatex"
+  "Exam_Programming.toc" 0 -1 0 "pdflatex"
   "Images_BE/Gauss_nu_0.01/3_times.png" 1779346709 264526 002f982b7b56164a06212cf30008f061 ""
   "Images_BE/Gauss_nu_0.01/summary.png" 1779346709 1289326 6bc15a6696c3d85876d7c88db184434c ""
   "Images_BE/Gauss_nu_0.01_bad/3_times.png" 1779346709 264526 002f982b7b56164a06212cf30008f061 ""
