@@ -19,14 +19,17 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_gauss_lownu"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_n_wave_lownu"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 def main():
     device = get_device()
     print(f"Device : {device}")
 
-    cfg = Config()
+    cfg = Config(
+        ic="N_wave",
+        nu=0.01
+    )
 
     time_to_shock = predict_shock_time(cfg)
     if time_to_shock <= 5 and time_to_shock >= 0.1:

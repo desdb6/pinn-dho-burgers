@@ -11,6 +11,8 @@ import matplotlib.animation as animation
 from tqdm import tqdm
 from config import Config
 
+N_WAVE_T0=0.5
+
 def gauss(cfg: Config) -> np.ndarray:
     """
     Generate a gauss curve.
@@ -93,7 +95,11 @@ def u_0(cfg: Config) -> np.ndarray:
     elif cfg.ic == "Step_up":
         return step_up(cfg)
     elif cfg.ic == "N_wave":
-        return n_wave(cfg)
+        if N_WAVE_T0 > 0:
+            u_0 = n_wave(cfg)
+            return solve_burgers_padded(u_0, N_WAVE_T0, cfg, 200)
+        else:
+            return n_wave(cfg)
     elif cfg.ic == "N_wave_chop":
         return n_wave_chop(cfg)
     elif cfg.ic == "Slope":
@@ -144,32 +150,19 @@ def solve_burgers_padded(u_0: np.ndarray, t: float, cfg: Config, pad: int) -> np
     return u_full[pad:-pad]
 
 def cole_hopf_grid(cfg: Config, pad: int = 200) -> tuple:
-    if cfg.ic == "Gauss":
-        u_0 = gauss(cfg)
-    elif cfg.ic == "Step_up":
-        u_0 = step_up(cfg)
-    elif cfg.ic == "N_wave":
-        u_0 = n_wave(cfg)
-    elif cfg.ic == "N_wave_chop":
-        u_0 = n_wave_chop(cfg)
-    elif cfg.ic == "Slope":
-        u_0 = negative_slope(cfg)
-    elif cfg.ic == "Step_down":
-        u_0 = step_down(cfg)
-    else:
-        raise ValueError(f"Unknown initial condition type: {cfg.ic}")
+    u_init = u_0(cfg)
 
     u_grid = np.zeros(shape=(cfg.n_t, cfg.n_x))
-    u_grid[0] = u_0
+    u_grid[0] = u_init
 
     for i, t in tqdm(enumerate(np.linspace(cfg.delta_t, cfg.t_extrap, cfg.n_t - 1)),
                      total=cfg.n_t - 1,
                      desc="Computing ground truth solution with Cole-Hopf"):
-        u_grid[i + 1] = solve_burgers_padded(u_0, t, cfg, pad)
+        u_grid[i + 1] = solve_burgers_padded(u_init, t, cfg, pad)
 
     # -- rescale rows for ICs with a known maximum -------------------------
     if cfg.ic in ("Step_up", "Step_down", "Slope"):
-        u_max = np.max(np.abs(u_0))
+        u_max = np.max(np.abs(u_init))
         if u_max > 1e-12:
             for i in range(1, cfg.n_t):
                 row_max = np.max(np.abs(u_grid[i]))
@@ -461,22 +454,24 @@ def plot_anim(sol: np.ndarray, plot_pause: float = 1) -> None:
     plt.show()
 
 if __name__ == "__main__":
-    cfg = Config(ic="Gauss")
+    cfg = Config(ic="N_wave")
     cfg.height = 2
     u_init = u_0(cfg)
+    plt.plot(u_init)
+    plt.show()
 
-    # Upwind Euler
-    sol_upwind, t_arr_upwind = euler_method(u_init, cfg.t_extrap, cfg)
-    rmse_upwind = rmse(sol_upwind, t_arr_upwind, cfg)
+    # # Upwind Euler
+    # sol_upwind, t_arr_upwind = euler_method(u_init, cfg.t_extrap, cfg)
+    # rmse_upwind = rmse(sol_upwind, t_arr_upwind, cfg)
 
-    # Lax-Wendroff
-    sol_lw, t_arr_lw = lax_wendroff(u_init, cfg.t_extrap, cfg)
-    rmse_lw = rmse(sol_lw, t_arr_lw, cfg)
+    # # Lax-Wendroff
+    # sol_lw, t_arr_lw = lax_wendroff(u_init, cfg.t_extrap, cfg)
+    # rmse_lw = rmse(sol_lw, t_arr_lw, cfg)
 
-    # Cole-Hopf integral
-    sol_ch, t_arr_ch = cole_hopf_grid(cfg, pad=600)
-    rmse_ch = rmse(sol_ch, t_arr_ch, cfg)
+    # # Cole-Hopf integral
+    # sol_ch, t_arr_ch = cole_hopf_grid(cfg, pad=600)
+    # rmse_ch = rmse(sol_ch, t_arr_ch, cfg)
 
-    print(f"RMSE Upwind Euler : {rmse_upwind:.6e}")
-    print(f"RMSE Lax-Wendroff : {rmse_lw:.6e}")
-    print(f"RMSE Cole-Hopf : {rmse_ch:.6e}")
+    # print(f"RMSE Upwind Euler : {rmse_upwind:.6e}")
+    # print(f"RMSE Lax-Wendroff : {rmse_lw:.6e}")
+    # print(f"RMSE Cole-Hopf : {rmse_ch:.6e}")
