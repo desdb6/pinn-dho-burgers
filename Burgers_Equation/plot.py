@@ -696,7 +696,7 @@ def plot_summary_2D(
                      aspect="auto", cmap="Reds", vmin=0)
     add_cbar(fig, im3, ax3, "$|r|$")
     mean_phys = np.sqrt(np.mean(phys_res))
-    ax3.set_title(rf"Panel 3 -- Physics residual $|u_t + u\,u_x - \nu u_{{xx}}|^2 = {mean_phys:.4f}$",
+    ax3.set_title(rf"Panel 3 -- Physics residual $|u_t + u\,u_x - \nu u_{{xx}}|^2 -- MSR = {mean_phys:.4f}$",
                   fontsize=9, loc="left", color="#444441")
 
     # -- panel 4: 3D surface (prediction) + observation scatter -----------
@@ -743,7 +743,7 @@ def plot_summary_2D(
                     aspect="auto", cmap="Reds", vmin=0)
     add_cbar(fig, im6, ax6, r"$|\hat{u}-u|^2$")
     mean_data = np.sqrt(np.mean(data_res))
-    ax6.set_title(rf"Panel 6 -- Data residual $|\hat{{u}}(x,t) - u(x,t)|^2 = {mean_data:.4f}$",
+    ax6.set_title(rf"Panel 6 -- Data residual $|\hat{{u}}(x,t) - u(x,t)|^2 -- RMSE = {mean_data:.4f}$",
                 fontsize=9, loc="left", color="#444441")
 
     # -- early stopping marker on loss plot (ax5) -------------------------
