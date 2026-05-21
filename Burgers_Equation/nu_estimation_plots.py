@@ -66,13 +66,40 @@ def nu_estimation_plot(
     ax.grid()
     save_show(output_path, show)
 
-for ic in ["Gauss", "N_wave", "Step_down", "Step_up"]:
-    for nu_class in ["low", "high", None]:
-        nu_estimation_plot(csv_path=OUTPUT_PATH / "nu_pairs.csv",
-                    ic=ic,
-                    nu_class=nu_class,
-                    output_path=OUTPUT_PATH / f"scatter_{ic}_{nu_class}.png",
-                    show=False
-                    )
-    
-    print(f"Saved {ic} scatter plots")
+def rmse(csv_path: str) -> tuple:
+    """Return the RMSE of every case"""
+    df = pd.read_csv(csv_path)
+    df_low = df[df["nu_class"]=="low"]
+    df_high = df[df["nu_class"]=="high"]
+
+    nu_full = np.sqrt(np.mean((df["nu_true"]-df["nu_pred"]) ** 2))
+    nu_low = np.sqrt(np.mean((df_low["nu_true"]-df_low["nu_pred"]) ** 2))
+    nu_high = np.sqrt(np.mean((df_high["nu_true"]-df_high["nu_pred"]) ** 2))
+
+    return nu_full, nu_low, nu_high
+
+
+
+if __name__ == "__main__":
+    nu_full, nu_low, nu_high= rmse(csv_path=OUTPUT_PATH / "nu_pairs.csv")
+    print(
+        "----------------------------------\n"
+        "RMSE for different regimes\n"
+        f"all nus : {nu_full:.4f}\n"
+        f"low nu: {nu_low:.4f}\n"
+        f"high nu : {nu_high:.4f}\n"
+        "----------------------------------"
+    )
+
+    for ic in ["Gauss"]:
+       
+
+        for nu_class in ["low", "high", None]:
+            nu_estimation_plot(csv_path=OUTPUT_PATH / "nu_pairs.csv",
+                        ic=ic,
+                        nu_class=nu_class,
+                        output_path=OUTPUT_PATH / f"scatter_{ic}_{nu_class}.png",
+                        show=False
+                        )
+        
+        print(f"Saved {ic} scatter plots")
