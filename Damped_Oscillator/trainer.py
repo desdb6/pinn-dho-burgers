@@ -134,9 +134,9 @@ def train(
 
         if inverse_mode:
             if cfg.train_extrap:
-                l_phys = loss_physics_inverse(cfg, model, torch.cat([t_col_dom_t, t_col_extrap_t]))
+                l_phys = loss_physics_inverse(model, torch.cat([t_col_dom_t, t_col_extrap_t]))
             else:
-                l_phys = loss_physics_inverse(cfg, model, t_col_dom_t)
+                l_phys = loss_physics_inverse(model, t_col_dom_t)
         elif cfg.use_physics:
             if cfg.train_extrap:
                 l_phys = loss_physics(cfg, model, torch.cat([t_col_dom_t, t_col_extrap_t]))

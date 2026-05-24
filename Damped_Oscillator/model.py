@@ -17,6 +17,7 @@ import torch.nn as nn
 import numpy as np
 from config import Config
 
+
 class FCNet(nn.Module):
     """
     Fully-connected network: 1 -> [hidden]*n_layers -> 1
@@ -31,18 +32,29 @@ class FCNet(nn.Module):
     """
     def __init__(self, cfg: Config):
         super().__init__()
-        layers = [nn.Linear(1, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+        layers = [
+            nn.Linear(1, cfg.hidden),
+            nn.Tanh(),
+            nn.Dropout(cfg.dropout_rate)
+            ]
         for _ in range(cfg.n_layers - 1):
-            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+            layers += [
+                nn.Linear(cfg.hidden, cfg.hidden),
+                nn.Tanh(),
+                nn.Dropout(cfg.dropout_rate)
+                ]
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
     def forward(self, t: torch.Tensor) -> torch.Tensor:
+        """Forward pass throught the network."""
         return self.net(t)
 
     def param_count(self) -> int:
+        """Return parameter count."""
         return sum(p.numel() for p in self.parameters())
-    
+
+
 class InverseFCNet(nn.Module):
     """
     Inverse Fully-connected network: 1 -> [hidden]*n_layers -> 1
@@ -57,24 +69,42 @@ class InverseFCNet(nn.Module):
     """
     def __init__(self, cfg: Config):
         super().__init__()
-        layers = [nn.Linear(1, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+        layers = [
+            nn.Linear(1, cfg.hidden),
+            nn.Tanh(),
+            nn.Dropout(cfg.dropout_rate)
+            ]
         for _ in range(cfg.n_layers - 1):
-            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+            layers += [
+                nn.Linear(cfg.hidden, cfg.hidden),
+                nn.Tanh(),
+                nn.Dropout(cfg.dropout_rate)
+                ]
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
         # zeta_init = np.random.uniform(0.1, 2)   # random start
-        # omega_0_init = np.random.uniform(3, 5) 
-        self.zeta_hat = nn.Parameter (torch.tensor([0.1], requires_grad = True ))
-        self.omega_0_hat = nn.Parameter (torch.tensor([0.5], requires_grad = True ))
+        # omega_0_init = np.random.uniform(3, 5)
+        self.zeta_hat = nn.Parameter(
+            torch.tensor([0.1], requires_grad=True)
+            )
+        self.omega_0_hat = nn.Parameter(
+            torch.tensor([0.5], requires_grad=True)
+            )
 
     def forward(self, t: torch.Tensor) -> torch.Tensor:
+        """Forward pass throught the network."""
         return self.net(t)
 
     def param_count(self) -> int:
+        """Return parameter count."""
         return sum(p.numel() for p in self.parameters())
-    
-def predict(model: nn.Module, t: np.ndarray) -> np.ndarray:
+
+
+def predict(
+        model: nn.Module,
+        t: np.ndarray
+        ) -> np.ndarray:
     """
     Run inference on CPU.  The model must already be on CPU.
     No gradients needed -- torch.no_grad() saves memory and time.
@@ -84,7 +114,12 @@ def predict(model: nn.Module, t: np.ndarray) -> np.ndarray:
     with torch.no_grad():
         return model(t_t).squeeze().numpy()
 
-def predict_from_state(state_dict: dict, t: np.ndarray, cfg: Config) -> np.ndarray:
+
+def predict_from_state(
+        state_dict: dict,
+        t: np.ndarray,
+        cfg: Config
+        ) -> np.ndarray:
     """
     Restore a CPU snapshot and predict.
     Automatically detects forward vs inverse model from state dict keys.
