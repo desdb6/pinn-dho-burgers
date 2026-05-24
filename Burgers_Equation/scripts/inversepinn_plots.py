@@ -1,19 +1,28 @@
 """
-Script to read a CSV file and plot the predicted-true \nu pairs.
+Script to plot true-predicted nu pairs for the Burgers
+inverse problem read from a CSV file.
+
+Usage:
+    python InversePINN_plots.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pathlib import Path
 from plot import style_ax
 from utils import save_show
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/nu_estimation_2"
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs/nu_estimation_2"
+OUTPUT_PATH.mkdir(exist_ok=True)
+
 
 # -- LaTeX font ------------------------------------------------
 plt.rcParams.update({

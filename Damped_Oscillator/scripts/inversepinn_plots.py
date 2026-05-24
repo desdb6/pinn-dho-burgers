@@ -2,12 +2,17 @@
 Script to read a CSV file and plot the predicted-true parameter pairs
 and a 2D color coded scatter plot.
 
+Usage:
+    python InversePINN_plots.py
+
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -18,7 +23,8 @@ from matplotlib.colors import LogNorm
 from plot import style_ax
 from utils import save_show
 
-OUTPUT_PATH = Path.cwd() / "Damped_Oscillator/outputs/parameter_estimation_4"
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs/parameter_estimation_4"
 
 # -- LaTeX font ------------------------------------------------------------
 plt.rcParams.update({

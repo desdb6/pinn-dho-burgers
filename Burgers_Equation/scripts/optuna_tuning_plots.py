@@ -2,20 +2,26 @@
 Load the best hyperparameter-tuned model for each regime,
 retrain it, and save plots to the correct folders.
 
+Usage:
+    python optuna_tuning_plots.py
+
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
+
+import sys
 from pathlib import Path
-from config import Config
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 from data import generate_data
 from model import FCNet
 from trainer import train
 from utils import get_device, save_model, load_best_cfg
 from plot import save_plots_from_file
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/optuna_tuning"
-OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs/optuna_tuning"
+OUTPUT_PATH.mkdir(exist_ok=True)
 
 ICS = ["Gauss", "N_wave", "Step_up", "Step_down", "Slope"]
 

@@ -3,7 +3,7 @@ Utils file for damped spring-mass PINN.
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
 import os

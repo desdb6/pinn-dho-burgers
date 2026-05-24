@@ -1,16 +1,18 @@
 """
-Demo script for training a PINN to solve
-the damped harmonic oscillator system.
+Solving the damped harmonic oscillation
+without any physics loss terms (traditional dense network).
 
 Usage:
-    python train_forward.py
+    python pinn_nophys.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 from config import Config
 from data import generate_data
 from model import FCNet
@@ -18,7 +20,7 @@ from trainer import train
 from utils import get_device
 from plot import save_model_plots
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 
 
 def main():
@@ -39,7 +41,7 @@ def main():
     output_path = SCRIPT_DIR / "outputs/demo_forward_model_underdamped_ML"
     output_path.mkdir(exist_ok=True)
     model = FCNet(cfg)
-    history, snapshots, best_state = train(
+    history, snapshots, _ = train(
         model=model,
         data=data,
         cfg=cfg,

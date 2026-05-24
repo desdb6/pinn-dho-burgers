@@ -1,24 +1,26 @@
 """
-Demo script for training a PINN to solve
-the damped harmonic oscillator system.
+Solving the damped harmonic oscillation
+without collocation points in the extrapolated region.
 
 Usage:
-    python train_forward.py
+    python pinn_blind_extrap.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 from config import Config
 from data import generate_data
 from model import FCNet
 from trainer import train
-from utils import get_device, save_model, convert_to_mck
+from utils import get_device, save_model
 from plot import save_plots_from_file
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 
 
 def main():

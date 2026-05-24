@@ -3,15 +3,16 @@ Demo script for training a PINN to solve the inverse
 problem of the damped harmonic oscillator with parameter estimation.
 
 Usage:
-    python train_forward.py
+    python inversepinn_demo.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
-
-import numpy as np
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
+import numpy as np
 from config import Config
 from data import generate_data
 from model import InverseFCNet

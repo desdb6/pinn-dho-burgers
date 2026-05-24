@@ -1,16 +1,18 @@
 """
-Demo script for training a PINN to solve
-the damped harmonic oscillator system.
+Solving the Burger's equation for different initial conditions
+and viscosities, as requested in the assignment
 
 Usage:
-    python train_forward.py
+    python pinn_cases.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 from config import Config
 from analytic import predict_shock_time
 from data import generate_data
@@ -19,8 +21,9 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_PATH = SCRIPT_DIR / "outputs"
+OUTPUT_PATH.mkdir(exist_ok=True)
 
 
 def train_model(cfg: Config, output_path: str) -> None:
@@ -75,26 +78,20 @@ def train_model(cfg: Config, output_path: str) -> None:
     save_plots_from_file(output_path)
 
 
-if __name__ == "__main__":
-    ics = ["Gauss"]
-    nu_values = [0.05]
+def main():
+    """Main loop."""
+    ics = ["Gauss", "N_wave", "Step_up"]
+    nu_values = [0.1, 0.05, 0.01]
     for ic in ics:
         for nu in nu_values:
             cfg = Config(
                 ic=ic,
-                nu=nu,
-                use_data=True,
-                train_extrap=True
+                nu=nu
             )
-            output_path = OUTPUT_PATH / f"{ic}_nu_{nu}_data_included"
+            output_path = OUTPUT_PATH / f"{ic}_nu_{nu}"
+
             train_model(cfg, output_path)
 
-            cfg = Config(
-                ic=ic,
-                nu=nu,
-                use_data=True,
-                train_extrap=False
-            )
-            output_path = OUTPUT_PATH / \
-                f"{ic}_nu_{nu}_data_included_extrapblind"
-            train_model(cfg, output_path)
+
+if __name__ == "__main__":
+    main()

@@ -1,13 +1,13 @@
 """
 Demo script for training a PINN to solve
-the damped harmonic oscillator system.
+the Burgers Equation.
 
 Usage:
-    python train_forward.py
+    python pinn_demo.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
 from pathlib import Path
@@ -19,7 +19,8 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_n_wave_lownu_complex"  # noqa:E501
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs/PINN_demo"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 
@@ -28,12 +29,7 @@ def main():
     print(f"Device : {device}")
 
     cfg = Config(
-        ic="N_wave",
-        lr=2e-3,
-        nu=0.01,
-        n_layers=15,
-        hidden=128,
-        time_to_ic=0.8
+        ic="Gauss"
     )
 
     time_to_shock = predict_shock_time(cfg)

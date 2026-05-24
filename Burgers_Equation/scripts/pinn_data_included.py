@@ -7,10 +7,12 @@ Usage:
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 from config import Config
 from analytic import predict_shock_time
 from data import generate_data
@@ -19,8 +21,9 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_PATH = SCRIPT_DIR / "outputs"
+OUTPUT_PATH.mkdir(exist_ok=True)
 
 
 def train_model(cfg: Config, output_path: str) -> None:
@@ -41,6 +44,10 @@ def train_model(cfg: Config, output_path: str) -> None:
         cfg.t_shock = time_to_shock
         cfg.t_dom = time_to_shock + 2.0
         cfg.t_extrap = time_to_shock + 4.0
+    elif cfg.ic == "Step_up":
+        cfg.t_shock = None
+        cfg.t_dom = 5.0
+        cfg.t_extrap = 7.0
     else:
         print("--------------------------------------------------"
               "\n"
@@ -72,38 +79,29 @@ def train_model(cfg: Config, output_path: str) -> None:
 
 
 def main():
+    """Main loop."""
+    ics = ["Gauss"]
+    nu_values = [0.05]
+    for ic in ics:
+        for nu in nu_values:
+            cfg = Config(
+                ic=ic,
+                nu=nu,
+                use_data=True,
+                train_extrap=True
+            )
+            output_path = OUTPUT_PATH / f"{ic}_nu_{nu}_data_included"
+            train_model(cfg, output_path)
 
-    cfg_list = [
-        Config(
-            n_layers=2,
-            hidden=4
-        ),
-        Config(
-            lambda_phys=1e2,
-        ),
-        Config(
-            use_bc=False
-        ),
-        Config(
-            lr=0.05
-        ),
-        Config(
-            lr=1e-3,
-            scheduler_gamma=0.3,
-            scheduler_step=1000
-        )
-    ]
-
-    label_list = [
-        "low_complexity",
-        "large_phys",
-        "no_bc",
-        "high_lr",
-        "low_lr"
-    ]
-
-    for cfg, label in zip(cfg_list, label_list):
-        train_model(cfg, OUTPUT_PATH / f"Gauss_nu_0.05_{label}")
+            cfg = Config(
+                ic=ic,
+                nu=nu,
+                use_data=True,
+                train_extrap=False
+            )
+            output_path = OUTPUT_PATH / \
+                f"{ic}_nu_{nu}_data_included_extrapblind"
+            train_model(cfg, output_path)
 
 
 if __name__ == "__main__":

@@ -1,18 +1,21 @@
 """
-Optuna hyperparameter search for the damped oscillator PINN.
+Optuna TPE hyperparameter search for the Burger's equation.
 
 Usage:
-    python tune.py
+    python optuna_tuning.py
+
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
 import csv
 import json
 import random
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 
 import numpy as np
 import optuna

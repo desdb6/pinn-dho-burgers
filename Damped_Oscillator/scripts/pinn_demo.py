@@ -3,15 +3,16 @@ Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 
 Usage:
-    python train_forward.py
+    python pinn_demo.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
+import sys
 from pathlib import Path
-
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 from config import Config
 from data import generate_data
 from model import FCNet
@@ -19,7 +20,7 @@ from plot import save_plots_from_file
 from trainer import train
 from utils import convert_to_mck, get_device, save_model
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 
 
 def main():

@@ -7,11 +7,13 @@ Usage:
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
 
-import numpy as np
+import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
+import numpy as np
 from analytic import predict_shock_time
 from config import Config
 from data import generate_data
@@ -20,7 +22,8 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/Gauss_backward_demo_highnu"  # noqa:E501
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs/Gauss_backward_demo_highnu"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 

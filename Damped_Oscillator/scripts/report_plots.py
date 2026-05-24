@@ -1,11 +1,13 @@
 """
-Plot generation for the report
+Plot generation for the report.
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
-
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 import numpy as np
 import matplotlib.pyplot as plt
 from config import Config

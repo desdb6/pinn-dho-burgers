@@ -3,28 +3,32 @@ Script to continuously generate true-predicted nu pairs for the Burgers
 inverse problem and save them to a CSV file.
 
 Runs until KeyboardInterrupt. Each iteration randomises nu, trains an
-InverseFCNet, and appends the result to the CSV.
+InverseFCNet, and appends the result to a CSV.
 
 Usage:
-    python estimate_nu.py
+    python inversepinn_data_generation.py
 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
-Last modified   : 12/05/2026
+Last modified   : 24/05/2026
 """
+
+import sys
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402
 import csv
 import numpy as np
-from pathlib import Path
 from plot import plot_predicted_parameter_convergence, plot_solution_grid
 from analytic import predict_shock_time
 from config import Config
 from data import generate_data
 from model import InverseFCNet
 from trainer import train
-from utils import get_device, save_model
+from utils import get_device
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/nu_estimation_2"
-OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_PATH = SCRIPT_DIR / "outputs/nu_estimation_2"
+OUTPUT_PATH.mkdir(exist_ok=True)
 
 CSV_PATH = OUTPUT_PATH / "nu_pairs.csv"
 CSV_FIELDS = ["run", "nu_true", "nu_pred", "abs_error",
