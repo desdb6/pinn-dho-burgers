@@ -20,8 +20,9 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/Gauss_backward_demo_highnu"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/Gauss_backward_demo_highnu"  # noqa:E501
 OUTPUT_PATH.mkdir(exist_ok=True)
+
 
 def main():
     device = get_device()
@@ -62,14 +63,14 @@ def main():
 
     print(f"Config : {cfg}")
 
-    data     = generate_data(cfg)
-    model    = InverseFCNet(cfg)
+    data = generate_data(cfg)
+    model = InverseFCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------

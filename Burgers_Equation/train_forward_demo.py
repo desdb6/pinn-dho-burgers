@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve 
+Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 
 Usage:
@@ -19,8 +19,9 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_n_wave_lownu_complex"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/forward_demo_n_wave_lownu_complex"  # noqa:E501
 OUTPUT_PATH.mkdir(exist_ok=True)
+
 
 def main():
     device = get_device()
@@ -49,14 +50,14 @@ def main():
         cfg.t_extrap = time_to_shock + 4.0
 
     # -- train model ------------------------------------------------
-    data     = generate_data(cfg)
-    model    = FCNet(cfg)
+    data = generate_data(cfg)
+    model = FCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------

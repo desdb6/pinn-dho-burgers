@@ -20,8 +20,9 @@ from trainer import train
 from plot import save_plots_from_file
 from utils import get_device, save_model
 
-OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/backward_demo_gauss_veryhighnu"
+OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/backward_demo_gauss_veryhighnu"  # noqa:E501
 OUTPUT_PATH.mkdir(exist_ok=True)
+
 
 def main():
     device = get_device()
@@ -30,7 +31,7 @@ def main():
     # -- randomise viscosity ------------------------------------------------
     # nu = np.random.uniform(0.005, 0.015) # Low viscosity
     nu = np.random.uniform(0.1, 0.5)   # High viscosity
-    nu=0.45
+    nu = 0.45
     print("------------------------------------------------"
           f"\nRandomised viscosity : {nu:.4f}"
           "\n------------------------------------------------")
@@ -63,14 +64,14 @@ def main():
 
     print(f"Config : {cfg}")
 
-    data     = generate_data(cfg)
-    model    = InverseFCNet(cfg)
+    data = generate_data(cfg)
+    model = InverseFCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------

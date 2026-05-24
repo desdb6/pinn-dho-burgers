@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve 
+Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 
 Usage:
@@ -20,12 +20,13 @@ from plot import save_plots_from_file
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
+
 def main():
     device = get_device()
     print(f"Device : {device}")
 
     # -- Underdamped ------------------------------------------------
-    output_path = SCRIPT_DIR/ "outputs/demo_forward_model_underdamped_extrapblind"
+    output_path = SCRIPT_DIR / "outputs/demo_forward_model_underdamped_extrapblind"  # noqa: E501
     output_path.mkdir(exist_ok=True)
     cfg = Config(
         m=1.0,
@@ -35,14 +36,14 @@ def main():
     )
 
     # -- train model ------------------------------------------------
-    data     = generate_data(cfg)
-    model    = FCNet(cfg)
+    data = generate_data(cfg)
+    model = FCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------
@@ -51,6 +52,7 @@ def main():
 
     # -- make plots ------------------------------------------------
     save_plots_from_file(output_path)
+
 
 if __name__ == "__main__":
     main()

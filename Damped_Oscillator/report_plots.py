@@ -20,15 +20,16 @@ plt.rcParams.update({
 })
 
 # -- Color palette ------------------------------------------------
-BLUE   = "#378ADD"   # noisy training observations
-RED    = "#E24B4A"   # noisy test/validation observations
-GREEN  = "#1D9E75"   # PINN
+BLUE = "#378ADD"   # noisy training observations
+RED = "#E24B4A"   # noisy test/validation observations
+GREEN = "#1D9E75"   # PINN
 ORANGE = "#EF9F27"   # collocation points
 PURPLE = "#7F77DD"   # initial condition marker
-GRAY   = "#888780"   # true solution / neutral
-LGRAY  = "#D3D1C7"   # spine colour
-BG     = "#FAFAF8"   # figure background
-PANEL  = "#F1EFE8"   # axes background
+GRAY = "#888780"   # true solution / neutral
+LGRAY = "#D3D1C7"   # spine colour
+BG = "#FAFAF8"   # figure background
+PANEL = "#F1EFE8"   # axes background
+
 
 def analytic_solutions_zeta_underdamped():
     zetas = np.arange(0.2, 0.8, 0.2)
@@ -52,9 +53,11 @@ def analytic_solutions_zeta_underdamped():
     ax.legend()
     ax.set_xlabel("Time $t$", fontsize=14)
     ax.set_ylabel("Solution $y(t)$", fontsize=14)
-    ax.set_title(r"Different values for $\zeta$ for the underdamped case", fontsize=16)
+    ax.set_title(
+        r"Different values for $\zeta$ for the underdamped case", fontsize=16)
     plt.tight_layout()
     plt.savefig("Report/Images/analytic_solutions_zeta_underdamped.png")
+
 
 def analytic_solutions_zeta_overdamped():
     zetas = np.arange(1, 2, 0.2)
@@ -78,9 +81,11 @@ def analytic_solutions_zeta_overdamped():
     ax.legend()
     ax.set_xlabel("Time $t$", fontsize=14)
     ax.set_ylabel("Solution $y(t)$", fontsize=14)
-    ax.set_title(r"Different values for $\zeta$ for the overdamped case", fontsize=16)
+    ax.set_title(
+        r"Different values for $\zeta$ for the overdamped case", fontsize=16)
     plt.tight_layout()
     plt.savefig("Report/Images/analytic_solutions_zeta_overdamped.png")
+
 
 def analytic_solutions_omega_underdamped():
     omegas = np.arange(1, 4, 0.5)
@@ -104,9 +109,11 @@ def analytic_solutions_omega_underdamped():
     ax.legend()
     ax.set_xlabel("Time $t$", fontsize=14)
     ax.set_ylabel("Solution $y(t)$", fontsize=14)
-    ax.set_title(r"Different values for $\omega_0$ for the underdamped case", fontsize=16)
+    ax.set_title(
+        r"Different values for $\omega_0$ for the underdamped case", fontsize=16)  # noqa: E501
     plt.tight_layout()
     plt.savefig("Report/Images/analytic_solutions_omega_underdamped.png")
+
 
 def analytic_solutions_omega_overdamped():
     omegas = np.arange(1, 4, 0.5)
@@ -130,15 +137,17 @@ def analytic_solutions_omega_overdamped():
     ax.legend()
     ax.set_xlabel("Time $t$", fontsize=14)
     ax.set_ylabel("Solution $y(t)$", fontsize=14)
-    ax.set_title(r"Different values for $\omega_0$ for the overdamped case", fontsize=16)
+    ax.set_title(r"Different values for $\omega_0$ for the overdamped case", fontsize=16)  # noqa: E501
     plt.tight_layout()
     plt.savefig("Report/Images/analytic_solutions_omega_overdamped.png")
+
 
 def main():
     analytic_solutions_zeta_underdamped()
     analytic_solutions_zeta_overdamped()
     analytic_solutions_omega_underdamped()
     analytic_solutions_omega_overdamped()
+
 
 if __name__ == "__main__":
     main()

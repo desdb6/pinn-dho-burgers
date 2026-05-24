@@ -122,7 +122,7 @@ def parameter_space_rmse_plot(
 
     cbar = fig.colorbar(sc, ax=ax, pad=0.02)
     cbar.set_label(
-        r"RMSE $= \sqrt{\frac{1}{2}[(\hat\zeta-\zeta)^2+(\hat\omega_0-\omega_0)^2]}$",
+        r"RMSE $= \sqrt{\frac{1}{2}[(\hat\zeta-\zeta)^2+(\hat\omega_0-\omega_0)^2]}$",  # noqa: E501
         fontsize=12,
     )
     cbar.ax.yaxis.set_minor_locator(ticker.NullLocator())

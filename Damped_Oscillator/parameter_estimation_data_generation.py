@@ -1,6 +1,6 @@
 """
-Script to continuously generate true-predicted zeta and omega_0 pairs for the Burgers
-inverse problem and save them to a CSV file.
+Script to continuously generate true-predicted zeta and omega_0 pairs for the
+Burgers equation inverse problem and save them to a CSV file.
 
 Runs until KeyboardInterrupt. Each iteration randomises nu, trains an
 InverseFCNet, and appends the result to the CSV.

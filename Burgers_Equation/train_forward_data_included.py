@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve 
+Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 
 Usage:
@@ -22,6 +22,7 @@ from utils import get_device, save_model
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = SCRIPT_DIR / "outputs"
 
+
 def train_model(cfg: Config, output_path: str) -> None:
     device = get_device()
     print(f"Device : {device}")
@@ -40,7 +41,7 @@ def train_model(cfg: Config, output_path: str) -> None:
         cfg.t_shock = time_to_shock
         cfg.t_dom = time_to_shock + 2.0
         cfg.t_extrap = time_to_shock + 4.0
-    elif cfg.ic=="Step_up":
+    elif cfg.ic == "Step_up":
         cfg.t_shock = None
         cfg.t_dom = 5.0
         cfg.t_extrap = 7.0
@@ -56,14 +57,14 @@ def train_model(cfg: Config, output_path: str) -> None:
         return None
 
     # -- train model ------------------------------------------------
-    data     = generate_data(cfg)
-    model    = FCNet(cfg)
+    data = generate_data(cfg)
+    model = FCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------
@@ -94,5 +95,6 @@ if __name__ == "__main__":
                 use_data=True,
                 train_extrap=False
             )
-            output_path = OUTPUT_PATH / f"{ic}_nu_{nu}_data_included_extrapblind"
+            output_path = OUTPUT_PATH / \
+                f"{ic}_nu_{nu}_data_included_extrapblind"
             train_model(cfg, output_path)

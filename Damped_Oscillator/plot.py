@@ -66,7 +66,7 @@ def plot_analytic(
         cfg: Config,
         output_path: Path = None,
         show: bool = True
-        ) -> None:
+) -> None:
     """Plot the analytic solution to the differential equation."""
     t = np.linspace(0, cfg.t_extrap, 500)
     y = analytic(t, cfg)
@@ -100,10 +100,12 @@ def plot_predicted(
         t_plot_full: np.ndarray,
         output_path: Path = None,
         show: bool = True
-        ) -> None:
-    """Plot the analytic and predicted solution to the differential equation."""
+) -> None:
+    """Plot the analytic and predicted solution to the ODE."""
     # -- detect inverse mode ----------------------------------------------
-    inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
+    inverse = any(
+        "zeta_hat" in k for v in snapshots.values() for k in v.keys()
+    )
 
     t = np.linspace(0, cfg.t_extrap, 500)
     y = analytic(t, cfg)
@@ -202,7 +204,8 @@ def plot_summary(
     model_color = RED if model_label == "ML" else GREEN
 
     # -- detect inverse mode ----------------------------------------------
-    inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
+    inverse = any("zeta_hat" in k for v in snapshots.values()
+                  for k in v.keys())
 
     # -- derived quantities ------------------------------------------------
     y_true_full = analytic(t_plot_full, cfg)
@@ -212,7 +215,8 @@ def plot_summary(
 
     rmse_pinn_train = rmse(y_pinn_full[mask_train], y_true_full[mask_train])
     rmse_pinn_ext = rmse(y_pinn_full[~mask_train], y_true_full[~mask_train])
-    phys_res_pinn = float(np.mean(pointwise_residual(y_pinn_full, t_plot_full, cfg)))
+    phys_res_pinn = float(
+        np.mean(pointwise_residual(y_pinn_full, t_plot_full, cfg)))
 
     # -- layout ------------------------------------------------------------
     fig, axes = plt.subplots(2, 3, figsize=(16, 9))
@@ -234,9 +238,11 @@ def plot_summary(
                       fontsize=9, loc="left", pad=6, color="#444441")
     ax_data.plot(t_plot_obs, y_true_train, color=GRAY, lw=1.5,
                  label="Analytic solution  $y(t)$")
-    ax_data.scatter(data["t_obs"], data["y_obs"],
-                    color=BLUE, s=50, zorder=5, marker="o",
-                    label=f"Noisy observations  (N={cfg.n_obs}, sigma={cfg.sigma})")
+    ax_data.scatter(
+        data["t_obs"], data["y_obs"],
+        color=BLUE, s=50, zorder=5, marker="o",
+        label=f"Noisy observations  (N={cfg.n_obs}, sigma={cfg.sigma})"
+        )
     ax_data.scatter([0], [cfg.y0], color=PURPLE, s=120, marker="*", zorder=7,
                     label=_ic_label)
     ax_data.scatter(
@@ -256,9 +262,11 @@ def plot_summary(
         fontsize=10, loc="left", pad=6, color="#444441"
     )
     ax_train.plot(t_plot_obs, y_true_train, color=GRAY, lw=1.5, label="True")
-    ax_train.plot(t_plot_obs, y_pinn_full[mask_train],
-                  color=model_color, lw=2,
-                  label=f"{model_label}         ($RMSE={rmse_pinn_train:.4f}$)")
+    ax_train.plot(
+        t_plot_obs, y_pinn_full[mask_train],
+        color=model_color, lw=2,
+        label=f"{model_label}         ($RMSE={rmse_pinn_train:.4f}$)"
+        )
     ax_train.scatter(data["t_obs"], data["y_obs"],
                      color=BLUE, s=30, zorder=5, marker="o", alpha=0.6,
                      label="Train observations")
@@ -275,7 +283,7 @@ def plot_summary(
     ax_loss.semilogy(hist["epoch"], hist["loss_data"],
                      color=model_color, lw=1.5, label="L_data")
     ax_loss.semilogy(hist["epoch"], hist["loss_phys"],
-                     color=model_color, lw=1.5, label="L_physics", linestyle="--")
+                     color=model_color, lw=1.5, label="L_physics", linestyle="--")  # noqa: E501
     ax_loss.semilogy(hist["epoch"], hist["loss_ic"],
                      color=model_color, lw=1.5, label="L_ic", linestyle="-.")
     for ep in cfg.snapshot_epochs[:-1]:
@@ -286,14 +294,14 @@ def plot_summary(
 
     # -- panel 4: extrapolation --------------------------------------------
     ax_extrap.set_title(
-        f"Panel 4 -- Extrapolation beyond training window  [{cfg.t_dom}, {cfg.t_extrap} s]",
+        f"Panel 4 -- Extrapolation beyond training window  [{cfg.t_dom}, {cfg.t_extrap} s]",  # noqa: E501
         fontsize=10, loc="left", pad=6, color="#444441"
     )
     shade_extrap(cfg, ax_extrap)
     ax_extrap.plot(t_plot_full, y_true_full, color=GRAY, lw=1.5, label="True")
     ax_extrap.plot(t_plot_full, y_pinn_full,
                    color=model_color, lw=2,
-                   label=f"{model_label}         (extrap RMSE={rmse_pinn_ext:.4f})")
+                   label=f"{model_label}         (extrap RMSE={rmse_pinn_ext:.4f})")  # noqa: E501
     ax_extrap.scatter(data["t_obs"], data["y_obs"],
                       color=BLUE, s=30, zorder=5, marker="o", alpha=0.5,
                       label="Observations")
@@ -315,7 +323,7 @@ def plot_summary(
     shade_extrap(cfg, ax_error)
     r_pinn = np.abs(y_true_full - y_pinn_full) ** 2
     ax_error.plot(t_plot_full, r_pinn, color=model_color, lw=1.5,
-                  label=f"{model_label}  data residual  (mean={np.mean(r_pinn):.3f})")
+                  label=f"{model_label}  data residual  (mean={np.mean(r_pinn):.3f})")  # noqa: E501
     ax_error.set_xlabel("Time $[s]$")
     ax_error.set_ylabel(r"$|y(t) - \hat{y}(t)|²$")
     ax_error.set_xlim(0, cfg.t_extrap)
@@ -345,7 +353,7 @@ def plot_summary(
             "\n"
             rf"{cfg.n_obs} observations ($t>0$)  $\sigma={cfg.sigma}$  |  "
             rf"{cfg.n_col_dom} collocation pts  |  "
-            rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "
+            rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "  # noqa: E501
             rf"IC: $y(0)={cfg.y0}\  y'(0)={cfg.dy0}$",
             fontsize=12, y=0.975, color="#131313"
         )
@@ -357,7 +365,7 @@ def plot_summary(
             "\n"
             rf"{cfg.n_obs} observations ($t>0$)  $\sigma={cfg.sigma}$  |  "
             rf"{cfg.n_col_dom} collocation pts  |  "
-            rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "
+            rf"$\lambda_{{phys}}={cfg.lambda_phys}  \lambda_{{ic}}={cfg.lambda_ic}$  |  "  # noqa: E501
             rf"IC: $y(0)={cfg.y0}\  y'(0)={cfg.dy0}$",
             fontsize=12, y=0.975, color="#131313"
         )
@@ -382,7 +390,8 @@ def plot_epoch_figure(
     model_color = RED if model_label == "ML" else GREEN
 
     # -- detect inverse mode ----------------------------------------------
-    inverse = any("zeta_hat" in k for v in snapshots.values() for k in v.keys())
+    inverse = any("zeta_hat" in k for v in snapshots.values()
+                  for k in v.keys())
 
     epochs = sorted(snapshots.keys())
     n_snap = len(epochs)
@@ -448,11 +457,11 @@ def plot_epoch_figure(
         Line2D([0], [0], color=model_color, lw=2.0,
                label=rf"{model_label} prediction  $\hat{{y}}(t)$"),
         Line2D([0], [0], color=BLUE, lw=0, marker="o", markersize=5,
-               label=rf"Train observations  (N={len(data['t_obs'])}, $\sigma={cfg.sigma}$)"),
+               label=rf"Train observations  (N={len(data['t_obs'])}, $\sigma={cfg.sigma}$)"),  # noqa: E501
         Line2D([0], [0], color=PURPLE, lw=0, marker="*", markersize=9,
                label=rf"IC  $y(0)={cfg.y0}$,  $y'(0)={cfg.dy0}$"),
         Line2D([0], [0], color=ORANGE, lw=0, marker="|", markersize=7,
-               label=rf"Collocation pts  (N={len(t_col_full)}, $[0, {cfg.t_extrap}]$)"),
+               label=rf"Collocation pts  (N={len(t_col_full)}, $[0, {cfg.t_extrap}]$)"),  # noqa: E501
     ]
     fig.legend(handles=legend_elements, loc="lower center",
                ncol=3, fontsize=8, framealpha=0.6,
@@ -520,7 +529,8 @@ def plot_losses(
     epochs = history["epoch"]
     for key, (color, ls, label) in loss_style.items():
         if key in history and any(v > 0 for v in history[key]):
-            ax.semilogy(epochs, history[key], color=color, ls=ls, lw=1.8, label=label)
+            ax.semilogy(epochs, history[key],
+                        color=color, ls=ls, lw=1.8, label=label)
 
     for ep in cfg.snapshot_epochs:
         if ep <= max(epochs):
@@ -528,7 +538,8 @@ def plot_losses(
 
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Loss (log scale)")
-    ax.set_title("Training loss curves", fontsize=11, loc="left", color="#444441")
+    ax.set_title("Training loss curves", fontsize=11,
+                 loc="left", color="#444441")
     ax.legend(fontsize=9, framealpha=0.5)
     ax.set_xlim(min(epochs), max(epochs))
 
@@ -569,7 +580,8 @@ def plot_predicted_parameter_convergence(
     ax.axhline(cfg.zeta, color=GRAY, lw=1.5, ls="--", label=r"True $\zeta$")
     ax.plot(epochs, omega_0_hat_history, color=ORANGE, lw=2.0,
             label=r"Predicted $\hat{\omega}_0$")
-    ax.axhline(cfg.omega_0, color=GRAY, lw=1.5, ls=":", label=r"True $\omega_0$")
+    ax.axhline(cfg.omega_0, color=GRAY, lw=1.5,
+               ls=":", label=r"True $\omega_0$")
 
     for ep in cfg.snapshot_epochs:
         if ep <= max(epochs):
@@ -676,7 +688,8 @@ def save_plots_from_file(folder_path: str) -> None:
     model, history, snapshots, cfg = load_model(model, folder_path)
 
     data = generate_data(cfg)
-    save_model_plots(model, history, snapshots, data, cfg, device, inverse, folder_path)
+    save_model_plots(model, history, snapshots, data,
+                     cfg, device, inverse, folder_path)
     print(f"Plots saved to {folder_path}")
 
 

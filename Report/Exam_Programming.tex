@@ -258,7 +258,9 @@ Judging from the predicted solution, the model is large enough to make an accura
 
 The model receives the same 15 noisy observation points every singe epoch. These points are used to calculate $\mathcal{L}_{data}$. Furthermore, the model receives the initial conditions to calculate $\mathcal{L}_{i.c.}$. The $\mathcal{L}_{physics}$ is calculated only using the residual of equation \ref{eq:damped_harmonic_oscillator}, for which no inputs are needed.\\
 
-This is a suboptimal approach, since the model could simply memorize the 15 given points. A better approach would be to randomize the 15 points every epoch to avoid overtraining on a specific dataset. Furthermore, it would also be good practise to stop the inputting of datapoints after a defined number of epochs, so that the model is solely trained based on the equation residuals. This is even an even safer approach to avoid overtraining and is known as \textit{curriculum training}. \cite{guo2025ctlpinn}
+This is a suboptimal approach, since the model could simply memorize the 15 given points. A better approach would be to randomize the 15 points every epoch to avoid overtraining on a specific dataset. 
+
+% Furthermore, it would also be good practise to stop the inputting of datapoints after a defined number of epochs, so that the model is solely trained based on the equation residuals. This is even an even safer approach to avoid overtraining and is known as \textit{curriculum training}. \cite{guo2025ctlpinn}
 
 \begin{tcolorbox}[title=Question 6, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The example uses the Adam algorithm as the so-called optimizer. What is the purpose of this optimizer? What is specific about the Adam algorithm, and what are its main hyper-parameters? Are there viable alternatives for the Adam optimizer?
@@ -302,7 +304,7 @@ The Adam optimiser is widely used since it generally has an efficient performanc
 \begin{tcolorbox}[title=Question 7, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     The example also uses an additional optimizer: a learning rate scheduler. What does this scheduler do? Is is a necessary ingredient for training a neural network? What are its main hyper-parameters? Are there alternatives that can be usefully applied in this example?
 \end{tcolorbox}
-The learning rate scheduler StepRL reduces the the learning rate with a factor $\gamma$ after every $n$ epochs, which are tunable hyperparameters. This adds a global decay, which can optimize the convergence in the different stages of optimisation. When the number of epochs is still small and the parameter set is still far from the optimum, the learning rate is big, but as the number of epochs gets bigger and the network converges towards the best set of parameters, the learning rate has to decrease as well in order to avoid oscillations around the minimum. This approach lead to a further acceleration of the gradient descent.\\
+The learning rate scheduler StepLR reduces the the learning rate with a factor $\gamma$ after every $n$ epochs, which are tunable hyperparameters. This adds a global decay, which can optimize the convergence in the different stages of optimisation. When the number of epochs is still small and the parameter set is still far from the optimum, the learning rate is big, but as the number of epochs gets bigger and the network converges towards the best set of parameters, the learning rate has to decrease as well in order to avoid oscillations around the minimum. This approach lead to a further acceleration of the gradient descent.\\
 
 There exist many different alternative learning rate schedulers, such as:
 \begin{enumerate}
@@ -311,7 +313,7 @@ There exist many different alternative learning rate schedulers, such as:
     \item ReduceLROnPlateau: adaptive scheduler which applies a decay factor $\gamma$ when improvement stagnates.
     \item CyclicalLR: non-traditional learning rate scheduler which periodically increases and decreases the learning rate in order to avoid local minima.
 \end{enumerate}
-In this specific case, StepRL or ExponentialLR are good choices to effectively train the model. 
+In this specific case, StepLR or ExponentialLR are good choices to effectively train the model. 
 
 \begin{tcolorbox}[title=Question 8, colback=blue!10!white, colframe=blue!40!white, sharp corners]
     How many epochs is the network trained for? How would you determine whether you have trained for too little or too many epochs?
@@ -761,16 +763,16 @@ Surprisingly, the model can suddenly pake an almost perfect prediction about the
     \label{fig:demo_forward_model_hyperparameters/large_phys_no_extrap/predicted_solution}
 \end{figure}
 
-The model does not seem to dit to the oscillatory behavior, but it does decrease exponentially, which means it at least has some notions of what the solution would look like. This was not the case in the previous blind test, where the solution evened out at a constant value (see Figure \ref{fig:demo_forward_model_underdamped_extrapblind/summary}).\\
+The model does not seem to fit to the oscillatory behavior, but it does decrease exponentially, which means it at least has some notions of what the solution would look like. This was not the case in the previous blind test, where the solution evened out at a constant value (see Figure \ref{fig:demo_forward_model_underdamped_extrapblind/summary}).\\
 
-Finally, I want to see if the model can fit to the solution \ref{without} any observation points. This results in the following prediction:
+Finally, I want to see if the model can fit to the solution without any observation points. This results in the following prediction:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Images_DHO/demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution.png}
     \caption{Predicted solution with $\lambda_{phys}=100$ and no noisy observation points for training.}
     \label{fig:demo_forward_model_hyperparameters/large_phys_no_data/predicted_solution}
 \end{figure}
-The model is in fact able to reconstruct the analytic solution without any data points being provided. This does however negat the point of using a neural network, since it is also possible to reconstruct the solution with finite-difference methods (ex. Euler method or Runge-Kutta). PINNs are more applicable to backwards problems, where we need to extract the (unknown) physical parameters from observational data. This means that we need to balance the loss terms so that both the observation points and the physics of the system are taken into account in the training loop. 
+The model is in fact able to reconstruct the analytic solution without any data points being provided. This Is however not the best way to use the neural network. Since we have the option to input data, PINNs are more applicable to backwards problems, where we need to extract the (unknown) physical parameters from observational data. This means that we need to balance the loss terms so that both the observation points and the physics of the system are taken into account in the training loop. 
 
 \subsubsection{Optuna}\label{ch:optuna_DHO}
 In order to find an optimal model complexity and learning rate, as well as tune the balance of the loss function, I have chosen to use the implement a use the \verb|optuna| library to employ a \textit{Tree-Structured Parzen Estimator} with the \verb|optuna.samplers.TPESampler| class. This has a few advantages \cite{watanabe2025treestructuredparzenestimatorunderstanding}:
@@ -782,7 +784,7 @@ In order to find an optimal model complexity and learning rate, as well as tune 
 We have chosen to separate the three cases, since the dynamics are very different for over- and underdamped cases which means the optimal hyperparameters will likely also be different. We have chosen to tune the following parameters:
 \begin{itemize}
     \item Model complexity: \texttt{hidden} and \texttt{n\_layers}. We have illustrated that the model complexity is an important factor that needs careful tuning. A simple network is fundamentally limited and cannot eficiently predict the underdamped case, while a very complex network is computationally heavy and is more prone to overfitting.
-    \item The loss weights \texttt{lambda\_phys} and \texttt{lambda\_ic}. These parameters can be seen as the distinguishing parameters that distinguish a PINN from a traditional ML network, so they also need to be tuned. The balance between the loss terms determines whether the model prioritises fitting the data (which can overfit or lead to non-physical behavior) or keeping the physics of the predictions consistent (which can lead to a prediction that deviates from the observations).
+    \item The loss weights: \texttt{lambda\_phys} and \texttt{lambda\_ic}. These parameters can be seen as the distinguishing parameters that distinguish a PINN from a traditional ML network, so they also need to be tuned. The balance between the loss terms determines whether the model prioritises fitting the data (which can overfit or lead to non-physical behavior) or keeping the physics of the predictions consistent (which can lead to a prediction that deviates from the observations).
     \item Learning rate: \texttt{lr}, \texttt{scheduler\_gamma}, and \texttt{scheduler\_step}. We have illustrated that the learning rate needs to be finely tuned; a small $lr$ leads to a model that stops too eraly before an optimised prediction is made, while a large $lr$ breaks the optimisation of the weights, since they are changed too much. An overly large $lr$ leads to a constant prediction.
 \end{itemize}
 More hyperparameters that could be optimised are the Adam optimiser $\beta_1$ and $\beta_2$. Hovewer, the effect of these parameters on the training process has already eticulously been studied, so these are left at the recommended values of $0.9$ and $0.999$ respectively.
@@ -810,7 +812,7 @@ For each case, we will run $1000$ trials and finally save the configuration that
 \begin{table}[H]
 \centering
 \caption{Optimal Hyperparameters Found by Optuna}\label{tab:optuna_best_params}
-\begin{tabular}{llrrr}
+\begin{tabular}{llccc}
 \toprule
 \textbf{Parameter} & \textbf{Description} & \textbf{Overdamped} & \textbf{Critically Damped} & \textbf{Underdamped} \\
 \midrule
@@ -841,7 +843,7 @@ Based on the previous optimised hyperparameters, I have chosen for the following
 \texttt{lambda\_phys}     & Physics loss weight           & $0.5$ \\
 \texttt{lambda\_ic}       & Initial condition loss weight & $10$ \\
 \texttt{lr}               & Initial learning rate         & $2.0\times10^{-3}$ \\
-\texttt{lr}               & Initial learning rate for  $\hat\zeta$ and $\hat\omega_0$       & $1.5\times10^{-2}$ \\
+\texttt{lr\_inverse}      & Initial learning rate for  $\hat\zeta$ and $\hat\omega_0$       & $1.5\times10^{-2}$ \\
 \texttt{scheduler\_gamma} & Scheduler decay factor        & $0.8$ \\
 \texttt{scheduler\_step}  & Scheduler step size           & 3000  \\
 \bottomrule
@@ -862,7 +864,7 @@ For the overdamped demonstration example, the randomised and predicted parameter
 \textbf{Parameter} & \textbf{True value} & \textbf{Predicted value} \\
 \midrule
 \texttt{$\zeta$}             & $1.162$ & $1.556$ \\
-\texttt{$\omega_0$}          & $2.523 rad/s$ & $2.592 rad/s$   \\
+\texttt{$\omega_0$}          & $2.523$ & $2.592$   \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -893,7 +895,7 @@ For the critically damped demonstration example, $\zeta$ can obviously not be ra
 \textbf{Parameter} & \textbf{True value} & \textbf{Predicted value} \\
 \midrule
 \texttt{$\zeta$}             & $1.000$ & $1.014$ \\
-\texttt{$\omega_0$}          & $4.000 rad/s$ & $4.350 rad/s$   \\
+\texttt{$\omega_0$}          & $4.000$ & $4.350$   \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -924,7 +926,7 @@ For the overdamped demonstration example, the randomised and predicted parameter
 \textbf{Parameter} & \textbf{True value} & \textbf{Predicted value} \\
 \midrule
 \texttt{$\zeta$}             & $0.160$ & $0.171$ \\
-\texttt{$\omega_0$}          & $1.950 rad/s$ & $1.961 rad/s$   \\
+\texttt{$\omega_0$}          & $1.950$ & $1.961$   \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1641,7 +1643,7 @@ I want to investigate the effect of the boundary term which I have added for thi
     \caption{Summary plot for the predicted solution by a PINN for gaussian initial conditions and $\nu=0.05$ and no boundary condition loss term.}
     \label{fig:no_ic/summary}
 \end{figure}
-This gives very similar results compared to the case where all loss terms are included (Figure \ref{fig:Gauss_nu_0.05/summary}). This makes sense for the gaussian initial conditions; the left boundary stays at zero since no waves can pass this point, and no waves will pass the right boundary since the viscosity term stops wave from travelling past the formed shockwave. We can thus conclude that the boundary term is not really necesarry in this case. It would be more important for different PDEs, like the heat equation, where the interaction between the system and the boundaries is more pronounced.
+This gives very similar results compared to the case where all loss terms are included (Figure \ref{fig:Gauss_nu_0.05/summary}). This makes sense for the gaussian initial conditions; the left boundary stays at zero since no waves can pass this point, and no waves will pass the right boundary since the viscosity term stops wave from travelling past the formed shockwave. We can thus conclude that the boundary term is not really necesarry in this case. It would be more important for different PDEs, like the heat equation, where the interaction between the system and the boundaries is more pronounced. However, I have chosen to still include this term in the rest of the experiments, as we explixitly know the boundary conditions and it is good practise to use all available information.
 
 \subsubsection{Optuna}
 Finally, an algorithmic search of the best hyperparameters can be useful to gain further insights to decide on an optimal parameter set for the inverse problem. For this, we have to generate noisy observation points and add the data loss term to the total loss function, so it becomes:
@@ -1798,7 +1800,7 @@ For a low viscosity the predicted value is off by almost a factor of $3$. Howeve
 
 
 \subsection{Statistical analysis}\label{ch:statistics_BE}
-In order to make a better-reasoned and statistically backed conlcusions, I want to perform a large amount of parameter estimations. In order to make this process more efficient, I have chosen to reduce the complexity of the model to 6 layers of 64 nodes, which goes at the cost of the estimation accuracy, However, in this way I have performed a total of $767$ model training where the viscosity is estimated, which allows for statistical treatment of the data. The viscosity is randomised for every run, with a $\%50$ chance of a low viscosity ($0.005-0.05$) and a a $\%50$ chance of a high viscosity ($0.05-0.5$). Figure \ref{fig:nu_estimation_2/scatter_Gauss_None} shows the true-predicted $\nu$ pairs in a scatter plot.
+In order to make a better-reasoned and statistically backed conlcusions, I want to perform a large amount of parameter estimations. In order to make this process more efficient, I have chosen to reduce the complexity of the model to 6 layers of 64 nodes, which goes at the cost of the estimation accuracy, However, in this way I have performed a total of $767$ model training where the viscosity is estimated, which allows for statistical treatment of the data. The viscosity is randomised for every run, with a $50\%$ chance of a low viscosity ($0.005-0.05$) and a $50\%$ chance of a high viscosity ($0.05-0.5$). Figure \ref{fig:nu_estimation_2/scatter_Gauss_None} shows the true-predicted $\nu$ pairs in a scatter plot.
 
 \begin{figure}[H]
     \centering
@@ -1849,6 +1851,13 @@ While the plots show that the relative error is greater for large viscosities, h
 For small true values of $\nu$, the model consistently overestimates the viscosity. As explained before, the model has the most difficulties with modelling sharp gradients which lead to large spatial first and second derivatives. As a result, the predicted solution is often smoothened out compared to the ground truth solution. This smoothing means that the spatial second derivative $u_{xx}$ will be smaller than the ground truth solution. This essentially means that the viscosity of the predicted solution is greater than the true viscosity, which is exactly what we observe. Another way to interpret this is by looking at the physics residual $|u_t + uu_x -\nu u_{xx}|$. This residual is minimized by the model, so if $u_{xx}$ is underestimated, this means $\nu$ will have to be overestimated.\\
 
 For large true values of $\nu$, the model consistently underestimates the viscosity. The fact that the absolute error becomes greater is not surprising: a larger viscosity means a lower second derivative, which means the contribution of the term $\nu u_{xx}$ to the physics reidual becomes smaller and smaller. Variations of $\nu$ have smaller effects on the total loss function, which means the model will not prioritise the optimisation of $\nu$ when compared to the less viscous case. The fact that $\nu$ is consistently underestimated can be explained if we look at the convergence plot of a case with a very high value for $\nu$, say $\nu=0.45$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images_BE/backward_demo_gauss_veryhighnu/parameter_convergence.png}
+    \caption{Parameter convergence for a backward problem with $\nu=0.4500$ and $\hat\nu=0.3930$}
+    \label{fig:backward_demo_gauss_veryhighnu/parameter_convergence}
+\end{figure}
 
 As we can see, the parameter converges to the true value from below. The initial strong decrease of the viscosity occurs because the when the predicted viscosity is large, the physics residual $|u_t + uu_x -\nu u_{xx}|$ is almost entirely determined by the viscous term. When calculating the gradient of this loss term, the viscosity will be decreased sharply. After this decrease, the parameter begins to converge to the true value again, but never reaches this value due to the small $u_{xx}$ it never actually reaches this value anymore. Through more hyperparameter tuning, more specifically of the inverse learning rate (which was not included in our \verb|optuna| tuning experiment), this behavior could be mitigated.
 \chapter{Conclusion}

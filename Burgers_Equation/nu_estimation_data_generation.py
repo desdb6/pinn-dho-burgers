@@ -26,8 +26,10 @@ from utils import get_device, save_model
 OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/nu_estimation_2"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
-CSV_PATH   = OUTPUT_PATH / "nu_pairs.csv"
-CSV_FIELDS = ["run", "nu_true", "nu_pred", "abs_error", "rel_error_pct", "best_val_loss", "ic", "nu_class"]
+CSV_PATH = OUTPUT_PATH / "nu_pairs.csv"
+CSV_FIELDS = ["run", "nu_true", "nu_pred", "abs_error",
+              "rel_error_pct", "best_val_loss", "ic", "nu_class"]
+
 
 def run_single(run_idx: int, device) -> dict | None:
     """
@@ -55,37 +57,39 @@ def run_single(run_idx: int, device) -> dict | None:
         scheduler_step=3000,
         patience_thershold=1e-5,
         use_data=True
-        )
+    )
 
     time_to_shock = predict_shock_time(cfg)
     if 0.1 <= time_to_shock <= 5:
-        print(f"  [run {run_idx}] Shock at {time_to_shock:.3f}s — adjusting domain.")
-        cfg.t_dom    = time_to_shock + 2.0
+        print(
+            f"  [run {run_idx}] Shock at {time_to_shock:.3f}s — adjusting domain.")  # noqa:E501
+        cfg.t_dom = time_to_shock + 2.0
         cfg.t_extrap = time_to_shock + 4.0
     elif time_to_shock < 0.1:
-        print(f"  [run {run_idx}] Shock too early ({time_to_shock:.3f}s) — setting default times.")
+        print(
+            f"  [run {run_idx}] Shock too early ({time_to_shock:.3f}s) — setting default times.")  # noqa:E501
 
-    data  = generate_data(cfg)
+    data = generate_data(cfg)
     model = InverseFCNet(cfg)
 
     history, snapshots, best_state = train(
-        model    = model,
-        data     = data,
-        cfg      = cfg,
-        device   = device,
-        label    = f"run {run_idx}",
-        verbatim = False,
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label=f"run {run_idx}",
+        verbatim=False,
     )
 
-    nu_pred    = float(model.nu_hat.item())
-    abs_error  = abs(nu_pred - nu)
-    rel_error  = abs_error / nu * 100
+    nu_pred = float(model.nu_hat.item())
+    abs_error = abs(nu_pred - nu)
+    rel_error = abs_error / nu * 100
 
-    best_val   = min(history["loss_val"])
+    best_val = min(history["loss_val"])
 
     print(f"  [run {run_idx}] nu_true={nu:.4f}  nu_pred={nu_pred:.4f}  "
-          f"err={abs_error:.4f} ({rel_error:.1f}%)  val={best_val:.5f}  ic={cfg.ic}")
-    
+          f"err={abs_error:.4f} ({rel_error:.1f}%)  val={best_val:.5f}  ic={cfg.ic}")  # noqa:E501
+
     model.to('cpu')
     plot_predicted_parameter_convergence(
         history=history,
@@ -104,7 +108,7 @@ def run_single(run_idx: int, device) -> dict | None:
         output_path=f"{OUTPUT_PATH}/solution_nu_{ic}_{nu:.4f}.png",
         show=False
     )
-    
+
     return {
         "run":             run_idx,
         "nu_true":         nu,
@@ -118,13 +122,13 @@ def run_single(run_idx: int, device) -> dict | None:
 
 
 def main():
-    device  = get_device()
+    device = get_device()
     print(f"Device      : {device}")
     print(f"Output CSV  : {CSV_PATH}")
     print("Press Ctrl+C to stop.\n")
 
     write_header = not CSV_PATH.exists()
-    run_idx      = 0
+    run_idx = 0
 
     try:
         with open(CSV_PATH, "a", newline="") as f:
@@ -144,7 +148,7 @@ def main():
 
                 if row is not None:
                     writer.writerow(row)
-                    f.flush()   # write immediately so data isn't lost on interrupt
+                    f.flush()   # write immediately so data isn't lost on interrupt  # noqa:E501
 
     except KeyboardInterrupt:
         print(f"\nStopped after {run_idx} runs. Results saved to {CSV_PATH}")

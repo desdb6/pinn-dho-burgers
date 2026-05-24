@@ -25,13 +25,6 @@
 \newblock Hyperparameter tuning, 2026.
 \newblock Accessed: 2026-05-07.
 
-\bibitem{guo2025ctlpinn}
-Y.~Guo, Z.~Fu, J.~Min, S.~Lin, X.~Liu, Y.~F. Rashed, and X.~Zhuang.
-\newblock Long-term simulation of physical and mechanical behaviors using
-  curriculum-transfer-learning based physics-informed neural networks.
-\newblock 2025.
-\newblock Accessed: 2026-05-07.
-
 \bibitem{pytorch2025}
 {PyTorch Contributors}.
 \newblock {\em {PyTorch} Documentation, Version 2.11}.

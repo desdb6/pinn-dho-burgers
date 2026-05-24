@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve 
+Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 Hyperparameter tuning by hand.
 
@@ -19,20 +19,21 @@ from plot import save_plots_from_file
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = SCRIPT_DIR / "outputs/demo_forward_model_hyperparameters/"
 
+
 def train_model(cfg, label, device):
-    """Train a model with one hyperparameter changed"""
+    """Train a model with one hyperparameter changed."""
     output_path = OUTPUT_PATH / label
     output_path.mkdir(exist_ok=True, parents=True)
 
     # -- train model ------------------------------------------------
-    data     = generate_data(cfg)
-    model    = FCNet(cfg)
+    data = generate_data(cfg)
+    model = FCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = label,
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label=label,
     )
 
     # -- save model ------------------------------------------------
@@ -42,7 +43,9 @@ def train_model(cfg, label, device):
     # -- make plots ------------------------------------------------
     save_plots_from_file(output_path)
 
+
 def main():
+    """Main loop."""
     device = get_device()
     print(f"Device : {device}")
 
@@ -87,7 +90,7 @@ def main():
 
     for cfg, label in zip(cfg_list, label_list):
         train_model(cfg, label, device)
-    
+
 
 if __name__ == "__main__":
     main()

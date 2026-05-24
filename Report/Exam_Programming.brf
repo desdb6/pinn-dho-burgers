@@ -1,9 +1,8 @@
 \backcite {geeksforgeeks2024lossfunctions}{{7}{2.2.1}{figure.caption.11}}
 \backcite {geeksforgeeks2026hyperparameter}{{8}{2.2.1}{equation.2.2.17}}
-\backcite {guo2025ctlpinn}{{8}{2.2.1}{equation.2.2.17}}
 \backcite {geeksforgeeks2025adam}{{8}{2.2.1}{equation.2.2.17}}
 \backcite {geeksforgeeks2025momentum}{{8}{1}{Item.1}}
-\backcite {geeksforgeeks2025rmsprop}{{9}{2}{Item.2}}
+\backcite {geeksforgeeks2025rmsprop}{{8}{2}{Item.2}}
 \backcite {pep484}{{11}{2.2.2}{subsection.2.2.2}}
 \backcite {pytorch2025}{{12}{2.2.2}{subsection.2.2.2}}
 \backcite {pytorch2025}{{13}{2.2.2}{subsection.2.2.2}}

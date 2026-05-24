@@ -48,19 +48,19 @@ def main():
     cfg = Config(m=m, c=c, k=k)
 
     # -- train model ------------------------------------------------
-    # data = generate_data(cfg)
-    # model = FCNet(cfg)
-    # history, snapshots, best_state = train(
-    #     model=model,
-    #     data=data,
-    #     cfg=cfg,
-    #     device=device,
-    #     label="Model",
-    # )
+    data = generate_data(cfg)
+    model = FCNet(cfg)
+    history, snapshots, best_state = train(
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
+    )
 
     # -- save model -------------------------------------------------
-    # save_model(best_state, history, snapshots, cfg, output_path)
-    # print(f"Model saved to {output_path}")
+    save_model(best_state, history, snapshots, cfg, output_path)
+    print(f"Model saved to {output_path}")
 
     # -- make plots -------------------------------------------------
     save_plots_from_file(output_path)

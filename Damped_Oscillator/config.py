@@ -56,13 +56,13 @@ class Config:
     # Data generation parameters
     n_obs: float = 15                   # Noisy observation points
     n_val: float = 200                  # Validation points
-    randomise_observation: bool = True  # Randomise observation points every epoch
+    randomise_observation: bool = True  # Randomise observation points every epoch  # noqa: E501
     # strata_splitting: int = 8           # Strata for stratified splitting
     # test_train_split: float = 0.4       # Fraction of train set(t)
 
     n_col_dom: float = 500              # ODE residual collocation points
     sigma: float = 0.05                 # Standard deviation for n_obs
-    randomise_collocation: bool = True  # Randomise collocation points every epoch
+    randomise_collocation: bool = True  # Randomise collocation points every epoch  # noqa: E501
 
     # Network architecture
     hidden: int = 64
@@ -71,12 +71,12 @@ class Config:
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
     lr: float = 5e-3                    # Starting learning rate
-    lr_inverse: float = 2e-2            # Learning rate for inverse problem; parameter estimation
+    lr_inverse: float = 2e-2            # Learning rate for inverse problem; parameter estimation  # noqa: E501
     patience: int = 1000                # Patience for model stop
     patience_thershold: float = 1e-5    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter
-    adam_beta2: float = 0.999           # Adam optimiser: RMSprop hyperparameter
+    adam_beta2: float = 0.999           # Adam optimiser: RMSprop hyperparameter  # noqa: E501
     scheduler_gamma: float = 0.5        # StepRL: scheduler decay factor
     scheduler_step: int = 3000          # StepRL: decay after this many epochs
 

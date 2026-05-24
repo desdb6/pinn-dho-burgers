@@ -187,7 +187,7 @@ def print_callback(
         f"  Trial {trial.number:>4} | "
         f"State: {trial.state.name:<10} | "
         f"RMSE: "
-        f"{f'{trial.value:.6f}' if trial.value is not None else 'pruned':>12} | "
+        f"{f'{trial.value:.6f}' if trial.value is not None else 'pruned':>12} | "  # noqa: E501
         f"Best: {optuna_study.best_value:.6f}"
     )
 

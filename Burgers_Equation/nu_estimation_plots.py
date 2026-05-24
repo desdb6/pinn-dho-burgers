@@ -22,15 +22,16 @@ plt.rcParams.update({
 })
 
 # -- Color palette ------------------------------------------------
-BLUE   = "#378ADD"   # noisy training observations
-RED    = "#E24B4A"   # noisy test/validation observations
-GREEN  = "#1D9E75"   # PINN
+BLUE = "#378ADD"   # noisy training observations
+RED = "#E24B4A"   # noisy test/validation observations
+GREEN = "#1D9E75"   # PINN
 ORANGE = "#EF9F27"   # collocation points
 PURPLE = "#7F77DD"   # initial condition marker
-GRAY   = "#888780"   # true solution / neutral
-LGRAY  = "#D3D1C7"   # spine colour
-BG     = "#FAFAF8"   # figure background
-PANEL  = "#F1EFE8"   # axes background
+GRAY = "#888780"   # true solution / neutral
+LGRAY = "#D3D1C7"   # spine colour
+BG = "#FAFAF8"   # figure background
+PANEL = "#F1EFE8"   # axes background
+
 
 def nu_estimation_plot(
         csv_path: Path,
@@ -47,8 +48,9 @@ def nu_estimation_plot(
     fig, ax = plt.subplots(figsize=(8, 8))
     style_ax(ax)
 
-    ax.scatter(nu_data["nu_true"], nu_data["nu_pred"], s=5, color = RED)
-    ax.plot(np.linspace(0, 0.5, 2), np.linspace(0, 0.5, 2), color=GRAY, linestyle="--", alpha=0.6)
+    ax.scatter(nu_data["nu_true"], nu_data["nu_pred"], s=5, color=RED)
+    ax.plot(np.linspace(0, 0.5, 2), np.linspace(0, 0.5, 2),
+            color=GRAY, linestyle="--", alpha=0.6)
 
     ax.set_xlabel(r"$\nu$", fontsize=20)
     ax.set_ylabel(r"$\hat\nu$", fontsize=20)
@@ -58,19 +60,22 @@ def nu_estimation_plot(
         ax.set_ylim(0, 0.05)
 
     if nu_class is not None:
-        ax.set_title(rf"$\nu$ prediction for {ic} initial condition and {nu_class} viscosity", fontsize = 14)
+        ax.set_title(
+            rf"$\nu$ prediction for {ic} initial condition and {nu_class} viscosity", fontsize=14)  # noqa:E501
         max = np.max(nu_data[["nu_true", "nu_pred"]])
     else:
-        ax.set_title(rf"$\nu$ prediction for {ic} initial condition", fontsize = 14)
-        
+        ax.set_title(
+            rf"$\nu$ prediction for {ic} initial condition", fontsize=14)
+
     ax.grid()
     save_show(output_path, show)
+
 
 def rmse(csv_path: str) -> tuple:
     """Return the RMSE of every case"""
     df = pd.read_csv(csv_path)
-    df_low = df[df["nu_class"]=="low"]
-    df_high = df[df["nu_class"]=="high"]
+    df_low = df[df["nu_class"] == "low"]
+    df_high = df[df["nu_class"] == "high"]
 
     nu_full = np.sqrt(np.mean((df["nu_true"]-df["nu_pred"]) ** 2))
     nu_low = np.sqrt(np.mean((df_low["nu_true"]-df_low["nu_pred"]) ** 2))
@@ -79,9 +84,8 @@ def rmse(csv_path: str) -> tuple:
     return nu_full, nu_low, nu_high
 
 
-
 if __name__ == "__main__":
-    nu_full, nu_low, nu_high= rmse(csv_path=OUTPUT_PATH / "nu_pairs.csv")
+    nu_full, nu_low, nu_high = rmse(csv_path=OUTPUT_PATH / "nu_pairs.csv")
     print(
         "----------------------------------\n"
         "RMSE for different regimes\n"
@@ -92,14 +96,14 @@ if __name__ == "__main__":
     )
 
     for ic in ["Gauss"]:
-       
 
         for nu_class in ["low", "high", None]:
             nu_estimation_plot(csv_path=OUTPUT_PATH / "nu_pairs.csv",
-                        ic=ic,
-                        nu_class=nu_class,
-                        output_path=OUTPUT_PATH / f"scatter_{ic}_{nu_class}.png",
-                        show=False
-                        )
-        
+                               ic=ic,
+                               nu_class=nu_class,
+                               output_path=OUTPUT_PATH /
+                               f"scatter_{ic}_{nu_class}.png",
+                               show=False
+                               )
+
         print(f"Saved {ic} scatter plots")

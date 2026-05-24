@@ -1,5 +1,5 @@
 """
-Neural network architecture and inference helpers for the Burgers equation PINN.
+Neural network architecture and inference helpers for the Burgers equation PINN.  # noqa:E501
 
 Contains:
     FCNet        -- fully-connected network with Tanh activations
@@ -16,6 +16,7 @@ import torch.nn as nn
 import numpy as np
 from config import Config
 
+
 class FCNet(nn.Module):
     """
     Fully-connected network: 2 -> [hidden]*n_layers -> 1
@@ -28,11 +29,14 @@ class FCNet(nn.Module):
     The model is instantiated on CPU and moved to DEVICE via .to(DEVICE)
     after construction (see training section).
     """
+
     def __init__(self, cfg: Config):
         super().__init__()
-        layers = [nn.Linear(2, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+        layers = [nn.Linear(2, cfg.hidden), nn.Tanh(),
+                  nn.Dropout(cfg.dropout_rate)]
         for _ in range(cfg.n_layers - 1):
-            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+            layers += [nn.Linear(cfg.hidden, cfg.hidden),
+                       nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
@@ -41,7 +45,8 @@ class FCNet(nn.Module):
 
     def param_count(self) -> int:
         return sum(p.numel() for p in self.parameters())
-    
+
+
 class InverseFCNet(nn.Module):
     """
     Inverse Fully-connected network: 2 -> [hidden]*n_layers -> 1
@@ -54,17 +59,21 @@ class InverseFCNet(nn.Module):
     The model is instantiated on CPU and moved to DEVICE via .to(DEVICE)
     after construction (see training section).
     """
+
     def __init__(self, cfg: Config):
         super().__init__()
-        layers = [nn.Linear(2, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+        layers = [nn.Linear(2, cfg.hidden), nn.Tanh(),
+                  nn.Dropout(cfg.dropout_rate)]
         for _ in range(cfg.n_layers - 1):
-            layers += [nn.Linear(cfg.hidden, cfg.hidden), nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
+            layers += [nn.Linear(cfg.hidden, cfg.hidden),
+                       nn.Tanh(), nn.Dropout(cfg.dropout_rate)]
         layers += [nn.Linear(cfg.hidden, 1)]
         self.net = nn.Sequential(*layers)
 
-        nu_init  = np.random.uniform(0.5, 2.0)   # random start
+        nu_init = np.random.uniform(0.5, 2.0)   # random start
         nu_init = float(np.log(np.exp(nu_init) - 1.0))   # softplus inverse
-        self._nu_raw = nn.Parameter(torch.tensor([nu_init], requires_grad = True ))
+        self._nu_raw = nn.Parameter(
+            torch.tensor([nu_init], requires_grad=True))
 
     @property
     def nu_hat(self):
@@ -75,7 +84,8 @@ class InverseFCNet(nn.Module):
 
     def param_count(self) -> int:
         return sum(p.numel() for p in self.parameters())
-    
+
+
 def predict(model: nn.Module, t: np.ndarray, x: np.ndarray) -> np.ndarray:
     """
     Run inference on CPU.  The model must already be on CPU.
@@ -87,7 +97,13 @@ def predict(model: nn.Module, t: np.ndarray, x: np.ndarray) -> np.ndarray:
     with torch.no_grad():
         return model(t_t, x_t).squeeze().numpy()
 
-def predict_from_state(state_dict: dict, t: np.ndarray, x: np.ndarray, cfg: Config) -> np.ndarray:
+
+def predict_from_state(
+        state_dict: dict,
+        t: np.ndarray,
+        x: np.ndarray,
+        cfg: Config
+        ) -> np.ndarray:
     """
     Restore a CPU snapshot and predict.
     Snapshots were saved as CPU state_dicts in train(), so no device

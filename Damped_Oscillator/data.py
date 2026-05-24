@@ -6,10 +6,10 @@ the validation set are all produced in this script.
 
 Contains:
     analytic           -- analytic solution for y(t)
-    make_observations  -- make noisy observation points and split into test and train sets
+    make_observations  -- make noisy observation points and split into test and train sets # noqa: E501
     make_collocation   -- make collocation points for the physics residual
-    generate_data      -- pipeline to generate all necesarry data for model training
-
+    generate_data      -- pipeline to generate all necesarry data for model training # noqa: E501
+ 
 Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
 Last modified   : 12/05/2026
@@ -18,6 +18,7 @@ Last modified   : 12/05/2026
 import numpy as np
 from sklearn.model_selection import train_test_split
 from config import Config
+
 
 def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
     """Closed-form solution for the damped spring-mass system ODE."""
@@ -33,10 +34,13 @@ def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
         #   y(t) = e^{-zeta*omega_0*t} * [A*cos(omega_d*t) + B*sin(omega_d*t)]
         #   A = y0
         #   B = (dy0 + zeta*omega_0*y0) / omega_d
-        a  = y0
-        b  = (dy0 + zeta * omega_0 * y0) / omega_d
+        a = y0
+        b = (dy0 + zeta * omega_0 * y0) / omega_d
 
-        return np.exp(-zeta * omega_0 * t) * (a * np.cos(omega_d * t) + b * np.sin(omega_d * t))
+        return (
+            np.exp(-zeta * omega_0 * t)
+            * (a * np.cos(omega_d * t) + b * np.sin(omega_d * t))
+            )
 
     elif zeta == 1.0:
         #   Critically damped
@@ -64,9 +68,10 @@ def analytic(t: np.ndarray, cfg: Config) -> np.ndarray:
 
         return a * np.exp(r1 * t) + b * np.exp(r2 * t)
 
+
 def make_observations_strata(cfg: Config) -> tuple[np.ndarray, np.ndarray,
-                                            np.ndarray, np.ndarray]:
-    """Generate noisy observation points and stratified train/validation sets."""
+                                                   np.ndarray, np.ndarray]:
+    """Generate noisy observation points and stratified train/validation sets."""  # noqa: E501
     if cfg.strata_splitting < 2:
         t = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
         y = analytic(t, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
@@ -117,24 +122,30 @@ def make_observations_strata(cfg: Config) -> tuple[np.ndarray, np.ndarray,
 
     return t_train, y_train, t_val, y_val
 
+
 def make_train_observation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
     """Make noisy observation points."""
-    t_obs= np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
+    t_obs = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
     y_obs = analytic(t_obs, cfg) + np.random.normal(0.0, cfg.sigma, cfg.n_obs)
     return t_obs, y_obs
 
+
 def make_validation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
     """Make randomised validation points."""
-    t_val= np.linspace(0.1, cfg.t_dom, cfg.n_val)
+    t_val = np.linspace(0.1, cfg.t_dom, cfg.n_val)
     y_val = analytic(t_val, cfg)
     return t_val, y_val
+
 
 def make_collocation(cfg: Config) -> np.ndarray:
     """Generate collocation points."""
     t_col_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
-    t_col_extrap = np.linspace(cfg.t_dom, cfg.t_extrap,
-                            int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
+    t_col_extrap = np.linspace(
+        cfg.t_dom, cfg.t_extrap,
+        int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom)
+        )
     return t_col_dom, t_col_extrap
+
 
 def generate_data(cfg: Config) -> dict:
     """Generate all data and return as a dict."""
@@ -151,6 +162,7 @@ def generate_data(cfg: Config) -> dict:
         "t_col_extrap": t_col_extrap,
         "t_ic":         np.array([0.0]),
     }
+
 
 if __name__ == "__main__":
     my_dict = generate_data(Config())

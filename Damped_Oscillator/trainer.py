@@ -21,6 +21,7 @@ from data import make_collocation, make_train_observation
 
 os.makedirs("outputs", exist_ok=True)
 
+
 def train(
     model: nn.Module,
     data: dict,
@@ -59,7 +60,7 @@ def train(
 
     Saves
     -----
-    best_model.pt : 
+    best_model.pt :
         The weights that correspond to the lowest validation loss
     """
     # -- detect inverse mode -------------------------------------------------
@@ -68,27 +69,38 @@ def train(
     # -- move model and tensors to device ------------------------------------
     model.to(device)
 
-    t_val_t         = to_tensor(data["t_val"])
-    y_val_t         = to_tensor(data["y_val"])
-    t_ic_t          = to_tensor(data["t_ic"], requires_grad=True)
+    t_val_t = to_tensor(data["t_val"])
+    y_val_t = to_tensor(data["y_val"])
+    t_ic_t = to_tensor(data["t_ic"], requires_grad=True)
 
-    if not cfg.randomise_observation:
-        t_obs_t       = to_tensor(data["t_obs"])      # Only make observation points once
-        y_obs_t       = to_tensor(data["y_obs"])
+    if not cfg.randomise_observation:  # Only make observation points once
+        t_obs_t = to_tensor(data["t_obs"])
+        y_obs_t = to_tensor(data["y_obs"])
 
-    if not cfg.randomise_collocation:
-        t_col_dom_t     = to_tensor(data["t_col_dom"], requires_grad=True)      # Only make collocation points once
-        t_col_extrap_t  = to_tensor(data["t_col_extrap"], requires_grad=True)
+    if not cfg.randomise_collocation:  # Only make collocation points once
+        t_col_dom_t = to_tensor(data["t_col_dom"], requires_grad=True)
+        t_col_extrap_t = to_tensor(data["t_col_extrap"], requires_grad=True)
 
-    # -- initialize optimiser and scheduler --------------------------------------------
+    # -- initialize optimiser and scheduler ----------------------------------
     if inverse_mode:
         optimiser = torch.optim.Adam([
             {"params": model.net.parameters(), "lr": cfg.lr},
-            {"params": [model.zeta_hat, model.omega_0_hat], "lr": cfg.lr_inverse}
+            {
+                "params": [model.zeta_hat, model.omega_0_hat],
+                "lr": cfg.lr_inverse
+                }
         ], betas=(cfg.adam_beta1, cfg.adam_beta2))
     else:
-        optimiser = torch.optim.Adam(model.parameters(), lr=cfg.lr, betas = (cfg.adam_beta1, cfg.adam_beta2))
-    scheduler = torch.optim.lr_scheduler.StepLR(optimiser, step_size=cfg.scheduler_step, gamma=cfg.scheduler_gamma)
+        optimiser = torch.optim.Adam(
+            model.parameters(),
+            lr=cfg.lr,
+            betas=(cfg.adam_beta1, cfg.adam_beta2)
+            )
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optimiser,
+        step_size=cfg.scheduler_step,
+        gamma=cfg.scheduler_gamma
+        )
 
     # -- history and snapshot storage ---------------------------------------
     history = {
@@ -103,8 +115,8 @@ def train(
         history["zeta_hat"] = []
         history["omega_0_hat"] = []
 
-    snapshots             = {}
-    best_val_loss         = float("inf")
+    snapshots = {}
+    best_val_loss = float("inf")
     epochs_no_improvement = 0
 
     # -- training loop ------------------------------------------------------
@@ -116,9 +128,9 @@ def train(
 
         # -- data loss ------------------------------------
         if cfg.use_data:
-            if cfg.randomise_observation:
+            if cfg.randomise_observation:  # Randomise every epoch
                 t_obs, y_obs = make_train_observation(cfg)
-                t_obs_t    = to_tensor(t_obs) # Randomise every epoch
+                t_obs_t = to_tensor(t_obs)
                 y_obs_t = to_tensor(y_obs)
 
             y_pred = model(t_obs_t)
@@ -127,28 +139,43 @@ def train(
             l_data = torch.zeros(1, device=device)
 
         # -- physics loss ------------------------------------
-        if cfg.randomise_collocation:
+        if cfg.randomise_collocation:  # Randomise every epoch
             t_col_dom, t_col_extrap = make_collocation(cfg)
-            t_col_dom_t    = to_tensor(t_col_dom,    requires_grad=True) # Randomise every epoch
+            t_col_dom_t = to_tensor(t_col_dom,    requires_grad=True)
             t_col_extrap_t = to_tensor(t_col_extrap, requires_grad=True)
 
         if inverse_mode:
             if cfg.train_extrap:
-                l_phys = loss_physics_inverse(model, torch.cat([t_col_dom_t, t_col_extrap_t]))
+                l_phys = loss_physics_inverse(
+                    model,
+                    torch.cat([t_col_dom_t, t_col_extrap_t])
+                    )
             else:
                 l_phys = loss_physics_inverse(model, t_col_dom_t)
         elif cfg.use_physics:
             if cfg.train_extrap:
-                l_phys = loss_physics(cfg, model, torch.cat([t_col_dom_t, t_col_extrap_t]))
+                l_phys = loss_physics(
+                    cfg,
+                    model,
+                    torch.cat([t_col_dom_t, t_col_extrap_t])
+                    )
             else:
                 l_phys = loss_physics(cfg, model, t_col_dom_t)
         else:
             l_phys = torch.zeros(1, device=device)
-            
-        # -- initial condition loss ------------------------------------
-        l_ic   = loss_ic(cfg, model, t_ic_t) if cfg.use_ic else torch.zeros(1, device=device)
 
-        loss_total   = (l_data + cfg.lambda_phys * l_phys + cfg.lambda_ic   * l_ic)
+        # -- initial condition loss ------------------------------------
+        l_ic = (
+            loss_ic(cfg, model, t_ic_t)
+            if cfg.use_ic
+            else torch.zeros(1, device=device)
+            )
+
+        loss_total = (
+            l_data
+            + cfg.lambda_phys * l_phys
+            + cfg.lambda_ic * l_ic
+            )
 
         # -- update weights ------------------------------------
         loss_total.backward()
@@ -159,7 +186,7 @@ def train(
         model.eval()
         with torch.no_grad():
             y_val_pred = model(t_val_t)
-            l_val      = loss_data(y_val_pred, y_val_t)
+            l_val = loss_data(y_val_pred, y_val_t)
 
         # -- optuna pruning ------------------------------------------------
         if optuna_trial is not None and epoch % cfg.log_every == 0:
@@ -174,13 +201,15 @@ def train(
             epochs_no_improvement += 1
 
         if l_val.item() < best_val_loss:
-            best_val_loss         = l_val.item()
-            best_state            = {k: v.cpu() for k, v in model.state_dict().items()}
+            best_val_loss = l_val.item()
+            best_state = {k: v.cpu() for k, v in model.state_dict().items()}
 
         if epochs_no_improvement >= cfg.patience:
-            print(f"  [{label}] early stopping at epoch {epoch}, improvement stalled.")
+            print(
+                f"[{label}] early stopping at epoch {epoch},"
+                " improvement stalled."
+            )
             break
-
 
         # -- snapshots ------------------------------------------------------
         if epoch in cfg.snapshot_epochs:
@@ -192,9 +221,18 @@ def train(
         if verbatim:
             if epoch % cfg.log_every == 0 or epoch == 1:
                 elapsed = time.perf_counter() - t0
-                zeta_str = f"zeta_hat={model.zeta_hat.item():.5f}  " if inverse_mode else ""
-                omega_0_str = f"omega_0_hat={model.omega_0_hat.item():.5f}  " if inverse_mode else ""
-                print(f"  [{label}] epoch {epoch:5d} | "
+                zeta_str = (
+                    f"zeta_hat={model.zeta_hat.item():.5f}  "
+                    if inverse_mode
+                    else ""
+                )
+                omega_0_str = (
+                    f"omega_0_hat={model.omega_0_hat.item():.5f}  "
+                    if inverse_mode
+                    else ""
+                )
+                print(
+                    f"  [{label}] epoch {epoch:5d} | "
                     f"L_data={l_data.item():.5f}  "
                     f"L_phys={l_phys.item():.5f}  "
                     f"L_ic={l_ic.item():.5f}  "
@@ -202,7 +240,8 @@ def train(
                     f"L_total={loss_total.item():.5f}  "
                     f"{zeta_str}"
                     f"{omega_0_str}"
-                    f"({elapsed:.1f}s)")
+                    f"({elapsed:.1f}s)"
+                    )
 
         if epoch % cfg.log_every == 0:
             history["epoch"].append(epoch)
@@ -217,8 +256,10 @@ def train(
 
     total_time = time.perf_counter() - t0
     if verbatim:
-        print(f"  [{label}] finished in {total_time:.1f}s "
-            f"({total_time / epoch * 1000:.2f} ms/epoch)")
+        print(
+            f"  [{label}] finished in {total_time:.1f}s "
+            f"({total_time / epoch * 1000:.2f} ms/epoch)"
+            )
         if inverse_mode:
             print(f"{'Predicted zeta:':<20} {float(model.zeta_hat):.4f}")
             print(f"{'Actual zeta:':<20} {cfg.zeta:.4f}")

@@ -19,26 +19,28 @@ plt.rcParams.update({
 })
 
 # -- Color palette ------------------------------------------------
-BLUE   = "#378ADD"   # noisy training observations
-RED    = "#E24B4A"   # noisy test/validation observations
-GREEN  = "#1D9E75"   # PINN
+BLUE = "#378ADD"   # noisy training observations
+RED = "#E24B4A"   # noisy test/validation observations
+GREEN = "#1D9E75"   # PINN
 ORANGE = "#EF9F27"   # collocation points
 PURPLE = "#7F77DD"   # initial condition marker
-GRAY   = "#888780"   # true solution / neutral
-LGRAY  = "#D3D1C7"   # spine colour
-BG     = "#FAFAF8"   # figure background
-PANEL  = "#F1EFE8"   # axes background
+GRAY = "#888780"   # true solution / neutral
+LGRAY = "#D3D1C7"   # spine colour
+BG = "#FAFAF8"   # figure background
+PANEL = "#F1EFE8"   # axes background
+
 
 def gauss_characteristics():
-    output_path="Report/Images/gauss_characteristics.png"
-    cfg=Config(ic="Gauss")
-    cfg.height=1.2
+    output_path = "Report/Images/gauss_characteristics.png"
+    cfg = Config(ic="Gauss")
+    cfg.height = 1.2
     u = u_0(cfg)
     x = np.linspace(0, cfg.L, cfg.n_x)
     cfg.t_shock = predict_shock_time(cfg)
-    plot_method_of_characteristics(cfg, output_path=output_path, samples=25, show=False)
+    plot_method_of_characteristics(
+        cfg, output_path=output_path, samples=25, show=False)
 
-    output_path="Report/Images/gauss_ic.png"
+    output_path = "Report/Images/gauss_ic.png"
     fig, ax = plt.subplots(figsize=(10, 6))
     style_ax(ax)
     ax.plot(x, u)
@@ -50,8 +52,8 @@ def gauss_characteristics():
     plt.tight_layout()
     plt.savefig(output_path)
 
-    output_path="Report/Images/gauss_t.png"
-    cfg.nu=0.01
+    output_path = "Report/Images/gauss_t.png"
+    cfg.nu = 0.01
     sol, t_arr = cole_hopf_grid(cfg, pad=600)
     fig, ax = plt.subplots(figsize=(10, 6))
     style_ax(ax)
@@ -66,8 +68,10 @@ def gauss_characteristics():
     plt.tight_layout()
     plt.savefig(output_path)
 
+
 def main():
     gauss_characteristics()
+
 
 if __name__ == "__main__":
     main()

@@ -15,26 +15,48 @@ from sklearn.model_selection import train_test_split
 from config import Config
 from analytic import cole_hopf_grid, interpolate_solution
 
-def make_observation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+def make_observation(
+        cfg: Config,
+        u_grid: np.ndarray,
+        t_arr: np.ndarray
+        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Make observation points."""
     t_obs = np.random.uniform(0.1, cfg.t_dom, cfg.n_obs)
     x_obs = np.random.uniform(0, cfg.L, cfg.n_obs)
 
     u_obs = []
     for x, t in zip(x_obs, t_obs):
-        u_obs.append(interpolate_solution(u_grid, t_arr, x, t, cfg) + np.random.normal(0.0, cfg.sigma))
+        u_obs.append(interpolate_solution(u_grid, t_arr, x, t,
+                     cfg) + np.random.normal(0.0, cfg.sigma))
 
     return t_obs, x_obs, np.array(u_obs)
 
-def make_collocation(cfg: Config) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+def make_collocation(
+        cfg: Config
+        ) -> tuple[
+            np.ndarray,
+            np.ndarray,
+            np.ndarray,
+            np.ndarray,
+            np.ndarray,
+            np.ndarray
+            ]:
+    """Make collocation points."""
     t_obs_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
     x_obs_dom = np.random.uniform(0, cfg.L, cfg.n_col_dom)
 
-    t_obs_extrap = np.linspace(cfg.t_dom, cfg.t_extrap, int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
-    x_obs_extrap = np.random.uniform(0, cfg.L, int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
+    t_obs_extrap = np.linspace(cfg.t_dom, cfg.t_extrap, int(
+        cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
+    x_obs_extrap = np.random.uniform(0, cfg.L, int(
+        cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
 
     return t_obs_dom, x_obs_dom, t_obs_extrap, x_obs_extrap
 
+
 def make_validation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray):
+    """Make validation points."""
     t_val_1d = np.linspace(0.1, cfg.t_dom, cfg.n_grid_val)
     x_val_1d = np.linspace(0, cfg.L, cfg.n_grid_val)
 
@@ -50,17 +72,19 @@ def make_validation(cfg: Config, u_grid: np.ndarray, t_arr: np.ndarray):
 
     return t_val, x_val, u_val
 
+
 def make_bc_points(cfg: Config) -> np.ndarray:
+    """Make boundary condition points."""
     t_bc = np.random.uniform(0, cfg.t_dom, cfg.n_bc)
     return t_bc
 
+
 def generate_data(cfg: Config) -> dict:
-    """
-    Generate all data and return as a dict.
-    """
+    """Generate all data and return as a dict."""
     print("Generating data...")
 
-    u_grid, t_arr = cole_hopf_grid(cfg, pad = 800 if cfg.ic in ["Step_up", "Step_down", "Slope"] else 400)
+    u_grid, t_arr = cole_hopf_grid(cfg, pad=800 if cfg.ic in [
+                                   "Step_up", "Step_down", "Slope"] else 400)
 
     t_obs, x_obs, u_obs = make_observation(cfg, u_grid, t_arr)
     t_col_dom, x_col_dom, t_col_extrap, x_col_extrap = make_collocation(cfg)
@@ -86,11 +110,14 @@ def generate_data(cfg: Config) -> dict:
         "u_ic":         u_grid[0],
     }
 
+
 def plot_observations_3D(data: dict) -> None:
+    """Make a 3d p^lot of the observation points."""
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.scatter(data["t_obs"], data["x_obs"], data["u_obs"], color='red', label='Observations')
+    ax.scatter(data["t_obs"], data["x_obs"], data["u_obs"],
+               color='red', label='Observations')
 
     ax.set_xlabel('Time')
     ax.set_ylabel('Space')
@@ -99,7 +126,8 @@ def plot_observations_3D(data: dict) -> None:
     plt.legend()
     plt.show()
 
+
 if __name__ == "__main__":
     cfg = Config()
-    data = generate_data(cfg)    # plot_observations_3D(data)
+    data = generate_data(cfg)
     plot_observations_3D(data)

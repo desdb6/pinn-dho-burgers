@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve 
+Demo script for training a PINN to solve
 the damped harmonic oscillator system.
 
 Usage:
@@ -21,6 +21,7 @@ from utils import get_device, save_model
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_PATH = SCRIPT_DIR / "outputs"
+
 
 def train_model(cfg: Config, output_path: str) -> None:
     device = get_device()
@@ -52,14 +53,14 @@ def train_model(cfg: Config, output_path: str) -> None:
         return None
 
     # -- train model ------------------------------------------------
-    data     = generate_data(cfg)
-    model    = FCNet(cfg)
+    data = generate_data(cfg)
+    model = FCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------
@@ -103,7 +104,7 @@ def main():
 
     for cfg, label in zip(cfg_list, label_list):
         train_model(cfg, OUTPUT_PATH / f"Gauss_nu_0.05_{label}")
-    
+
 
 if __name__ == "__main__":
     main()

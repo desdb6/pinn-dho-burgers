@@ -1,5 +1,5 @@
 """
-Demo script for training a PINN to solve the inverse 
+Demo script for training a PINN to solve the inverse
 problem of the damped harmonic oscillator with parameter estimation.
 
 Usage:
@@ -25,14 +25,14 @@ def main():
     print(f"Device : {device}")
     cfg = Config()
 
-    ########## PARAMETER RADOMISATION ##########
+    # PARAMETER RADOMISATION
 
     # ---------- Underdamped ----------
 
     set_seed(13)
     zeta = np.random.uniform(0.02, 0.2)
     omega_0 = np.random.uniform(1, 5)
-    output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_underdamped"
+    output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_underdamped"  # noqa: E501
     output_path.mkdir(exist_ok=True)
 
     # ---------- Critcally damped ----------
@@ -40,7 +40,7 @@ def main():
     # set_seed(13)
     # zeta = 1
     # omega_0 = np.random.uniform(0.5, 5)
-    # output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_criticallydamped"
+    # output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_criticallydamped"  # noqa: E501
     # output_path.mkdir(exist_ok=True)
 
     # ---------- Overdamped ----------
@@ -48,14 +48,14 @@ def main():
     # set_seed(16)
     # zeta = np.random.uniform(1.5, 2)
     # omega_0 = np.random.uniform(2, 3)
-    # output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_overdamped"
+    # output_path = Path.cwd() / "Damped_Oscillator/outputs/demo_backward_model_overdamped"  # noqa: E501
     # output_path.mkdir(exist_ok=True)
 
     print("------------------------------------------------"
           f"\nRandomised zeta    : {zeta:.4f}"
           f"\nRandomised omega_0 : {omega_0:.4f}"
           "\n------------------------------------------------")
-    
+
     m, c, k = convert_to_mck(zeta, omega_0)
 
     cfg = Config(
@@ -64,14 +64,14 @@ def main():
         k=k
     )
 
-    data     = generate_data(cfg)
-    model    = InverseFCNet(cfg)
+    data = generate_data(cfg)
+    model = InverseFCNet(cfg)
     history, snapshots, best_state = train(
-        model       = model,
-        data        = data,
-        cfg         = cfg,
-        device      = device,
-        label       = "Model",
+        model=model,
+        data=data,
+        cfg=cfg,
+        device=device,
+        label="Model",
     )
 
     # -- save model ------------------------------------------------
@@ -80,6 +80,7 @@ def main():
 
     # -- make plots ------------------------------------------------
     save_plots_from_file(output_path)
+
 
 if __name__ == "__main__":
     main()

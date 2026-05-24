@@ -24,8 +24,8 @@ from data import generate_data
 from utils import get_device
 
 # -- settings --------------------------------------------------------------
-SEED        = 42
-N_TRIALS    = 500
+SEED = 42
+N_TRIALS = 500
 OUTPUT_PATH = Path.cwd() / "Burgers_Equation/outputs/optuna_tuning_2"
 OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -43,49 +43,56 @@ CSV_FIELDS = [
 ICS = ["Gauss"]
 
 # -- fixed seed ------------------------------------------------------------
+
+
 def set_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
+
 # -- generate data once ----------------------------------------------------
-_base_cfg  = Config()
+_base_cfg = Config()
 _base_data = generate_data(_base_cfg)
 
 # -- objective -------------------------------------------------------------
+
+
 def objective(trial: optuna.Trial) -> float:
     set_seed(SEED)
 
     cfg = Config(
-         # -- regime parameters from _base_cfg -----------------------------
-        ic = _base_cfg.ic,
+        # -- regime parameters from _base_cfg -----------------------------
+        ic=_base_cfg.ic,
         # architecture
-        hidden          = trial.suggest_int(  "hidden",          16,   128, step=16),
-        n_layers        = trial.suggest_int(  "n_layers",         2,     10),
+        hidden=trial.suggest_int("hidden",          16,   128, step=16),
+        n_layers=trial.suggest_int("n_layers",         2,     10),
         # loss weights
-        lambda_phys     = trial.suggest_float("lambda_phys",     1e-1,  1e2, log=True),
-        lambda_ic       = trial.suggest_float("lambda_ic",       1e1,   1e3, log=True),
-        lambda_bc       = trial.suggest_float("lambda_bc",       1e1,   1e3, log=True),
+        lambda_phys=trial.suggest_float(
+            "lambda_phys",     1e-1,  1e2, log=True),
+        lambda_ic=trial.suggest_float("lambda_ic",       1e1,   1e3, log=True),
+        lambda_bc=trial.suggest_float("lambda_bc",       1e1,   1e3, log=True),
         # learning rate and scheduler
-        lr              = trial.suggest_float("lr",              1e-4,  1e-2, log=True),
-        scheduler_gamma = trial.suggest_float("scheduler_gamma", 0.3,   0.9),
-        scheduler_step  = trial.suggest_int(  "scheduler_step",  1000, 5000, step=1000),
+        lr=trial.suggest_float("lr",              1e-4,  1e-2, log=True),
+        scheduler_gamma=trial.suggest_float("scheduler_gamma", 0.3,   0.9),
+        scheduler_step=trial.suggest_int(
+            "scheduler_step",  1000, 5000, step=1000),
 
         use_data=True
     )
 
     device = get_device()
-    model  = FCNet(cfg)
+    model = FCNet(cfg)
 
     try:
         history, _, _ = train(
-            model        = model,
-            data         = _base_data,
-            cfg          = cfg,
-            device       = device,
-            verbatim     = False,
-            optuna_trial = trial,
+            model=model,
+            data=_base_data,
+            cfg=cfg,
+            device=device,
+            verbatim=False,
+            optuna_trial=trial,
         )
     except optuna.exceptions.TrialPruned:
         raise
@@ -118,13 +125,17 @@ def objective(trial: optuna.Trial) -> float:
 
 
 # -- callback --------------------------------------------------------------
-def print_callback(study: optuna.Study, trial: optuna.trial.FrozenTrial) -> None:
+def print_callback(
+        study: optuna.Study,
+        trial: optuna.trial.FrozenTrial
+        ) -> None:
     print(
         f"  Trial {trial.number:>4} | "
         f"State: {trial.state.name:<10} | "
-        f"RMSE: {f'{trial.value:.6f}' if trial.value is not None else 'pruned':>12} | "
+        f"RMSE: {f'{trial.value:.6f}' if trial.value is not None else 'pruned':>12} | "  # noqa:E501
         f"Best:  {study.best_value:.6f}"
     )
+
 
 # -- run -------------------------------------------------------------------
 if __name__ == "__main__":
@@ -133,8 +144,8 @@ if __name__ == "__main__":
         print(f"Starting study: {ic}")
         print(f"{'='*60}")
 
-        # -- generate data for this initial condition ---------------------------------
-        _base_cfg  = Config(ic=ic)
+        # -- generate data for this initial condition -------------------------
+        _base_cfg = Config(ic=ic)
         _base_data = generate_data(_base_cfg)
 
         # -- per-regime output paths ---------------------------------------
@@ -143,18 +154,18 @@ if __name__ == "__main__":
         CSV_PATH = regime_path / "optuna_results.csv"
 
         study = optuna.create_study(
-            direction     = "minimize",
-            pruner        = optuna.pruners.MedianPruner(n_warmup_steps=20),
-            sampler       = optuna.samplers.TPESampler(seed=SEED),
-            storage       = f"sqlite:///{regime_path}/optuna.db",
-            study_name    = f"Burgers_Equation_{ic}",
-            load_if_exists= True,
+            direction="minimize",
+            pruner=optuna.pruners.MedianPruner(n_warmup_steps=20),
+            sampler=optuna.samplers.TPESampler(seed=SEED),
+            storage=f"sqlite:///{regime_path}/optuna.db",
+            study_name=f"Burgers_Equation_{ic}",
+            load_if_exists=True,
         )
 
         study.optimize(
             objective,
-            n_trials  = N_TRIALS,
-            callbacks = [print_callback],
+            n_trials=N_TRIALS,
+            callbacks=[print_callback],
         )
 
         # -- summary -------------------------------------------------------

@@ -19,6 +19,7 @@ OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
 
 ICS = ["Gauss", "N_wave", "Step_up", "Step_down", "Slope"]
 
+
 def main():
     device = get_device()
     print(f"Device : {device}\n")
@@ -28,7 +29,7 @@ def main():
         print(f"Regime: {ic}")
         print(f"{'='*60}")
 
-        # -- load best hyperparameters for this damped case ---------------------
+        # -- load best hyperparameters for this damped case -------------------
         best_params_path = OUTPUT_PATH / ic / "best_params.json"
         if not best_params_path.exists():
             print(f"  No best_params.json found for {ic} — skipping.")
@@ -38,19 +39,19 @@ def main():
         cfg.ic = ic
         print(f"  Best cfg : {cfg}")
 
-        # -- output folder for this damped case ---------------------------------
+        # -- output folder for this damped case -------------------------------
         ic_output = OUTPUT_PATH / ic
         ic_output.mkdir(parents=True, exist_ok=True)
 
         # -- train ---------------------------------------------------------
-        data  = generate_data(cfg)
+        data = generate_data(cfg)
         model = FCNet(cfg)
         history, snapshots, best_state = train(
-            model   = model,
-            data    = data,
-            cfg     = cfg,
-            device  = device,
-            label   = ic,
+            model=model,
+            data=data,
+            cfg=cfg,
+            device=device,
+            label=ic,
         )
 
         # -- save ----------------------------------------------------------
