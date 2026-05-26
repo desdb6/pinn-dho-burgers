@@ -24,7 +24,8 @@ Both forward problems (predict the solution given known parameters) and inverse 
 │   ├── losses.py       # Loss functions (data, physics, initial condition)
 │   ├── trainer.py      # Training loop with early stopping and snapshots
 │   ├── plot.py         # All plotting functions
-│   └── utils.py        # Helper utilities (device, tensors, save/load)
+│   ├── utils.py        # Helper utilities (device, tensors, save/load)
+│   └── scripts/        # Example scripts to train PINNs
 │
 └── Burgers_Equation/
     ├── config.py       # Physical constants, hyperparameters, runtime settings
@@ -34,7 +35,8 @@ Both forward problems (predict the solution given known parameters) and inverse 
     ├── losses.py       # Loss functions (data, physics, IC, boundary condition)
     ├── trainer.py      # Training loop with early stopping and snapshots
     ├── plot.py         # All plotting functions
-    └── utils.py        # Helper utilities (device, tensors, save/load)
+    ├── utils.py        # Helper utilities (device, tensors, save/load)
+    └── scripts/        # Example scripts to train PINNs
 ```
 
 Each module is self-contained and importable. Training experiments are written as separate scripts that import from these modules.
