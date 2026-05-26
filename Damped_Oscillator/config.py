@@ -46,34 +46,32 @@ class Config:
     t_extrap: float = 10.0          # End time of extrapolated domain
 
     # Loss weights
-    use_physics: bool = True
-    lambda_phys: float = 1e-2
-    use_ic: bool = True
-    lambda_ic: float = 1e1
-    train_extrap: bool = True
-    use_data: bool = True
+    use_physics: bool = True        # Use physics loss terms
+    lambda_phys: float = 1e-2       # Physics loss weight
+    use_ic: bool = True             # Use initial condition terms
+    lambda_ic: float = 1e1          # Initial condition loss weight
+    train_extrap: bool = True       # Generate collocation points in the extrapolated domain  # noqa: E501
+    use_data: bool = False          # Generate training observation points
 
     # Data generation parameters
     n_obs: float = 15                   # Noisy observation points
     n_val: float = 200                  # Validation points
     randomise_observation: bool = True  # Randomise observation points every epoch  # noqa: E501
-    # strata_splitting: int = 8           # Strata for stratified splitting
-    # test_train_split: float = 0.4       # Fraction of train set(t)
 
     n_col_dom: float = 500              # ODE residual collocation points
     sigma: float = 0.05                 # Standard deviation for n_obs
     randomise_collocation: bool = True  # Randomise collocation points every epoch  # noqa: E501
 
     # Network architecture
-    hidden: int = 64
-    n_layers: int = 5
+    hidden: int = 64                    # Network layer node count
+    n_layers: int = 5                   # Network layer count
 
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
     lr: float = 5e-3                    # Starting learning rate
     lr_inverse: float = 2e-2            # Learning rate for inverse problem; parameter estimation  # noqa: E501
     patience: int = 1000                # Patience for model stop
-    patience_thershold: float = 1e-5    # Patience threshold for new best model
+    patience_threshold: float = 1e-5    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter
     adam_beta2: float = 0.999           # Adam optimiser: RMSprop hyperparameter  # noqa: E501

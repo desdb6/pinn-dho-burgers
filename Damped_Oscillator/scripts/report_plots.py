@@ -5,6 +5,7 @@ Author          : Des De Borger
 Email           : des.deborger@student.uantwerpen.be
 Last modified   : 24/05/2026
 """
+
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parent.parent))  # noqa: E402

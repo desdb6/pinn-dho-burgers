@@ -224,7 +224,7 @@ def train(
                 raise optuna.exceptions.TrialPruned()
 
         # -- early stopping -------------------------------------------------
-        if l_val.item() < best_val_loss - cfg.patience_thershold:
+        if l_val.item() < best_val_loss - cfg.patience_threshold:
             epochs_no_improvement = 0
         else:
             epochs_no_improvement += 1

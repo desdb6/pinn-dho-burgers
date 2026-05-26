@@ -109,6 +109,7 @@ def u_0(cfg: Config) -> np.ndarray:
 def cole_hopf_trans(u_0: np.ndarray, cfg: Config) -> np.ndarray:
     """
     Transform to phi using Cole-Hopf tranformation.
+
     phi_0 = exp(-1/2nu int^x_0 u(x)dx)
     """
     phi_0 = np.zeros_like(u_0, dtype=float)
@@ -137,6 +138,7 @@ def heat_convolution(
 def reverse_cole_hopf_trans(phi: np.ndarray, cfg: Config) -> np.ndarray:
     """
     Recover u from phi.
+
     u(x, t) = -2\nu \frac{dphi}{phi}
     """
     u = -2.0 * cfg.nu * (np.gradient(phi, cfg.delta_x) / phi)

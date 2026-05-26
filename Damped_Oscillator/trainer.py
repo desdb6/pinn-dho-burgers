@@ -195,7 +195,7 @@ def train(
                 raise optuna.exceptions.TrialPruned()
 
         # -- early stopping -------------------------------------------------
-        if l_val.item() < best_val_loss - cfg.patience_thershold:
+        if l_val.item() < best_val_loss - cfg.patience_threshold:
             epochs_no_improvement = 0
         else:
             epochs_no_improvement += 1
@@ -261,9 +261,15 @@ def train(
             f"({total_time / epoch * 1000:.2f} ms/epoch)"
             )
         if inverse_mode:
-            print(f"{'Predicted zeta:':<20} {float(model.zeta_hat):.4f}")
+            print(
+                f"{'Predicted zeta:':<20} "
+                f"{float(model.zeta_hat.detach()):.4f}"
+                )
             print(f"{'Actual zeta:':<20} {cfg.zeta:.4f}")
-            print(f"{'Predicted omega_0:':<20} {float(model.omega_0_hat):.4f}")
+            print(
+                f"{'Predicted omega_0:':<20} "
+                f"{float(model.omega_0_hat.detach()):.4f}"
+                )
             print(f"{'Actual omega_0:':<20} {cfg.omega_0:.4f}")
 
     return history, snapshots, best_state

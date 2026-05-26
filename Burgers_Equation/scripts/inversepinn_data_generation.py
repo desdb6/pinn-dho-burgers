@@ -59,7 +59,7 @@ def run_single(run_idx: int, device) -> dict | None:
         lr=0.003,
         scheduler_gamma=0.6,
         scheduler_step=3000,
-        patience_thershold=1e-5,
+        patience_threshold=1e-5,
         use_data=True
     )
 

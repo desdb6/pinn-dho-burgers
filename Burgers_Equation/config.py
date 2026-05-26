@@ -10,13 +10,12 @@ Email           : des.deborger@student.uantwerpen.be
 Last modified   : 24/05/2026
 """
 
-import numpy as np
-from pathlib import Path
 from dataclasses import dataclass
 
 
 @dataclass
 class Config:
+    """Config class containing all parameters for model training."""
     # Physical parameters
     nu: float = 0.05                   # viscosity
 
@@ -30,12 +29,12 @@ class Config:
     bc_right: float = None
 
     # Time domain
-    t_dom: float = 5.0              # End time of known domain
-    t_extrap: float = 7.0           # End time of extrapolated domain
+    t_dom: float = 5.0               # End time of known domain
+    t_extrap: float = 7.0            # End time of extrapolated domain
     t_shock: float = None            # Time of shockwave formation, if known. If not calculated, set to None.  # noqa: E501
 
     # Space domain
-    n_x: int = 1000                     # Spatial resolution for numerical solution  # noqa: E501
+    n_x: int = 1000                      # Spatial resolution for numerical solution  # noqa: E501
     delta_t = 1.5e-2                     # Time step for numerical solution if adaptive stepping is disabled  # noqa: E501
     L: float = 15                        # System length
 
@@ -48,14 +47,14 @@ class Config:
         return int(self.t_extrap // self.delta_t)
 
     # Loss weights
-    use_physics: bool = True
-    lambda_phys: float = 5
-    use_ic: bool = True
-    lambda_ic: float = 10
-    use_bc: bool = True
-    lambda_bc: float = 10
-    train_extrap: bool = True
-    use_data: bool = False
+    use_physics: bool = True        # Use physics loss terms
+    lambda_phys: float = 5          # Physics loss weight
+    use_ic: bool = True             # Use initial condition terms
+    lambda_ic: float = 10           # Initial condition loss weight
+    use_bc: bool = True             # Use boundary condition loss
+    lambda_bc: float = 10           # Boundary condition loss weight
+    train_extrap: bool = True       # Generate collocation points in the extrapolated domain  # noqa: E501
+    use_data: bool = False          # Generate training observation points
 
     # Data generation parameters
     n_obs: float = 30                     # Noisy observation points
@@ -68,15 +67,15 @@ class Config:
     n_grid_val: float = 300               # Validation grid size
 
     # Network architecture
-    hidden: int = 96
-    n_layers: int = 8
+    hidden: int = 96                    # Network layer node count
+    n_layers: int = 8                   # Network layer count
 
     # Hyperparameters
     n_epochs: int = 30000               # Number of epochs
     lr: float = 1.5e-3                  # Starting learning rate
     lr_inverse: float = 5e-3            # Learning rate for inverse problem; parameter estimation  # noqa: E501
     patience: int = 2000                # Patience for model stop
-    patience_thershold: float = 2e-6    # Patience threshold for new best model
+    patience_threshold: float = 2e-6    # Patience threshold for new best model
     dropout_rate: float = 0.0           # Dropout rate for every layer
     adam_beta1: float = 0.9             # Adam optimiser: moment hyperparameter
     adam_beta2: float = 0.999           # Adam optimiser: RMSprop hyperparameter  # noqa: E501

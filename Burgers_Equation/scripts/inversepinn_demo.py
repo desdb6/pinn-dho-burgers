@@ -23,7 +23,7 @@ from plot import save_plots_from_file
 from utils import get_device, save_model
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
-OUTPUT_PATH = SCRIPT_DIR / "outputs/InversePINN_demo"
+OUTPUT_PATH = SCRIPT_DIR / "outputs/inversepinn_demo"
 OUTPUT_PATH.mkdir(exist_ok=True)
 
 
@@ -34,7 +34,6 @@ def main():
     # -- randomise viscosity ------------------------------------------------
     # nu = np.random.uniform(0.005, 0.015) # Low viscosity
     nu = np.random.uniform(0.1, 0.5)   # High viscosity
-    nu = 0.45
     print("------------------------------------------------"
           f"\nRandomised viscosity : {nu:.4f}"
           "\n------------------------------------------------")
@@ -48,7 +47,7 @@ def main():
         lr=0.003,
         scheduler_gamma=0.6,
         scheduler_step=3000,
-        patience_thershold=1e-5,
+        patience_threshold=1e-5,
         use_data=True
     )
 
