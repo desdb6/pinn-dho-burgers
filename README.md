@@ -122,17 +122,13 @@ Helper functions:
 
 #### `losses.py`
 Three loss functions, each returning a scalar `torch.Tensor`:
-
 - **`loss_data`** — MSE between predicted and observed $y$ values:
-$\mathcal{L}_{data} = \frac{1}{M}\sum_{j=1}^{M}(\hat{y}(t_j) - y_j)^2$
-
+$$\mathcal{L}_{data} = \frac{1}{M}\sum_{j=1}^{M}(\hat{y}(t_j) - y_j)^2$$
 - **`loss_physics`** — mean squared ODE residual at collocation points. Both $\hat{y}'$ and $\hat{y}''$ are computed with `torch.autograd.grad` using `create_graph=True` so the second derivative can be backpropagated through:
-$\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^{N}(m\hat{y}''(t_i) + c\hat{y}'(t_i) + k\hat{y}(t_i))^2$
-
+$$\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^{N}(m\hat{y}''(t_i) + c\hat{y}'(t_i) + k\hat{y}(t_i))^2$$
 - **`loss_physics_inverse`** — same as above but uses `model.zeta_hat` and `model.omega_0_hat` instead of fixed `cfg.c` and `cfg.k`.
-
 - **`loss_ic`** — squared error on both initial conditions, evaluated at $t=0$ using `autograd` for $\hat{y}'(0)$:
-$\mathcal{L}_{ic} = (\hat{y}(0) - y_0)^2 + (\hat{y}'(0) - dy_0)^2$
+$$\mathcal{L}_{ic} = (\hat{y}(0) - y_0)^2 + (\hat{y}'(0) - dy_0)^2$$
 
 The total loss is:
 $\mathcal{L}_{tot} = \mathcal{L}_{data} + \lambda_{phys}\mathcal{L}_{physics} + \lambda_{ic}\mathcal{L}_{ic}$
@@ -267,7 +263,7 @@ Identical in structure to the DHO utils. The `load_best_cfg` function reads an O
 
 ## Running the demo scripts
 
-Both projects ship ready-to-run demo scripts under their respective `scripts/` folders. All scripts share the same CLI interface.
+Both projects ship ready-to-run demo scripts under their respective `scripts/` folders. All scripts share the same CLI.
 
 ---
 
@@ -337,27 +333,6 @@ python Burgers_Equation/scripts/inversepinn_demo.py --nu-regime low --output out
 
 ---
 
-### What happens when you run a script
-
-**Damped Harmonic Oscillator:**
-
-1. ζ and ω₀ are resolved from CLI flags or their defaults and converted to physical constants m, c, k.
-2. Training and validation data are generated from the closed-form analytic solution.
-3. The network is trained with early stopping. Progress is printed every `log_every` epochs.
-4. The best model, loss history, snapshots, and config are saved to the output directory.
-5. Plots are generated and saved automatically via `save_plots_from_file`.
-
-**Burgers' Equation:**
-
-1. The initial condition and viscosity are resolved from CLI arguments or their defaults.
-2. The shock formation time is estimated analytically. If it falls in the expected range (0.1–5 s), the training domain is automatically capped at the shock time, with a short extrapolation window beyond it.
-3. Training data (observations, collocation points, boundary conditions) is generated from the Cole-Hopf solution.
-4. The network is trained with early stopping. Progress is printed every `log_every` epochs.
-5. The best model, loss history, snapshots, and config are saved to the output directory (see [Saving and loading](#saving-and-loading)).
-6. Plots are generated and saved automatically via `save_plots_from_file`.
-
----
-
 ### Output directory layout
 
 ```
@@ -368,12 +343,7 @@ outputs/pinn_underdamped/
 └── config.json
 ```
 
-Plots are written alongside these files. To regenerate plots from a previous run without retraining:
-
-```python
-from Damped_Oscillator.plot import save_plots_from_file
-save_plots_from_file("outputs/pinn_underdamped")
-```
+Plots are written alongside these files.
 ---
 
 ## Training a model
