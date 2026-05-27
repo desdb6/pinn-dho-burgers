@@ -124,18 +124,18 @@ Helper functions:
 Three loss functions, each returning a scalar `torch.Tensor`:
 
 - **`loss_data`** — MSE between predicted and observed $y$ values:
-$$\mathcal{L}_{data} = \frac{1}{M}\sum_{j=1}^{M}(\hat{y}(t_j) - y_j)^2$$
+$\mathcal{L}_{data} = \frac{1}{M}\sum_{j=1}^{M}(\hat{y}(t_j) - y_j)^2$
 
 - **`loss_physics`** — mean squared ODE residual at collocation points. Both $\hat{y}'$ and $\hat{y}''$ are computed with `torch.autograd.grad` using `create_graph=True` so the second derivative can be backpropagated through:
-$$\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^{N}(m\hat{y}''(t_i) + c\hat{y}'(t_i) + k\hat{y}(t_i))^2$$
+$\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^{N}(m\hat{y}''(t_i) + c\hat{y}'(t_i) + k\hat{y}(t_i))^2$
 
 - **`loss_physics_inverse`** — same as above but uses `model.zeta_hat` and `model.omega_0_hat` instead of fixed `cfg.c` and `cfg.k`.
 
 - **`loss_ic`** — squared error on both initial conditions, evaluated at $t=0$ using `autograd` for $\hat{y}'(0)$:
-$$\mathcal{L}_{ic} = (\hat{y}(0) - y_0)^2 + (\hat{y}'(0) - dy_0)^2$$
+$\mathcal{L}_{ic} = (\hat{y}(0) - y_0)^2 + (\hat{y}'(0) - dy_0)^2$
 
 The total loss is:
-$$\mathcal{L}_{tot} = \mathcal{L}_{data} + \lambda_{phys}\mathcal{L}_{physics} + \lambda_{ic}\mathcal{L}_{ic}$$
+$\mathcal{L}_{tot} = \mathcal{L}_{data} + \lambda_{phys}\mathcal{L}_{physics} + \lambda_{ic}\mathcal{L}_{ic}$
 
 #### `trainer.py`
 The `train()` function runs the full training loop. Key features:
@@ -171,7 +171,7 @@ Shared helper functions:
 
 The viscid Burgers' equation is:
 
-$$u_t + u u_x = \nu u_{xx}$$
+$u_t + u u_x = \nu u_{xx}$
 
 where $\nu$ is the kinematic viscosity. The solution $u(x, t)$ represents a 1D velocity field. The nonlinear advection term causes wave steepening and eventual shock formation; the viscosity term prevents true discontinuities from forming.
 
