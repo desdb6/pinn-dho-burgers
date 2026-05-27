@@ -122,13 +122,10 @@ Helper functions:
 
 #### `losses.py`
 Three loss functions, each returning a scalar `torch.Tensor`:
-- **`loss_data`** — MSE between predicted and observed $y$ values:
-$$\mathcal{L}_{data} = \frac{1}{M}\sum_{j=1}^{M}(\hat{y}(t_j) - y_j)^2$$
-- **`loss_physics`** — mean squared ODE residual at collocation points. Both $\hat{y}'$ and $\hat{y}''$ are computed with `torch.autograd.grad` using `create_graph=True` so the second derivative can be backpropagated through:
-$$\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^{N}(m\hat{y}''(t_i) + c\hat{y}'(t_i) + k\hat{y}(t_i))^2$$
+- **`loss_data`** — MSE between predicted and observed $y$ values: $\mathcal{L}_{data} = \frac{1}{M}\sum_{j=1}^{M}(\hat{y}(t_j) - y_j)^2$
+- **`loss_physics`** — mean squared ODE residual at collocation points. Both $\hat{y}'$ and $\hat{y}''$ are computed with `torch.autograd.grad` using `create_graph=True` so the second derivative can be backpropagated through: $\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^{N}(m\hat{y}''(t_i) + c\hat{y}'(t_i) + k\hat{y}(t_i))^2$
 - **`loss_physics_inverse`** — same as above but uses `model.zeta_hat` and `model.omega_0_hat` instead of fixed `cfg.c` and `cfg.k`.
-- **`loss_ic`** — squared error on both initial conditions, evaluated at $t=0$ using `autograd` for $\hat{y}'(0)$:
-$$\mathcal{L}_{ic} = (\hat{y}(0) - y_0)^2 + (\hat{y}'(0) - dy_0)^2$$
+- **`loss_ic`** — squared error on both initial conditions, evaluated at $t=0$ using `autograd` for $\hat{y}'(0)$: $\mathcal{L}_{ic} = (\hat{y}(0) - y_0)^2 + (\hat{y}'(0) - dy_0)^2$
 
 The total loss is:
 $\mathcal{L}_{tot} = \mathcal{L}_{data} + \lambda_{phys}\mathcal{L}_{physics} + \lambda_{ic}\mathcal{L}_{ic}$
@@ -239,17 +236,13 @@ Additional functions:
 #### `losses.py`
 
 - **`loss_data`** — MSE between predicted and observed $u$ values.
-- **`loss_physics`** — mean squared PDE residual:
-$$\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^N (\hat{u}_t + \hat{u}\hat{u}_x - \nu\hat{u}_{xx})^2$$
+- **`loss_physics`** — mean squared PDE residual: $\mathcal{L}_{physics} = \frac{1}{N}\sum_{i=1}^N (\hat{u}_t + \hat{u}\hat{u}_x - \nu\hat{u}_{xx})^2$
 All derivatives ($\hat{u}_t$, $\hat{u}_x$, $\hat{u}_{xx}$) are computed with `torch.autograd.grad`.
 - **`loss_physics_inverse`** — same but uses `model.nu_hat` in place of `cfg.nu`.
-- **`loss_ic`** — MSE between the predicted and true initial condition over all $x$:
-$$\mathcal{L}_{ic} = \frac{1}{N_x}\sum_i (\hat{u}(0, x_i) - u_0(x_i))^2$$
-- **`loss_bc`** — MSE of predicted values at both boundaries against the Dirichlet conditions:
-$$\mathcal{L}_{bc} = \frac{1}{N}\sum_i \left[(\hat{u}(t_i, 0) - u_{left})^2 + (\hat{u}(t_i, L) - u_{right})^2\right]$$
+- **`loss_ic`** — MSE between the predicted and true initial condition over all $x$: $\mathcal{L}_{ic} = \frac{1}{N_x}\sum_i (\hat{u}(0, x_i) - u_0(x_i))^2$
+- **`loss_bc`** — MSE of predicted values at both boundaries against the Dirichlet conditions: $\mathcal{L}_{bc} = \frac{1}{N}\sum_i \left[(\hat{u}(t_i, 0) - u_{left})^2 + (\hat{u}(t_i, L) - u_{right})^2\right]$
 
-The total loss is:
-$$\mathcal{L}_{tot} = \mathcal{L}_{data} + \lambda_{phys}\mathcal{L}_{physics} + \lambda_{ic}\mathcal{L}_{ic} + \lambda_{bc}\mathcal{L}_{bc}$$
+The total loss is: $\mathcal{L}_{tot} = \mathcal{L}_{data} + \lambda_{phys}\mathcal{L}_{physics} + \lambda_{ic}\mathcal{L}_{ic} + \lambda_{bc}\mathcal{L}_{bc}$
 
 #### `trainer.py`
 Same structure as the DHO trainer with the following additions:
