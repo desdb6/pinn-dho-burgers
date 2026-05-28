@@ -126,7 +126,8 @@ def save_model(
 
     # -- history as .csv file -----------------------------------------------
     import csv
-    with open(output_path / "history.csv", "w", newline="", encoding='utf-8') as f:
+    with open(
+        output_path / "history.csv", "w", newline="", encoding='utf-8') as f:  # noqa:E501
         writer = csv.DictWriter(f, fieldnames=history.keys())
         writer.writeheader()
         writer.writerows([

@@ -85,8 +85,8 @@ def make_validation(cfg: Config) -> tuple[np.ndarray, np.ndarray]:
 
 def make_collocation(cfg: Config) -> np.ndarray:
     """Generate collocation points."""
-    t_col_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
-    t_col_extrap = np.linspace(
+    t_col_dom = np.random.uniform(0.1, cfg.t_dom, cfg.n_col_dom)
+    t_col_extrap = np.random.uniform(
         cfg.t_dom, cfg.t_extrap,
         int(cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom)
         )
@@ -108,8 +108,3 @@ def generate_data(cfg: Config) -> dict:
         "t_col_extrap": t_col_extrap,
         "t_ic":         np.array([0.0]),
     }
-
-
-if __name__ == "__main__":
-    my_dict = generate_data(Config())
-    print(my_dict["t_train"])

@@ -90,7 +90,7 @@ def train(
 
     t_bc_t = to_tensor(data["t_bc"])
 
-    best_state=None
+    best_state = None
 
     # -- initialize optimiser and scheduler -----------------------------------
     if inverse_mode:
@@ -230,8 +230,9 @@ def train(
         if epochs_no_improvement >= cfg.patience:
             if verbatim:
                 print(
-                    f"  [{label}] early stopping at epoch {epoch}, improvement stalled."
-                    )
+                    f"[{label}] early stopping at epoch {epoch},"
+                    " improvement stalled."
+                )
             break
 
         # -- snapshots ------------------------------------------------------

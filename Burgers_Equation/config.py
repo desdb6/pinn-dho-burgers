@@ -59,14 +59,14 @@ class Config:
     use_data: bool = False          # Generate training observation points
 
     # Data generation parameters
-    n_obs: float = 30                     # Noisy observation points
+    n_obs: int = 30                       # Noisy observation points
     randomise_observation: bool = True    # Randomise observation points every epoch  # noqa: E501
-    n_col_dom: float = 200                # ODE residual collocation points
+    n_col_dom: int = 200                  # ODE residual collocation points
     sigma: float = 0.01                   # Standard deviation for n_obs
     randomise_collocation: bool = True    # Randomise collocation points every epoch  # noqa: E501
-    n_bc: float = 50                      # Boundary condition points
+    n_bc: int = 50                        # Boundary condition points
     randomise_bc_points: bool = True      # Randomise boundary condition loss points every epoch  # noqa: E501
-    n_grid_val: float = 300               # Validation grid size
+    n_grid_val: int = 300                 # Validation grid size
 
     # Network architecture
     hidden: int = 96                    # Network layer node count

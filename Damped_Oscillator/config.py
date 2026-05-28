@@ -54,8 +54,8 @@ class Config:
     use_data: bool = True           # Generate training observation points
 
     # Data generation parameters
-    n_obs: float = 15                   # Noisy observation points
-    n_val: float = 200                  # Validation points
+    n_obs: int = 15                     # Noisy observation points
+    n_val: int = 200                    # Validation points
     randomise_observation: bool = True  # Randomise observation points every epoch  # noqa: E501
 
     n_col_dom: float = 500              # ODE residual collocation points

@@ -18,6 +18,7 @@ from utils import to_tensor
 from losses import loss_data, loss_ic, loss_physics, loss_physics_inverse
 from data import make_collocation, make_train_observation
 
+
 def train(
     model: nn.Module,
     data: dict,
@@ -251,6 +252,7 @@ def train(
                 history["zeta_hat"].append(model.zeta_hat.item())
                 history["omega_0_hat"].append(model.omega_0_hat.item())
 
+    model.load_state_dict(best_state)
     total_time = time.perf_counter() - t0
     if verbatim:
         print(

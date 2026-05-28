@@ -43,10 +43,10 @@ def make_collocation(
             np.ndarray
             ]:
     """Make collocation points."""
-    t_obs_dom = np.linspace(0.1, cfg.t_dom, cfg.n_col_dom)
+    t_obs_dom = np.random.uniform(0.1, cfg.t_dom, cfg.n_col_dom)
     x_obs_dom = np.random.uniform(0, cfg.L, cfg.n_col_dom)
 
-    t_obs_extrap = np.linspace(cfg.t_dom, cfg.t_extrap, int(
+    t_obs_extrap = np.random.uniform(cfg.t_dom, cfg.t_extrap, int(
         cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
     x_obs_extrap = np.random.uniform(0, cfg.L, int(
         cfg.n_col_dom * (cfg.t_extrap - cfg.t_dom) / cfg.t_dom))
